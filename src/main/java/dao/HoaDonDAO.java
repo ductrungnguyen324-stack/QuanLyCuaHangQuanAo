@@ -1,3 +1,4 @@
-public class HoaDonDao {
+package dao;
 
+public class HoaDonDAO {
 }
