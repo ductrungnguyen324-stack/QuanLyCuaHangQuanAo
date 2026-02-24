@@ -8,7 +8,7 @@ public class HoaDon
     String maKH;
     String maNV;
     LocalDateTime ngaytao;
-    KhuyenMai khuyenmai;
+    String maKM;
     double tongtien;
     double sotiengiam;
     double thanhtoan;
@@ -30,12 +30,12 @@ public class HoaDon
         this.maNV = maNV;
     }
 
-    public HoaDon(String maHD, String maKH, String maNV, LocalDateTime ngaytao, KhuyenMai khuyenmai, double tongtien, double sotiengiam, double thanhtoan, String phuongthucTT, String trangthai) {
+    public HoaDon(String maHD, String maKH, String maNV, LocalDateTime ngaytao, String khuyenmai, double tongtien, double sotiengiam, double thanhtoan, String phuongthucTT, String trangthai) {
         this.maHD = maHD;
         this.maKH = maKH;
         this.maNV = maNV;
         this.ngaytao = ngaytao;
-        this.khuyenmai = khuyenmai;
+        this.maKM = khuyenmai;
         this.tongtien = tongtien;
         this.sotiengiam = sotiengiam;
         this.thanhtoan = thanhtoan;
@@ -75,12 +75,12 @@ public class HoaDon
         this.ngaytao = ngaytao;
     }
 
-    public KhuyenMai getKhuyenmai() {
-        return khuyenmai;
+    public String getKhuyenmai() {
+        return maKM;
     }
 
-    public void setKhuyenmai(KhuyenMai khuyenmai) {
-        this.khuyenmai = khuyenmai;
+    public void setKhuyenmai(String khuyenmai) {
+        this.maKM = khuyenmai;
     }
 
     public double getTongtien() {
