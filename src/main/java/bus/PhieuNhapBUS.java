@@ -1,59 +1,48 @@
 package BUS;
 
-import DAO.PhieuNhapDAO;
+import DAO.PhieuNhapHangDAO;
 import DAO.ChiTietPhieuNhapDAO;
-import DTO.PhieuNhapDTO;
-import DTO.ChiTietPhieuNhapDTO;
+import entity.PhieuNhapHang;
+import entity.ChiTietPhieuNhap;
 import java.util.ArrayList;
 
 public class PhieuNhapBUS {
-    private PhieuNhapDAO pnDAO = new PhieuNhapDAO();
+    private PhieuNhapHangDAO pnDAO = new PhieuNhapHangDAO();
     private ChiTietPhieuNhapDAO ctDAO = new ChiTietPhieuNhapDAO();
 
-    public ArrayList<PhieuNhapDTO> getAll() {
+    public ArrayList<PhieuNhapHang> getAll() {
         return pnDAO.getAll();
     }
 
-    public String addPhieuNhap(PhieuNhapDTO pn, ArrayList<ChiTietPhieuNhapDTO> dsChiTiet) {
-        if (pn.getMaPhieu() == null || pn.getMaPhieu().trim().isEmpty()) 
-            return "Mã phiếu không được để trống!";
-        
-        if (dsChiTiet == null || dsChiTiet.isEmpty()) 
-            return "Phiếu nhập phải có ít nhất 1 sản phẩm!";
-      
-        if (pn.getTongTien() < 0) return "Tổng tiền không hợp lệ!";
-
-        if (pnDAO.insert(pn)) {
-            boolean allDetailSuccess = true;
-            for (ChiTietPhieuNhapDTO ct : dsChiTiet) {
-                if (!ctDAO.insert(ct)) {
-                    allDetailSuccess = false;
-                    break; 
-                }
-            }
-            
-            if (allDetailSuccess) {
-                return "Nhập hàng thành công!";
-            } else {
-                return "Phiếu nhập đã tạo nhưng một số chi tiết bị lỗi!";
+   public String addFullPhieuNhap(PhieuNhapHang pn, ArrayList<ChiTietPhieuNhap> listCT) {
+    if (pn.getMaPN() == null || pn.getMaPN().trim().isEmpty()) return "Mã phiếu không được để trống!";
+    if (listCT == null || listCT.isEmpty()) return "Phiếu nhập phải có ít nhất một sản phẩm!";
+    for (ChiTietPhieuNhap ct : listCT) {
+        if (ct.getSoluong() <= 0) return "Số lượng sản phẩm " + ct.getMaSP() + " phải > 0!";
+    }
+ if (pnDAO.insert(pn)) {
+        for (ChiTietPhieuNhap ct : listCT) {
+            if (!ctDAO.insert(ct)) {
+                return "Lỗi khi lưu chi tiết sản phẩm: " + ct.getMaSP();
             }
         }
-        return "Lỗi khi lưu phiếu nhập vào cơ sở dữ liệu!";
+        return "Nhập hàng thành công!";
     }
-
-    public ArrayList<PhieuNhapDTO> search(String keyword) {
-        ArrayList<PhieuNhapDTO> result = new ArrayList<>();
-       
-        if (keyword == null) return getAll();
-        
-        String lowercaseKey = keyword.toLowerCase().trim();
-        for (PhieuNhapDTO pn : pnDAO.getAll()) {
-            
-            if (pn.getMaPhieu().toLowerCase().contains(lowercaseKey) || 
-                pn.getTenNCC().toLowerCase().contains(lowercaseKey)) {
-                result.add(pn);
-            }
+    return "Lỗi hệ thống khi tạo phiếu nhập!";
+}
+   public ArrayList<PhieuNhapHang> search(String keyword) {
+    ArrayList<PhieuNhapHang> result = new ArrayList<>();
+    if (keyword == null || keyword.trim().isEmpty()) {
+        return getAll(); 
+    }
+    
+    String key = keyword.trim().toLowerCase();
+    for (PhieuNhapHang pn : pnDAO.getAll()) {
+        if (pn.getMaPN().toLowerCase().contains(key) || 
+            pn.getNhacungcap().toLowerCase().contains(key)) {
+            result.add(pn);
         }
-        return result;
     }
+    return result;
+}
 }
