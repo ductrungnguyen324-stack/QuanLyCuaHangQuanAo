@@ -8,9 +8,9 @@ public class ChiTietPhieuNhapDAO {
         Connection con = null;
         try {
             con = MyConnection.getConnection();
-            con.setAutoCommit(false); // Bắt đầu giao dịch (Transaction)
+            con.setAutoCommit(false);
 
-            // 1. Thêm chi tiết phiếu nhập
+            // Thêm chi tiết phiếu nhập
             String sqlInsert = "INSERT INTO ChiTietPhieuNhap VALUES (?, ?, ?, ?, ?, ?)";
             try (PreparedStatement ps = con.prepareStatement(sqlInsert)) {
                 ps.setString(1, ct.getMaCTPN());
@@ -22,7 +22,7 @@ public class ChiTietPhieuNhapDAO {
                 ps.executeUpdate();
             }
 
-            // 2. Cập nhật tồn kho trong bảng SanPham
+            //  Cập nhật tồn kho trong bảng SanPham
             String sqlUpdateStock = "UPDATE SanPham SET tonkho = tonkho + ? WHERE maSP = ?";
             try (PreparedStatement ps = con.prepareStatement(sqlUpdateStock)) {
                 ps.setDouble(1, ct.getSoluong());
@@ -41,3 +41,4 @@ public class ChiTietPhieuNhapDAO {
         }
     }
 }
+
