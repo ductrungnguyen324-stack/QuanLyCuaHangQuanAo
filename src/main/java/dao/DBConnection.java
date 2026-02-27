@@ -9,7 +9,7 @@ public class DBConnection  {
     private static final String PORT = "3306";
     private static  final  String USER = "root";
     private static final  String PASS = "12345";
-    private static final String DATABASE = "";
+    private static final String DATABASE = "htbqa";
     private static final String URL = "jdbc:mysql://"+HOST+":"+PORT + "/"+DATABASE
             + "?useSSL=false"
             + "&allowPublicKeyRetrieval=true"
