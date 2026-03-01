@@ -68,10 +68,10 @@ public class HoaDonDAO {
             pstmt.setString(1, hd.getMaKH());
             pstmt.setString(2, hd.getMaNV());
             pstmt.setString(3, hd.getKhuyenmai());
-            pstmt.setString(4, Timestamp.valuesOf(hd.getNgaytao()));
-            pstmt.setString(5, hd.getTongtien());
-            pstmt.setString(6, hd.getSotiengiam());
-            pstmt.setString(7, hd.getThanhtoan());
+            pstmt.setTimestamp(4, Timestamp.valueOf(hd.getNgaytao()));
+            pstmt.setDouble(5, hd.getTongtien());
+            pstmt.setDouble(6, hd.getSotiengiam());
+            pstmt.setDouble(7, hd.getThanhtoan());
             pstmt.setString(8, hd.getPhuongthucTT());
             pstmt.setString(9, hd.getTrangthai());
             pstmt.setString(10, hd.getMaHD());
@@ -141,5 +141,10 @@ public class HoaDonDAO {
             hd.setNgaytao(ts.toLocalDateTime());
         }
         return hd;
+    }
+
+    public static void main(String[] args) {
+        HoaDonDAO hd = new HoaDonDAO();
+        String ma = hd.generateHD();
     }
 }

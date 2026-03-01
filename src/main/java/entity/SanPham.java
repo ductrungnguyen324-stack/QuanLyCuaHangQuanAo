@@ -84,7 +84,7 @@ public class SanPham
     }
 
     public String getTrangthai() {
-        return trangthai;
+        return this.trangthai;
     }
 
     public void setTrangthai(String trangthai) {
@@ -92,7 +92,7 @@ public class SanPham
     }
 
     public int getTonkho() {
-        return tonkho;
+        return this.tonkho;
     }
 
     public void setTonkho(int tonkho) {
@@ -106,4 +106,6 @@ public class SanPham
     public static void setSoluong(int soluong) {
         SanPham.soluong = soluong;
     }
+
+
 }
