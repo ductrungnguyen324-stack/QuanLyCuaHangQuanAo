@@ -11,7 +11,6 @@ public class SanPham
     String mausac;
     String trangthai;
     int tonkho;
-    static int soluong;
 
     public SanPham() {}
 
@@ -84,7 +83,7 @@ public class SanPham
     }
 
     public String getTrangthai() {
-        return trangthai;
+        return this.trangthai;
     }
 
     public void setTrangthai(String trangthai) {
@@ -92,18 +91,10 @@ public class SanPham
     }
 
     public int getTonkho() {
-        return tonkho;
+        return this.tonkho;
     }
 
     public void setTonkho(int tonkho) {
         this.tonkho = tonkho;
-    }
-
-    public static int getSoluong() {
-        return soluong;
-    }
-
-    public static void setSoluong(int soluong) {
-        SanPham.soluong = soluong;
     }
 }
