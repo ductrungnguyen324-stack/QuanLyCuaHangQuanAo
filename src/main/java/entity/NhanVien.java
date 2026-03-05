@@ -6,16 +6,21 @@ public class NhanVien
     String hoten;
     String sdt;
     String chucvu;
-    static int soluong;
+    String tendannhap;
+    String matkhau;
+    String trangthai;
 
     NhanVien() {}
 
-    public NhanVien(String maNV, String hoten, String sdt, String chucvu)
+    public NhanVien(String maNV, String hoten, String sdt, String chucvu, String tendannhap, String matkhau, String trangthai)
     {
         this.maNV = maNV;
         this.hoten = hoten;
         this.sdt = sdt;
         this.chucvu = chucvu;
+        this.tendannhap = tendannhap;
+        this.matkhau = matkhau;
+        this.trangthai = trangthai;
     }
 
     public String getManv() {
@@ -50,11 +55,27 @@ public class NhanVien
         this.chucvu = chucvu;
     }
 
-    public static int getSoluong() {
-        return soluong;
+    public String getTendannhap() {
+        return tendannhap;
     }
 
-    public static void setSoluong(int soluong) {
-        NhanVien.soluong = soluong;
+    public void setTendannhap(String tendannhap) {
+        this.tendannhap = tendannhap;
+    }
+
+    public String getMatkhau() {
+        return matkhau;
+    }
+
+    public void setMatkhau(String matkhau) {
+        this.matkhau = matkhau;
+    }
+
+    public String getTrangthai() {
+        return trangthai;
+    }
+
+    public void setTrangthai(String trangthai) {
+        this.trangthai = trangthai;
     }
 }

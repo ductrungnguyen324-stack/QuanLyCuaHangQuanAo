@@ -8,7 +8,6 @@ public class KhachHang
     String hoten;
     String sdt;
     LocalDate ngaythamgia;
-    static int soluong;
 
     public KhachHang() {}
 
@@ -50,14 +49,6 @@ public class KhachHang
 
     public void setNgaythamgia(LocalDate ngaythamgia) {
         this.ngaythamgia = ngaythamgia;
-    }
-
-    public static int getSoluong() {
-        return soluong;
-    }
-
-    public static void setSoluong(int soluong) {
-        KhachHang.soluong = soluong;
     }
 }
 
