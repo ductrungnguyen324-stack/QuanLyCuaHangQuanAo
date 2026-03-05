@@ -11,7 +11,6 @@ public class SanPham
     String mausac;
     String trangthai;
     int tonkho;
-    static int soluong;
 
     public SanPham() {}
 
@@ -98,14 +97,4 @@ public class SanPham
     public void setTonkho(int tonkho) {
         this.tonkho = tonkho;
     }
-
-    public static int getSoluong() {
-        return soluong;
-    }
-
-    public static void setSoluong(int soluong) {
-        SanPham.soluong = soluong;
-    }
-
-
 }
