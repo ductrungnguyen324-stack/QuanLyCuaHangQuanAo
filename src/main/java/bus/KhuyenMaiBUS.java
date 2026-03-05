@@ -56,6 +56,24 @@ public class KhuyenMaiBUS
         return kmDAO.delete(makhuyenmai);
     }
 
+    public int countKhuyenMai()
+    {
+        return kmDAO.count();
+    }
+
+    public List<KhuyenMai> searchKhuyenMai(String keyword) {
+        // Nếu từ khóa trống hoặc chỉ toàn khoảng trắng, trả về tất cả
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return kmDAO.getAll();
+        }
+
+        // Tiền xử lý: Loại bỏ khoảng trắng thừa
+        String cleanKeyword = keyword.trim();
+
+        // Gọi DAO để thực hiện truy vấn LIKE %keyword%
+        return kmDAO.search(cleanKeyword);
+    }
+
     public List<KhuyenMai> getActivePromotions() {
         return kmDAO.getActivePromotions();
     }
