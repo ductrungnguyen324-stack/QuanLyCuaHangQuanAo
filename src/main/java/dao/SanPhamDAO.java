@@ -13,7 +13,7 @@ public class SanPhamDAO {
     
     public List<SanPham> getALL() {
         List<SanPham> list = new ArrayList<>();
-        String sql = "SELECT * FROM SanPham ORDER BY maSP DESC";
+        String sql = "SELECT * FROM sanpham";
 
         try(Connection conn = DBConnection.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -25,7 +25,7 @@ public class SanPhamDAO {
             }
             rs.close();
         } catch(SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Lỗi getAll SanPham: " + e.getMessage());
         }
 
         return list;
@@ -33,7 +33,8 @@ public class SanPhamDAO {
     }
 
     public boolean insert(SanPham sp) {
-        String sql = "INSERT INTO SanPham VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO SanPham (maSP, tenSP, loaiSP, giaban, thuonghieu, kichco, mausac, trangthai, tonkho) " +
+                     "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         String maSP = generateSP();
         sp.setMasp(maSP);
@@ -54,16 +55,15 @@ public class SanPhamDAO {
             return pstmt.executeUpdate() > 0;
 
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException("Lỗi insert SanPham: " + e.getMessage());
         }
-        return false;
     }
 
     public boolean update(SanPham sp) {
         SanPham check = new SanPham();
         if(check == null) throw new RuntimeException("San Pham chua ton tai");
 
-        String sql = "UPDATE SanPham SET tenSP=?, loaiSP=?, giaban=?, thuonghieu=?, kichco=?," +
+        String sql = "UPDATE sanpham SET tenSP=?, loaiSP=?, giaban=?, thuonghieu=?, kichco=?," +
                 "mausac=?, trangthai=?, tonkho=?" +
                 "WHERE maSP = ?";
 
@@ -82,13 +82,53 @@ public class SanPhamDAO {
 
             return pstmt.executeUpdate() > 0;
         }catch(SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Lỗi update SanPham: " + e.getMessage());
         }
-        return false;
+    }
+
+    public List<SanPham> search(String keyword) {
+        List<SanPham> list = new ArrayList<>();
+        // Tìm kiếm không phân biệt hoa thường với LIKE và dấu %
+        String sql = "SELECT * FROM sanpham WHERE maSP LIKE ? OR tenSP LIKE ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // Cấu hình tham số tìm kiếm: %keyword%
+            String searchPattern = "%" + keyword + "%";
+            pstmt.setString(1, searchPattern);
+            pstmt.setString(2, searchPattern);
+
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                list.add(mapResultSetToEntity(rs));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi search SanPham: " + e.getMessage());
+        }
+        return list;
+    }
+
+    public int count()
+    {
+        String sql = "SELECT COUNT(*) FROM sanpham";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement pstmt = con.prepareStatement(sql))
+        {
+            ResultSet rs = pstmt.executeQuery(sql);
+            if (rs.next())
+            {
+                return rs.getInt(1);
+            }
+            rs.close();
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi count SanPham: " + e.getMessage());
+        }
+        return 0;
     }
 
     public SanPham getById(String maSP) {
-        String sql = "SELECT * from SanPham WHERE maSP = ?";
+        String sql = "SELECT * from sanpham WHERE maSP = ?";
 
         try(Connection conn = DBConnection.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -102,13 +142,13 @@ public class SanPhamDAO {
             }
 
         }catch(SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Lỗi getById SanPham: " + e.getMessage());
         }
         return null;
     }
 
     public String generateSP() {
-        String sql = "SELECT maSP FROM SanPham ORDER BY maSP DESC LIMIT 1";
+        String sql = "SELECT maSP FROM sanpham ORDER BY maSP DESC LIMIT 1";
 
         try(Connection conn =DBConnection.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -122,7 +162,7 @@ public class SanPhamDAO {
             rs.close();
 
         }catch(SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Lỗi generateSP SanPham: " + e.getMessage());
         }
         return "SP001";
     }
@@ -139,7 +179,6 @@ public class SanPhamDAO {
         sp.setMausac(rs.getString("mausac"));
         sp.setTrangthai(rs.getString("trangthai"));
         sp.setTonkho(rs.getInt("tonkho"));
-        sp.setSoluong(rs.getInt("soluong"));
 
         return sp;
     }
