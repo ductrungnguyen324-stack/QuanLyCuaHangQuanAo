@@ -3,7 +3,7 @@ package dao;
 import entity.KhuyenMai;
 
 import java.sql.*;
-        import java.util.ArrayList;
+import java.util.ArrayList;
 import java.util.List;
 
 public class KhuyenMaiDAO
@@ -33,7 +33,7 @@ public class KhuyenMaiDAO
     public KhuyenMai getByID(String makhuyenmai)
     {
         KhuyenMai km = null;
-        String sql = "SELECT * FROM khuyenmai WHERE MaKhuyenMai = ?";
+        String sql = "SELECT * FROM khuyenmai WHERE maKM = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql))
@@ -52,7 +52,7 @@ public class KhuyenMaiDAO
 
     public boolean insert(KhuyenMai km)
     {
-        String sql = "INSERT INTO khumay (MaKhuyenMai, TenKhuyenMai, LoaiKhuyeMai, GiaTriGiam, GiamToiDa, GiaTriDonHangToiThieu, NgayBatDau, NgayKetThuc, SoLuong, DaSuDung) " +
+        String sql = "INSERT INTO khumay (maKM, tenKM, loaiKM, giatrigiam, giamtoida, giatridonhangtoithieu, ngaybatdau, ngayketthuc, soluong, dasudung) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         // Tạo mã khu tự động
@@ -87,11 +87,11 @@ public class KhuyenMaiDAO
 
         //kiểm tra khu máy tồn tại
         if (existing == null){
-            throw new RuntimeException("Lỗi khuyến mãi không tồn tại !");
+            throw new RuntimeException("Lỗi: khuyến mãi không tồn tại !");
         }
 
-        String sql = "UPDATE khuyenmai SET TenKhuyenMai = ?, LoaiKhuyenMai = ?, GiaTriGiam = ?, GiamToiDa = ?, GiaTriDonHangToiThieu = ?, NgayBatDau = ?, NgayKetThuc = ?, SoLuong = ?, DaSuDung = ? " +
-                "WHERE MaKhuyenMai = ?";
+        String sql = "UPDATE khuyenmai SET tenKM = ?, loaiKM = ?, giatrigiam = ?, giamtoida = ?, giatridonhangtoithieu = ?, ngaybatdau = ?, ngayketthuc = ?, soluong = ?, dasudung = ? " +
+                "WHERE maKM = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql))
         {
@@ -123,7 +123,7 @@ public class KhuyenMaiDAO
             throw new RuntimeException("Lỗi khu máy không tồn tại !");
         }
 
-        String sql = "DELETE FROM khuyenmai WHERE MaKhuyenMai = ?";
+        String sql = "DELETE FROM khuyenmai WHERE maKM = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql))
         {
@@ -136,37 +136,63 @@ public class KhuyenMaiDAO
         }
     }
 
+    public List<KhuyenMai> search(String keyword) {
+        List<KhuyenMai> list = new ArrayList<>();
+        // Tìm kiếm không phân biệt hoa thường với LIKE và dấu %
+        String sql = "SELECT * FROM khuyenmai WHERE maKM LIKE ? OR tenKM LIKE ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // Cấu hình tham số tìm kiếm: %keyword%
+            String searchPattern = "%" + keyword + "%";
+            pstmt.setString(1, searchPattern);
+            pstmt.setString(2, searchPattern);
+
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                list.add(mapResultSetToEntity(rs));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi search KhuyenMai: " + e.getMessage());
+        }
+        return list;
+    }
+
+    public int count()
+    {
+        String sql = "SELECT COUNT(*) FROM khuyenmai";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement pstmt = con.prepareStatement(sql))
+        {
+            ResultSet rs = pstmt.executeQuery(sql);
+            if (rs.next())
+            {
+                return rs.getInt(1);
+            }
+            rs.close();
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi count KhuyenMai: " + e.getMessage());
+        }
+        return 0;
+    }
+
     public List<KhuyenMai> getActivePromotions()
     {
         List<KhuyenMai> list = new ArrayList<>();
-        String sql = "SELECT * FROM KhuyenMai WHERE DaSuDung < SoLuong " +
-                "AND NOW() >= NgayBatDau AND NOW() <= NgayKetThuc";
+        String sql = "SELECT * FROM KhuyenMai WHERE dasudung < soluong " +
+                "AND NOW() >= ngaybatdau AND NOW() <= ngayketthuc";
 
-        try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql))
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql))
         {
-            ResultSet rs = ps.executeQuery();
+            ResultSet rs = pstmt.executeQuery();
             while (rs.next())
             {
-                KhuyenMai km = new KhuyenMai();
-                km.setMaKM(rs.getString("MaKhuyenMai"));
-                km.setTenKM(rs.getString("TenKhuyenMai"));
-                km.setLoaiKM(rs.getString("LoaiKhuyenMai"));
-                km.setGiatrigiam(rs.getDouble("GiaTriGiam"));
-                km.setGiamtoida(rs.getDouble("GiamToiDa"));
-                km.setGiatridonhangtoithieu(rs.getDouble("GiaTriDonHangToiThieu"));
-
-                Timestamp nbd = rs.getTimestamp("NgayBatDau");
-                if (nbd != null) km.setNgaybatdau(nbd.toLocalDateTime());
-
-                Timestamp nkt = rs.getTimestamp("NgayKetThuc");
-                if (nkt != null) km.setNgayketthuc(nkt.toLocalDateTime());
-
-                km.setSoluong(rs.getInt("SoLuong"));
-                km.setDasudung(rs.getInt("DaSuDung"));
-
+                KhuyenMai km = mapResultSetToEntity(rs);
                 list.add(km);
             }
+            rs.close();
         } catch (SQLException e) {
             throw new RuntimeException("Lỗi getActivePromotions KhuyenMai: " + e.getMessage());
         }
@@ -177,18 +203,18 @@ public class KhuyenMaiDAO
     {
         // SQL: Tăng giá trị dasudung thêm amount đơn vị
         // Điều kiện: dasudung + amount không được vượt quá soluong và không nhỏ hơn 0
-        String sql = "UPDATE Khuyenmai SET DaSuDung = DaSuDung + ? " +
-                "WHERE MaKhuyenMai = ? AND (DaSuDung + ?) <= SoLuong AND (DaSuDung + ?) >= 0";
+        String sql = "UPDATE Khuyenmai SET dasudung = dasudung + ? " +
+                "WHERE maKM = ? AND (dasudung + ?) <= soluong AND (dasudung + ?) >= 0";
 
-        try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql))
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql))
         {
-            ps.setInt(1, amount);
-            ps.setString(2, makhuyenmai);
-            ps.setInt(3, amount);
-            ps.setInt(4, amount);
+            pstmt.setInt(1, amount);
+            pstmt.setString(2, makhuyenmai);
+            pstmt.setInt(3, amount);
+            pstmt.setInt(4, amount);
 
-            return ps.executeUpdate() > 0;
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new RuntimeException("Lỗi updateUsageCount KhuyenMai: " + e.getMessage());
         }
@@ -197,8 +223,8 @@ public class KhuyenMaiDAO
     //Tạo mã tự động
     public String generateMaKhuyenMai()
     {
-        String sql = "SELECT MaKhuyenMai FROM khuyenmai "+
-                "ORDER BY MaKhuyenMai DESC LIMIT 1";
+        String sql = "SELECT maKM FROM khuyenmai "+
+                "ORDER BY maKM DESC LIMIT 1";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql))
@@ -222,12 +248,12 @@ public class KhuyenMaiDAO
     public KhuyenMai mapResultSetToEntity(ResultSet rs) throws SQLException
     {
         KhuyenMai km = new KhuyenMai();
-        km.setMaKM(rs.getString("MaKhuyenMai"));
-        km.setTenKM(rs.getString("TenKhuyenMai"));
-        km.setLoaiKM(rs.getString("LoaiKhuyenMai"));
-        km.setGiatrigiam(rs.getDouble("GiaTriGiam"));
-        km.setGiamtoida(rs.getDouble("GiaToiDa"));
-        km.setGiatridonhangtoithieu(rs.getDouble("GiaTriDonHangToiThieu"));
+        km.setMaKM(rs.getString("maKM"));
+        km.setTenKM(rs.getString("tenKM"));
+        km.setLoaiKM(rs.getString("loaiKM"));
+        km.setGiatrigiam(rs.getDouble("giatrigiam"));
+        km.setGiamtoida(rs.getDouble("giatoida"));
+        km.setGiatridonhangtoithieu(rs.getDouble("giatridonhangtoithieu"));
 
         // Chuyển đổi SQL Timestamp sang Java LocalDateTime
         Timestamp nbd = rs.getTimestamp("ngaybatdau");
