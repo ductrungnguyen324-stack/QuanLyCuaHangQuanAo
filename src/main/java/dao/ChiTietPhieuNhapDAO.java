@@ -1,5 +1,6 @@
 package DAO;
 
+import dao.DBConnection;
 import entity.ChiTietPhieuNhap;
 import java.sql.*;
 
@@ -7,7 +8,7 @@ public class ChiTietPhieuNhapDAO {
     public boolean insert(ChiTietPhieuNhap ct) {
         Connection con = null;
         try {
-            con = MyConnection.getConnection();
+            con = DBConnection.getConnection();
             con.setAutoCommit(false);
 
             // Thêm chi tiết phiếu nhập

@@ -2,6 +2,7 @@
 
 package DAO;
 
+import dao.DBConnection;
 import entity.PhieuNhapHang;
 import java.sql.*;
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ public class PhieuNhapHangDAO {
     public ArrayList<PhieuNhapHang> getAll() {
         ArrayList<PhieuNhapHang> ds = new ArrayList<>();
         String sql = "SELECT * FROM PhieuNhapHang";
-        try (Connection con = MyConnection.getConnection();
+        try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
@@ -29,7 +30,7 @@ public class PhieuNhapHangDAO {
 
     public boolean insert(PhieuNhapHang pn) {
         String sql = "INSERT INTO PhieuNhapHang VALUES (?, ?, ?, ?, ?, ?)";
-        try (Connection con = MyConnection.getConnection();
+        try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, pn.getMaPN());
             ps.setString(2, pn.getMaNV());

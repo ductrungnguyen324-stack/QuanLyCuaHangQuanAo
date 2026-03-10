@@ -139,8 +139,15 @@ public class SanPhamDAO {
         sp.setMausac(rs.getString("mausac"));
         sp.setTrangthai(rs.getString("trangthai"));
         sp.setTonkho(rs.getInt("tonkho"));
-        sp.setSoluong(rs.getInt("soluong"));
 
         return sp;
+    }
+
+    public static void main(String[] args) {
+        SanPhamDAO sp = new SanPhamDAO();
+        List<SanPham> list = sp.getALL();
+        for(SanPham sps : list) {
+            System.out.println(sps.getTensp());
+        }
     }
 }
