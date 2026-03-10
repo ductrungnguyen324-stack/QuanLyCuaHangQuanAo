@@ -2,65 +2,57 @@ package bus;
 
 import dao.NhanVienDAO;
 import entity.NhanVien;
-import java.util.ArrayList;
+import java.util.List;
 
 public class NhanVienBUS {
-    private ArrayList<NhanVien> dsNV;
-    private NhanVienDAO nvDAO;
+    private NhanVienDAO nvDAO = new NhanVienDAO();
 
-    public NhanVienBUS() {
-        nvDAO = new NhanVienDAO();
-        dsNV = nvDAO.getAll();
+    // Lấy tất cả nhân viên trực tiếp từ DAO
+    public List<NhanVien> getAll() {
+        return nvDAO.getAll();
     }
 
-    public ArrayList<NhanVien> getDsNV() {
-        return dsNV;
-    }
-
-    public String add(NhanVien nv) {
-        // Kiểm tra logic: không được trùng mã
-        for (NhanVien item : dsNV) {
-            if (item.getManv().equalsIgnoreCase(nv.getManv())) {
-                return "Mã nhân viên đã tồn tại!";
-            }
+    // Thêm nhân viên với kiểm tra logic
+    public boolean add(NhanVien nv) {
+        // Kiểm tra mã nhân viên không được rỗng
+        if (nv.getManv() == null || nv.getManv().trim().isEmpty()) {
+            System.out.println("Mã nhân viên không được rỗng!");
+            return false;
         }
-        if (nvDAO.insert(nv)) {
-            dsNV.add(nv);
-            return "Thêm thành công!";
+
+        // Kiểm tra họ tên không được rỗng
+        if (nv.getHoten() == null || nv.getHoten().trim().isEmpty()) {
+            System.out.println("Họ tên nhân viên không được rỗng!");
+            return false;
         }
-        return "Thêm thất bại!";
+
+        // Kiểm tra trùng mã (tương tự logic mẫu HoaDon)
+        if (getById(nv.getManv()) != null) {
+            System.out.println("Mã nhân viên đã tồn tại!");
+            return false;
+        }
+
+        return nvDAO.insert(nv);
     }
 
-    public String update(NhanVien nv) {
-        if (nvDAO.update(nv)) {
-            // Cập nhật lại trong danh sách bộ nhớ
-            for (int i = 0; i < dsNV.size(); i++) {
-                if (dsNV.get(i).getManv().equals(nv.getManv())) {
-                    dsNV.set(i, nv);
-                    break;
-                }
-            }
-            return "Cập nhật thành công!";
+    // Cập nhật thông tin nhân viên
+    public boolean update(NhanVien nv) {
+        if (nv.getManv() == null || nv.getManv().trim().isEmpty()) {
+            return false;
         }
-        return "Cập nhật thất bại!";
+        return nvDAO.update(nv);
     }
 
-    public String delete(String maNV) {
-        if (nvDAO.delete(maNV)) {
-            dsNV.removeIf(nv -> nv.getManv().equals(maNV));
-            return "Xóa thành công!";
+    // Xóa nhân viên
+    public boolean delete(String maNV) {
+        if (maNV == null || maNV.trim().isEmpty()) {
+            return false;
         }
-        return "Xóa thất bại!";
+        return nvDAO.delete(maNV);
     }
 
-    public ArrayList<NhanVien> search(String keyword) {
-        ArrayList<NhanVien> result = new ArrayList<>();
-        for (NhanVien nv : dsNV) {
-            if (nv.getManv().contains(keyword) || nv.getHoten().toLowerCase().contains(keyword.toLowerCase())) {
-                result.add(nv);
-            }
-        }
-        return result;
+    // Tìm kiếm nhân viên theo mã (getById) theo mẫu HoaDon
+    public NhanVien getById(String maNV) {
+        return nvDAO.getById(maNV);
     }
-
 }
