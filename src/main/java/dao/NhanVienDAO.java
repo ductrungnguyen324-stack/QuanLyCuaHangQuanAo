@@ -118,4 +118,26 @@ public class NhanVienDAO {
                 rs.getString("trangthai")
         );
     }
+    public NhanVien checkLogin(String user, String pass) {
+        String sql = "SELECT * FROM NhanVien WHERE tendangnhap = ? AND matkhau = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, user);
+            ps.setString(2, pass);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    // Nếu tìm thấy, dùng hàm map để tạo đối tượng NhanVien
+                    return mapResultSetToEntity(rs);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Nếu không tìm thấy hoặc có lỗi, trả về null
+        return null;
+    }
 }
