@@ -41,6 +41,7 @@ public class HoaDonView extends JFrame {
     private JTextField        searchField;
     private JComboBox<String> cbPhuongThuc, cbTrangThai;
     private JLabel            lblTongHD, lblTongThu, lblChuaTT;
+    private JButton           btnThem, btnReset;
 
     private static final String[] COLUMNS = {
             "ID",           // col 0 an (maHD)
@@ -69,21 +70,20 @@ public class HoaDonView extends JFrame {
 
         add(top,          BorderLayout.NORTH);
         add(buildTable(), BorderLayout.CENTER);
-
-        loadDanhSach();
     }
 
     // ── Header ───────────────────────────────────────────
     private JPanel buildHeader() {
         JPanel h = new JPanel(new BorderLayout());
         h.setBackground(SURFACE);
+        // set vien cho h va createCompoundBorder gop 2 vien (1 out, 1 in)
         h.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(0, 0, 1, 0, BORDER),
                 BorderFactory.createEmptyBorder(16, 22, 16, 22)
         ));
 
         JLabel title = new JLabel("Quản lý Hoá đơn");
-        title.setFont(new Font("Dialog", Font.BOLD, 20));
+        title.setFont(new Font("Sans serif", Font.BOLD, 20));
         title.setForeground(TEXT1);
 
         // Chip thong ke
@@ -99,14 +99,14 @@ public class HoaDonView extends JFrame {
 
         JPanel left = new JPanel(new BorderLayout(0, 6));
         left.setOpaque(false);
-        left.add(title, BorderLayout.NORTH);
-        left.add(chips, BorderLayout.CENTER);
+        left.add(title, BorderLayout.NORTH);// tren
+        left.add(chips, BorderLayout.CENTER);// giua
 
-        JButton btnThem = makeButton("+ Tạo hoá đơn", ACCENT, Color.WHITE);
+        btnThem = makeButton("+ Tạo hoá đơn", ACCENT, Color.WHITE);
 //        btnThem.addActionListener(e -> moDialogThem());
 
-        h.add(left,    BorderLayout.WEST);
-        h.add(btnThem, BorderLayout.EAST);
+        h.add(left,    BorderLayout.WEST);// trai
+        h.add(btnThem, BorderLayout.EAST);// phai
         return h;
     }
 
@@ -118,35 +118,19 @@ public class HoaDonView extends JFrame {
 
         searchField = new JTextField(18);
         styleTextField(searchField);
-//        searchField.getDocument().addDocumentListener(
-//                new javax.swing.event.DocumentAdapter() {
-//                    public void update(javax.swing.event.DocumentEvent e) { locDuLieu(); }
-//                }
-//        );
 
         cbPhuongThuc = new JComboBox<>(new String[]{
                 "Tất cả phương thức", "TIENMAT", "CHUYENKHOAN", "MOMO", "VNPAY", "ZaloPay"
         });
+
         cbTrangThai = new JComboBox<>(new String[]{
                 "Tất cả trạng thái", "CHUATHANHTOAN", "DATHANHTOAN"
         });
+
         styleCombo(cbPhuongThuc);
         styleCombo(cbTrangThai);
 
-        cbPhuongThuc.addItemListener(e -> {
-            if (e.getStateChange() == ItemEvent.SELECTED) locDuLieu();
-        });
-        cbTrangThai.addItemListener(e -> {
-            if (e.getStateChange() == ItemEvent.SELECTED) locDuLieu();
-        });
-
-        JButton btnReset = makeButton("Làm mới", CARD, TEXT2);
-        btnReset.addActionListener(e -> {
-            searchField.setText("");
-            cbPhuongThuc.setSelectedIndex(0);
-            cbTrangThai.setSelectedIndex(0);
-            loadDanhSach();
-        });
+        btnReset = makeButton("Làm mới", CARD, TEXT2);
 
         bar.add(makeLabel("Tìm kiếm:"));
         bar.add(searchField);
@@ -174,18 +158,19 @@ public class HoaDonView extends JFrame {
 
         table.setBackground(SURFACE);
         table.setForeground(TEXT1);
-        table.setGridColor(BORDER);
-        table.setRowHeight(40);
-        table.setFont(new Font("Dialog", Font.PLAIN, 12));
+        table.setGridColor(BORDER);// mau duong ke giua cac o
+        table.setRowHeight(40);// chieu cao moi dong
+        table.setFont(new Font("Sans serif", Font.PLAIN, 12));
         table.setSelectionBackground(ROW_SEL);
-        table.setShowVerticalLines(false);
-        table.setFillsViewportHeight(true);
+        table.setShowVerticalLines(false); // tat duong ke doc
+        table.setFillsViewportHeight(true);// Nếu bảng ít dữ liệu, JTable sẽ vẫn lấp đầy chiều cao của ScrollPane.
 
         JTableHeader header = table.getTableHeader();
+
         header.setBackground(CARD);
         header.setForeground(TEXT2);
-        header.setFont(new Font("Dialog", Font.BOLD, 11));
-        header.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, BORDER));
+        header.setFont(new Font("Sans serif", Font.BOLD, 11));
+        header.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, BORDER));// Tạo border với độ dày từng cạnh
 
         // An cot ID (col 0)
         table.getColumnModel().getColumn(0).setMinWidth(0);
@@ -195,7 +180,7 @@ public class HoaDonView extends JFrame {
         // Do rong cot
         int[] widths = {0, 80, 110, 110, 90, 120, 110, 90, 110, 110, 120, 130};
         for (int i = 0; i < widths.length; i++)
-            table.getColumnModel().getColumn(i).setPreferredWidth(widths[i]);
+            table.getColumnModel().getColumn(i).setPreferredWidth(widths[i]);// setPreferredWidth dat do rong cho cot
 
         // Renderer cot Trạng thái (col 10)
         table.getColumnModel().getColumn(10).setCellRenderer(
@@ -203,7 +188,7 @@ public class HoaDonView extends JFrame {
                     String s = String.valueOf(val);
                     JLabel l = new JLabel("  " + s);
                     l.setOpaque(true);
-                    l.setFont(new Font("Dialog", Font.BOLD, 11));
+                    l.setFont(new Font("Sans serif", Font.BOLD, 11));
                     l.setBackground(sel ? ROW_SEL : row % 2 == 0 ? SURFACE : ROW_ODD);
                     l.setForeground(s.equals("DATHANHTOAN") ? GREEN : YELLOW);
                     return l;
@@ -240,69 +225,12 @@ public class HoaDonView extends JFrame {
                 }
         );
 
-        // MouseListener: xu ly click cot Thao tác
-        table.addMouseListener(new MouseAdapter() {
-            @Override public void mouseClicked(MouseEvent e) {
-                int row = table.rowAtPoint(e.getPoint());
-                if (row < 0) return;
-                int modelRow = table.convertRowIndexToModel(row);
-                String maHD  = (String) tableModel.getValueAt(modelRow, 0);
-                int col = table.columnAtPoint(e.getPoint());
-
-//                if (col == 11) {
-//                    Rectangle rect = table.getCellRect(row, col, true);
-//                    int third = rect.width / 3;
-//                    int dx = e.getX() - rect.x;
-//                    if (dx < third)           xemChiTiet(maHD);
-//                    else if (dx < third * 2)  inHoaDon(maHD);
-//                    else                      xoaHoaDon(maHD);
-//                } else if (e.getClickCount() == 2) {
-//                    xemChiTiet(maHD);
-//                }
-            }
-        });
-
         JScrollPane scroll = new JScrollPane(table);
         scroll.getViewport().setBackground(SURFACE);
         scroll.setBorder(BorderFactory.createEmptyBorder());
         return scroll;
     }
 
-    // ── Load & Render ────────────────────────────────────
-    private void loadDanhSach() {
-        // TODO: List<HoaDon> list = bus.getAll();
-        tableModel.setRowCount(0);
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-        Object[][] sample = {
-                {"HD001","HD001","KH001","NV001","KM001", new Date(), 850000.0, 50000.0, 800000.0, "TIENMAT",     "DATHANHTOAN"},
-                {"HD002","HD002","KH002","NV001","-",     new Date(), 450000.0, 0.0,     450000.0, "MOMO",        "DATHANHTOAN"},
-                {"HD003","HD003","KH003","NV002","KM002", new Date(),1200000.0,120000.0,1080000.0, "CHUYENKHOAN", "CHUATHANHTOAN"},
-                {"HD004","HD004","KH001","NV003","-",     new Date(), 280000.0, 0.0,     280000.0, "VNPAY",       "DATHANHTOAN"},
-                {"HD005","HD005","KH004","NV002","-",     new Date(), 680000.0, 0.0,     680000.0, "ZaloPay",     "CHUATHANHTOAN"},
-        };
-        for (Object[] r : sample) {
-            tableModel.addRow(new Object[]{
-                    r[0],                                           // col 0 maHD (an)
-                    r[1],                                           // col 1 ma HD
-                    r[2],                                           // col 2 maKH
-                    r[3],                                           // col 3 maNV
-                    r[4],                                           // col 4 maKM
-                    sdf.format((Date) r[5]),                        // col 5 ngay tao
-                    String.format("%,.0f d", (double) r[6]),        // col 6 tong tien
-                    String.format("%,.0f d", (double) r[7]),        // col 7 giam gia
-                    String.format("%,.0f d", (double) r[8]),        // col 8 thanh toan
-                    r[9],                                           // col 9 phuong thuc
-                    r[10],                                          // col 10 trang thai
-                    ""                                              // col 11 thao tac
-            });
-        }
-        updateStats();
-    }
-
-    private void locDuLieu() {
-        // TODO: filter tren bus.getAll()
-        loadDanhSach();
-    }
 
     private void updateStats() {
         int total = tableModel.getRowCount();
@@ -311,41 +239,6 @@ public class HoaDonView extends JFrame {
             if ("CHUATHANHTOAN".equals(tableModel.getValueAt(i, 10))) chuaTT++;
         lblTongHD.setText("HD: " + total);
         lblChuaTT.setText("Chưa TT: " + chuaTT);
-    }
-
-    // ── Chuc nang ────────────────────────────────────────
-//    private void moDialogThem() {
-//        HoaDonDialog dialog = new HoaDonDialog((Frame) SwingUtilities.getWindowAncestor(this), null);
-//        dialog.setVisible(true);
-//        if (dialog.getKetQua() != null) {
-//            // TODO: bus.them(dialog.getKetQua());
-//            loadDanhSach();
-//            JOptionPane.showMessageDialog(this, "Tạo hoá đơn thành công!");
-//        }
-//    }
-
-//    private void xemChiTiet(String maHD) {
-//        HoaDonChiTietDialog dialog = new HoaDonChiTietDialog(
-//                (Frame) SwingUtilities.getWindowAncestor(this), maHD);
-//        dialog.setVisible(true);
-//    }
-
-    private void inHoaDon(String maHD) {
-        // TODO: tich hop thu vien in that (JasperReports, iText...)
-        JOptionPane.showMessageDialog(this,
-                "In hoá đơn: " + maHD + "\n(Chức năng đang phát triển)",
-                "In hoá đơn", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    private void xoaHoaDon(String maHD) {
-        int confirm = JOptionPane.showConfirmDialog(this,
-                "Bạn có chắc muốn xoá hoá đơn: " + maHD + "?",
-                "Xác nhận xoá", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-        if (confirm == JOptionPane.YES_OPTION) {
-            // TODO: bus.xoa(maHD);
-            loadDanhSach();
-            JOptionPane.showMessageDialog(this, "Đã xoá " + maHD);
-        }
     }
 
     // ── Helpers ──────────────────────────────────────────
@@ -361,7 +254,7 @@ public class HoaDonView extends JFrame {
         ));
         l.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         return l;
-    }
+    }// chua hieu o day
 
     private JLabel makeChip(String text, Color color) {
         JLabel l = new JLabel(text);

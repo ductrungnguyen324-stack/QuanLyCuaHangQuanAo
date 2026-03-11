@@ -1,4 +1,6 @@
 package gui.view;
+import gui.controller.LoginController;
+
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
@@ -35,6 +37,8 @@ public class LoginView extends JFrame {
         setContentPane(bg);
         setVisible(true);
         SwingUtilities.invokeLater(() -> Username.requestFocusInWindow());
+
+        new LoginController(this);
     }
 
     private JPanel buildCard() {
@@ -61,8 +65,6 @@ public class LoginView extends JFrame {
         lblUser.setFont(new Font("Sans serif", Font.BOLD, 13));
         lblUser.setForeground(TEXT2);
         inner.add(lblUser);
-
-        // O username
         Username = makePlaceholderField("Nhập tên đăng nhập.....");
         inner.add(Username);
 
@@ -71,12 +73,9 @@ public class LoginView extends JFrame {
         lblPass.setFont(new Font("Sans serif", Font.BOLD, 13));
         lblPass.setForeground(TEXT2);
         inner.add(lblPass);
-
-        // O password
         Password = new JPasswordField();
         Password.setEchoChar('\u25CF');
         styleField(Password);
-        Password.addActionListener(e -> Login());
         inner.add(Password);
 
         // Checkbox hien mat khau
@@ -107,7 +106,6 @@ public class LoginView extends JFrame {
         btnLogin.setFocusPainted(false);
         btnLogin.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnLogin.setBorder(BorderFactory.createEmptyBorder(12, 0, 12, 0));
-        btnLogin.addActionListener(e -> Login());
         inner.add(btnLogin);
 
         card.add(inner);
@@ -166,9 +164,29 @@ public class LoginView extends JFrame {
     public String getPassword() {
         return new String(Password.getPassword());
     }
+    // tra ve o user
+    public JTextField getTUserName() {
+        return Username;
+    }
+    // tra ve o password
+    public JPasswordField getPPassword() {
+        return Password;
+    }
     // tra ve button dang nhap
     public JButton getBtnLogin() {
         return btnLogin;
+    }
+    // show loi
+    public void showError(String message) {
+        lblStatus.setText(message == null || message.isEmpty() ? " " : message);
+    }
+
+    public void clearPassword() {
+        Password.setText("");
+    }
+
+    public void focusPassword() {
+        Password.requestFocusInWindow();
     }
 
     public static void main(String[] args) {

@@ -2,65 +2,62 @@ package bus;
 
 import dao.NhanVienDAO;
 import entity.NhanVien;
-import java.util.ArrayList;
+import java.util.List;
 
 public class NhanVienBUS {
-    private ArrayList<NhanVien> dsNV;
-    private NhanVienDAO nvDAO;
+    private NhanVienDAO nvDAO = new NhanVienDAO();
 
-    public NhanVienBUS() {
-        nvDAO = new NhanVienDAO();
-        dsNV = nvDAO.getAll();
+    // Lay tat ca nhan vien truc tiep tu DAO
+    public List<NhanVien> getAll() {
+        return nvDAO.getAll();
     }
 
-    public ArrayList<NhanVien> getDsNV() {
-        return dsNV;
-    }
-
-    public String add(NhanVien nv) {
-        // Kiểm tra logic: không được trùng mã
-        for (NhanVien item : dsNV) {
-            if (item.getManv().equalsIgnoreCase(nv.getManv())) {
-                return "Mã nhân viên đã tồn tại!";
-            }
+    // Them nhan vien voi kiem tra logic
+    public boolean add(NhanVien nv) {
+        // Kiem tra ma nhan vien khong duoc rong
+        if (nv.getManv() == null || nv.getManv().trim().isEmpty()) {
+            System.out.println("Ma nhan vien khong duoc rong!");
+            return false;
         }
-        if (nvDAO.insert(nv)) {
-            dsNV.add(nv);
-            return "Thêm thành công!";
+
+        // Kiem tra ho ten khong duoc rong
+        if (nv.getHoten() == null || nv.getHoten().trim().isEmpty()) {
+            System.out.println("Ho ten nhan vien khong duoc rong!");
+            return false;
         }
-        return "Thêm thất bại!";
+
+        // Kiem tra trung ma (tuong tu logic mau HoaDon)
+        if (getById(nv.getManv()) != null) {
+            System.out.println("Ma nhan vien da ton tai!");
+            return false;
+        }
+
+        return nvDAO.insert(nv);
     }
 
-    public String update(NhanVien nv) {
-        if (nvDAO.update(nv)) {
-            // Cập nhật lại trong danh sách bộ nhớ
-            for (int i = 0; i < dsNV.size(); i++) {
-                if (dsNV.get(i).getManv().equals(nv.getManv())) {
-                    dsNV.set(i, nv);
-                    break;
-                }
-            }
-            return "Cập nhật thành công!";
+    // Cap nhat thong tin nhan vien
+    public boolean update(NhanVien nv) {
+        if (nv.getManv() == null || nv.getManv().trim().isEmpty()) {
+            return false;
         }
-        return "Cập nhật thất bại!";
+        return nvDAO.update(nv);
     }
 
-    public String delete(String maNV) {
-        if (nvDAO.delete(maNV)) {
-            dsNV.removeIf(nv -> nv.getManv().equals(maNV));
-            return "Xóa thành công!";
+    // Xoa nhan vien
+    public boolean delete(String maNV) {
+        if (maNV == null || maNV.trim().isEmpty()) {
+            return false;
         }
-        return "Xóa thất bại!";
+        return nvDAO.delete(maNV);
     }
 
-    public ArrayList<NhanVien> search(String keyword) {
-        ArrayList<NhanVien> result = new ArrayList<>();
-        for (NhanVien nv : dsNV) {
-            if (nv.getManv().contains(keyword) || nv.getHoten().toLowerCase().contains(keyword.toLowerCase())) {
-                result.add(nv);
-            }
-        }
-        return result;
+    // Tim kiem nhan vien theo ma (getById) theo mau HoaDon
+    public NhanVien getById(String maNV) {
+        return nvDAO.getById(maNV);
     }
 
+    // Ham dang nhap goi tu DAO
+    public NhanVien Login(String username, String password) {
+        return nvDAO.checkLogin(username, password);
+    }
 }
