@@ -1,6 +1,6 @@
 package bus;
 
-import dao.MyConnection;
+import dao.DBConnection;
 import dao.PhieuNhapHangDAO;
 import dao.ChiTietPhieuNhapDAO;
 import entity.PhieuNhapHangDTO;
@@ -21,7 +21,7 @@ public class ChiTietPhieuNhapBUS {
     public boolean insert(ChiTietPhieuNhapDTO ctpn) {
         Connection conn = null;
         try {
-            conn = MyConnection.getConnection();
+            conn = DBConnection.getConnection();
             return ctpnDAO.insert(ctpn, conn);
         } catch (Exception e) {
             e.printStackTrace();
@@ -40,7 +40,7 @@ public class ChiTietPhieuNhapBUS {
     public boolean deletePhieuFull(String maPN) {
         Connection conn = null;
         try {
-            conn = MyConnection.getConnection();
+            conn = DBConnection.getConnection();
             conn.setAutoCommit(false);
             ctpnDAO.deleteByMaPN(maPN, conn);
 
@@ -75,7 +75,7 @@ public class ChiTietPhieuNhapBUS {
     public boolean themPhieuFull(PhieuNhapHangDTO pn, ArrayList<ChiTietPhieuNhapDTO> dsCT) {
         Connection conn = null;
         try {
-            conn = MyConnection.getConnection();
+            conn = DBConnection.getConnection();
             conn.setAutoCommit(false);
 
             if (!pnDAO.insert(pn, conn)) {
@@ -131,7 +131,7 @@ public class ChiTietPhieuNhapBUS {
     public boolean updatePhieuFull(PhieuNhapHangDTO pn, ArrayList<ChiTietPhieuNhapDTO> dsCT) {
         Connection conn = null;
         try {
-            conn = MyConnection.getConnection();
+            conn = DBConnection.getConnection();
             conn.setAutoCommit(false);
 
             if (!pnDAO.update(pn, conn)) {
