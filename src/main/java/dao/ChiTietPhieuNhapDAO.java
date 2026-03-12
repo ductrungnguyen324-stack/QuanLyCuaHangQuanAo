@@ -1,7 +1,7 @@
-package DAO;
+package dao;
 
-import DTO.ChiTietPhieuNhapDTO;
-import DTO.PhieuNhapHangDTO;
+import entity.ChiTietPhieuNhapDTO;
+import entity.PhieuNhapHangDTO;
 import java.sql.*;
 import java.util.ArrayList;
 
