@@ -2,10 +2,6 @@ package DTO;
 
 import java.util.Date;
 
-/**
- * PhieuNhapHangDTO — Đối tượng vận chuyển dữ liệu cho bảng PhieuNhap Mapping
- * với SQL: maPN, maNV, nhacungcap, ngaytao, thanhtien, trangthai
- */
 public class PhieuNhapHangDTO {
 
     private String maPN;
