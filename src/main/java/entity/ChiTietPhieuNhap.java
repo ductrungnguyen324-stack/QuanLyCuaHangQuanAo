@@ -1,4 +1,4 @@
-package DTO;
+package entity;
 
 public class ChiTietPhieuNhapDTO {
 
