@@ -1,13 +1,14 @@
 package gui.view;
 
+import gui.controller.KhuyenMaiController;
 
 import javax.swing.*;
 import javax.swing.border.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 public class KhuyenMaiView extends JFrame {
 
@@ -27,29 +28,29 @@ public class KhuyenMaiView extends JFrame {
     private static final Color ROW_SEL = new Color(25, 35, 80);
 
     // ── Components ───────────────────────────────────────
-    // private final KhuyenMaiBUS bus = new KhuyenMaiBUS(); // ← BẬT KHI CÓ BUS
     private JTable              table;
     private DefaultTableModel   tableModel;
     private JTextField          searchField;
     private JComboBox<String>   cbLoaiKM, cbTrangThai;
     private JLabel              lblTongKM, lblDangHoat, lblHetHan;
 
+    // ── Controller ───────────────────────────────────────
+    private KhuyenMaiController controller;
+
     private static final String[] COLUMNS = {
             "Mã KM",            // col 0
             "Tên khuyến mãi",   // col 1
-            "Loại",             // col 2  (loaiKM)
-            "Giá trị giảm",     // col 3  (giatrigiam)
-            "Giảm tối đa",      // col 4  (giamtoida)
-            "Đơn tối thiểu",    // col 5  (giatridonhangtoithieu)
-            "Ngày bắt đầu",     // col 6  (ngaybatdau)
-            "Ngày kết thúc",    // col 7  (ngayketthuc)
-            "Số lượng",         // col 8  (soluong)
-            "Đã dùng",          // col 9  (dasudung)
-            "Trạng thái",       // col 10 (isKhaDung)
+            "Loại",             // col 2
+            "Giá trị giảm",     // col 3
+            "Giảm tối đa",      // col 4
+            "Đơn tối thiểu",    // col 5
+            "Ngày bắt đầu",     // col 6
+            "Ngày kết thúc",    // col 7
+            "Số lượng",         // col 8
+            "Đã dùng",          // col 9
+            "Trạng thái",       // col 10
             "Thao tác"          // col 11
     };
-
-    private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     public KhuyenMaiView() {
         setTitle("Quản lý Khuyến mãi");
@@ -59,15 +60,21 @@ public class KhuyenMaiView extends JFrame {
         setBackground(BG);
         setLayout(new BorderLayout(0, 0));
 
+        // Khởi tạo bảng trước (controller cần tableModel)
+        JScrollPane scrollPane = buildTable();
+
         JPanel top = new JPanel(new BorderLayout());
         top.setOpaque(false);
         top.add(buildHeader(),  BorderLayout.NORTH);
         top.add(buildToolbar(), BorderLayout.SOUTH);
 
-        add(top,          BorderLayout.NORTH);
-        add(buildTable(), BorderLayout.CENTER);
+        add(top,        BorderLayout.NORTH);
+        add(scrollPane, BorderLayout.CENTER);
 
-        loadDanhSach();
+        // Controller khởi tạo sau khi View đã có đủ component
+        controller = new KhuyenMaiController(this);
+        controller.loadDanhSach();
+
         setVisible(true);
     }
 
@@ -84,10 +91,9 @@ public class KhuyenMaiView extends JFrame {
         title.setFont(new Font("Dialog", Font.BOLD, 20));
         title.setForeground(TEXT1);
 
-        // Chip thống kê
-        lblTongKM   = makeChip("KM: --",          ACCENT);
+        lblTongKM   = makeChip("KM: --",             ACCENT);
         lblDangHoat = makeChip("Đang hoạt động: --", GREEN);
-        lblHetHan   = makeChip("Hết hạn: --",     RED);
+        lblHetHan   = makeChip("Hết hạn: --",        RED);
 
         JPanel chips = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         chips.setOpaque(false);
@@ -101,7 +107,7 @@ public class KhuyenMaiView extends JFrame {
         left.add(chips, BorderLayout.CENTER);
 
         JButton btnThem = makeButton("+ Thêm khuyến mãi", ACCENT, Color.WHITE);
-//        btnThem.addActionListener(e -> moDialogThem());
+        btnThem.addActionListener(e -> controller.moDialogThem());
 
         h.add(left,    BorderLayout.WEST);
         h.add(btnThem, BorderLayout.EAST);
@@ -117,6 +123,13 @@ public class KhuyenMaiView extends JFrame {
         searchField = new JTextField(18);
         styleTextField(searchField);
         searchField.setToolTipText("Tìm theo mã hoặc tên khuyến mãi...");
+        // Tìm kiếm khi nhấn Enter
+        // Live search: gõ đến đâu lọc đến đó
+        searchField.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e)  { triggerFilter(); }
+            public void removeUpdate(DocumentEvent e)  { triggerFilter(); }
+            public void changedUpdate(DocumentEvent e) { triggerFilter(); }
+        });
 
         cbLoaiKM = new JComboBox<>(new String[]{
                 "Tất cả loại", "PHANTRAM", "TIENCODINH"
@@ -128,10 +141,10 @@ public class KhuyenMaiView extends JFrame {
         styleCombo(cbTrangThai);
 
         cbLoaiKM.addItemListener(e -> {
-            if (e.getStateChange() == ItemEvent.SELECTED) locDuLieu();
+            if (e.getStateChange() == ItemEvent.SELECTED) triggerFilter();
         });
         cbTrangThai.addItemListener(e -> {
-            if (e.getStateChange() == ItemEvent.SELECTED) locDuLieu();
+            if (e.getStateChange() == ItemEvent.SELECTED) triggerFilter();
         });
 
         JButton btnReset = makeButton("Làm mới", CARD, TEXT2);
@@ -139,7 +152,7 @@ public class KhuyenMaiView extends JFrame {
             searchField.setText("");
             cbLoaiKM.setSelectedIndex(0);
             cbTrangThai.setSelectedIndex(0);
-            loadDanhSach();
+            controller.loadDanhSach();
         });
 
         bar.add(makeLabel("Tìm kiếm:"));
@@ -148,6 +161,15 @@ public class KhuyenMaiView extends JFrame {
         bar.add(cbTrangThai);
         bar.add(btnReset);
         return bar;
+    }
+
+    private void triggerFilter() {
+        if (controller != null)
+            controller.locDuLieu(
+                    searchField.getText(),
+                    (String) cbLoaiKM.getSelectedItem(),
+                    (String) cbTrangThai.getSelectedItem()
+            );
     }
 
     // ── Table ────────────────────────────────────────────
@@ -181,7 +203,6 @@ public class KhuyenMaiView extends JFrame {
         header.setFont(new Font("Dialog", Font.BOLD, 11));
         header.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, BORDER));
 
-        // Độ rộng cột
         int[] widths = {80, 200, 110, 110, 110, 120, 130, 130, 80, 80, 120, 130};
         for (int i = 0; i < widths.length; i++)
             table.getColumnModel().getColumn(i).setPreferredWidth(widths[i]);
@@ -213,19 +234,18 @@ public class KhuyenMaiView extends JFrame {
                 }
         );
 
-        // Renderer cột Thao tác (col 11)
+        // Renderer cột Thao tác (col 11) — chỉ Sửa và Xóa
         table.getColumnModel().getColumn(11).setCellRenderer(
                 (t, val, sel, foc, row, col) -> {
-                    JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 8));
+                    JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 8));
                     p.setBackground(sel ? ROW_SEL : row % 2 == 0 ? SURFACE : ROW_ODD);
-                    p.add(makeTag("Chi tiết", CYAN));
-                    p.add(makeTag("Sửa",      YELLOW));
-                    p.add(makeTag("Xóa",      RED));
+                    p.add(makeTag("Sửa", YELLOW));
+                    p.add(makeTag("Xóa", RED));
                     return p;
                 }
         );
 
-        // MouseListener: xử lý click cột Thao tác
+        // MouseListener: click cột Thao tác — 2 vùng: Sửa | Xóa
         table.addMouseListener(new MouseAdapter() {
             @Override public void mouseClicked(MouseEvent e) {
                 int row = table.rowAtPoint(e.getPoint());
@@ -234,16 +254,13 @@ public class KhuyenMaiView extends JFrame {
                 String maKM  = (String) tableModel.getValueAt(modelRow, 0);
                 int col = table.columnAtPoint(e.getPoint());
 
-//                if (col == 11) {
-//                    Rectangle rect = table.getCellRect(row, col, true);
-//                    int third = rect.width / 3;
-//                    int dx = e.getX() - rect.x;
-//                    if (dx < third)           xemChiTiet(maKM);
-//                    else if (dx < third * 2)  suaKhuyenMai(maKM);
-//                    else                      xoaKhuyenMai(maKM);
-//                } else if (e.getClickCount() == 2) {
-//                    xemChiTiet(maKM);
-//                }
+                if (col == 11) {
+                    Rectangle rect = table.getCellRect(row, col, true);
+                    int half = rect.width / 2;
+                    int dx   = e.getX() - rect.x;
+                    if (dx < half) controller.suaKhuyenMai(maKM);
+                    else           controller.xoaKhuyenMai(maKM);
+                }
             }
         });
 
@@ -253,114 +270,22 @@ public class KhuyenMaiView extends JFrame {
         return scroll;
     }
 
-    // ── Load & Render ────────────────────────────────────
-    private void loadDanhSach() {
-        // TODO: List<KhuyenMai> list = bus.getAll();
-        tableModel.setRowCount(0);
-        LocalDateTime now = LocalDateTime.now();
-
-        // Dữ liệu mẫu — mỗi phần tử tương ứng field trong KhuyenMai.java
-        // { maKM, tenKM, loaiKM, giatrigiam, giamtoida, giatridonhangtoithieu,
-        //   ngaybatdau, ngayketthuc, soluong, dasudung }
-        Object[][] sample = {
-                {"KM001", "Giảm 10% đơn từ 200k",     "PHANTRAM",   10.0,  50000.0, 200000.0,
-                        now.minusDays(10), now.plusDays(20),  100, 42},
-                {"KM002", "Giảm 50k đơn từ 300k",      "TIENCODINH", 50000.0, 50000.0, 300000.0,
-                        now.minusDays(5),  now.plusDays(25),  200, 87},
-                {"KM003", "Flash Sale 20%",             "PHANTRAM",   20.0, 100000.0, 500000.0,
-                        now.minusDays(1),  now.plusDays(1),   50,  50},
-                {"KM004", "Ưu đãi tháng 3 - 15%",      "PHANTRAM",   15.0,  80000.0, 400000.0,
-                        now.minusDays(30), now.minusDays(1),  150, 145},
-                {"KM005", "Giảm 100k đơn từ 1 triệu",  "TIENCODINH",100000.0,100000.0,1000000.0,
-                        now.minusDays(3),  now.plusDays(27),  80,  12},
-        };
-
-        for (Object[] r : sample) {
-            LocalDateTime batDau   = (LocalDateTime) r[6];
-            LocalDateTime ketThuc  = (LocalDateTime) r[7];
-            int    soluong  = (int)    r[8];
-            int    dasudung = (int)    r[9];
-
-            boolean conHieu = (dasudung < soluong)
-                    && now.isAfter(batDau) && now.isBefore(ketThuc);
-            String loai = (String) r[2];
-
-            // Hiển thị giá trị giảm: % hoặc tiền cố định
-            String giaTriHienThi = loai.equals("PHANTRAM")
-                    ? String.format("%.0f%%", (double) r[3])
-                    : String.format("%,.0f đ", (double) r[3]);
-
-            tableModel.addRow(new Object[]{
-                    r[0],                                                    // col 0  maKM
-                    r[1],                                                    // col 1  tenKM
-                    loai,                                                    // col 2  loaiKM
-                    giaTriHienThi,                                           // col 3  giatrigiam
-                    String.format("%,.0f đ", (double) r[4]),                 // col 4  giamtoida
-                    String.format("%,.0f đ", (double) r[5]),                 // col 5  giatridonhangtoithieu
-                    batDau.format(FMT),                                      // col 6  ngaybatdau
-                    ketThuc.format(FMT),                                     // col 7  ngayketthuc
-                    soluong,                                                 // col 8  soluong
-                    dasudung,                                                // col 9  dasudung
-                    conHieu ? "Còn hiệu lực" : "Hết hạn",                   // col 10 trangthai
-                    ""                                                       // col 11 thaotac
-            });
-        }
-        updateStats();
-    }
-
-    private void locDuLieu() {
-        // TODO: filter trên bus.getAll()
-        loadDanhSach();
-    }
-
-    private void updateStats() {
-        int total = tableModel.getRowCount();
-        int hoatDong = 0, hetHan = 0;
-        for (int i = 0; i < total; i++) {
-            String tt = (String) tableModel.getValueAt(i, 10);
-            if ("Còn hiệu lực".equals(tt)) hoatDong++;
-            else hetHan++;
-        }
+    // ── Public: Controller gọi để cập nhật stats ─────────
+    /**
+     * Luôn nhận số liệu từ toàn bộ DB (không phụ thuộc filter).
+     * @param total    tổng số khuyến mãi trong DB
+     * @param hoatDong số đang còn hiệu lực
+     * @param hetHan   số đã hết hạn / hết lượt
+     */
+    public void updateStats(int total, int hoatDong, int hetHan) {
         lblTongKM.setText("KM: " + total);
         lblDangHoat.setText("Đang hoạt động: " + hoatDong);
         lblHetHan.setText("Hết hạn: " + hetHan);
     }
 
-    // ── Chức năng (mở comment khi có BUS) ────────────────
-//    private void moDialogThem() {
-//        KhuyenMaiDialog dialog = new KhuyenMaiDialog(this, null);
-//        dialog.setVisible(true);
-//        if (dialog.getKetQua() != null) {
-//            bus.them(dialog.getKetQua());
-//            loadDanhSach();
-//            JOptionPane.showMessageDialog(this, "Thêm khuyến mãi thành công!");
-//        }
-//    }
-
-//    private void xemChiTiet(String maKM) {
-//        KhuyenMai km = bus.getByMa(maKM);
-//        JOptionPane.showMessageDialog(this, km.toString(), "Chi tiết: " + maKM, JOptionPane.INFORMATION_MESSAGE);
-//    }
-
-//    private void suaKhuyenMai(String maKM) {
-//        KhuyenMai km = bus.getByMa(maKM);
-//        KhuyenMaiDialog dialog = new KhuyenMaiDialog(this, km);
-//        dialog.setVisible(true);
-//        if (dialog.getKetQua() != null) {
-//            bus.capNhat(dialog.getKetQua());
-//            loadDanhSach();
-//        }
-//    }
-
-    private void xoaKhuyenMai(String maKM) {
-        int confirm = JOptionPane.showConfirmDialog(this,
-                "Bạn có chắc muốn xóa khuyến mãi: " + maKM + "?",
-                "Xác nhận xóa", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-        if (confirm == JOptionPane.YES_OPTION) {
-            // TODO: bus.xoa(maKM);
-            loadDanhSach();
-            JOptionPane.showMessageDialog(this, "Đã xóa " + maKM);
-        }
+    /** Controller cần truy cập tableModel để đổ dữ liệu. */
+    public DefaultTableModel getTableModel() {
+        return tableModel;
     }
 
     // ── Helpers ──────────────────────────────────────────
@@ -428,9 +353,4 @@ public class KhuyenMaiView extends JFrame {
         cb.setFont(new Font("Dialog", Font.BOLD, 12));
     }
 
-    public static void main(String[] args) {
-        try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); }
-        catch (Exception ignored) {}
-        SwingUtilities.invokeLater(KhuyenMaiView::new);
-    }
 }
