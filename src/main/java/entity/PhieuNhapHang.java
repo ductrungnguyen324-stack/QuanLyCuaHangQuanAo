@@ -1,25 +1,30 @@
-package entity;
+package DTO;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
-public class PhieuNhapHang
-{
-    String maPN;
-    String maNV;
-    String nhacungcap;
-    LocalDateTime ngaytao;
-    double thanhtien;
-    String trangthai;
+/**
+ * PhieuNhapHangDTO — Đối tượng vận chuyển dữ liệu cho bảng PhieuNhap Mapping
+ * với SQL: maPN, maNV, nhacungcap, ngaytao, thanhtien, trangthai
+ */
+public class PhieuNhapHangDTO {
 
-    public PhieuNhapHang() {}
+    private String maPN;
+    private String maNV;
+    private String nhaCungCap;
+    private Date ngayTao;
+    private double tongTien;
+    private String trangThai;
 
-    public PhieuNhapHang(String maPN, String maNV, String nhacungcap, LocalDateTime ngaytao, double thanhtien, String trangthai) {
+    public PhieuNhapHangDTO() {
+    }
+
+    public PhieuNhapHangDTO(String maPN, String maNV, String nhaCungCap, Date ngayTao, double tongTien, String trangThai) {
         this.maPN = maPN;
         this.maNV = maNV;
-        this.nhacungcap = nhacungcap;
-        this.ngaytao = ngaytao;
-        this.thanhtien = thanhtien;
-        this.trangthai = trangthai;
+        this.nhaCungCap = nhaCungCap;
+        this.ngayTao = ngayTao;
+        this.tongTien = tongTien;
+        this.trangThai = trangThai;
     }
 
     public String getMaPN() {
@@ -38,35 +43,40 @@ public class PhieuNhapHang
         this.maNV = maNV;
     }
 
-    public String getNhacungcap() {
-        return nhacungcap;
+    public String getNhaCungCap() {
+        return nhaCungCap;
     }
 
-    public void setNhacungcap(String nhacungcap) {
-        this.nhacungcap = nhacungcap;
+    public void setNhaCungCap(String nhaCungCap) {
+        this.nhaCungCap = nhaCungCap;
     }
 
-    public LocalDateTime getNgaytao() {
-        return ngaytao;
+    public Date getNgayTao() {
+        return ngayTao;
     }
 
-    public void setNgaytao(LocalDateTime ngaytao) {
-        this.ngaytao = ngaytao;
+    public void setNgayTao(Date ngayTao) {
+        this.ngayTao = ngayTao;
     }
 
-    public double getThanhtien() {
-        return thanhtien;
+    public double getTongTien() {
+        return tongTien;
     }
 
-    public void setThanhtien(double thanhtien) {
-        this.thanhtien = thanhtien;
+    public void setTongTien(double tongTien) {
+        this.tongTien = tongTien;
     }
 
-    public String getTrangthai() {
-        return trangthai;
+    public String getTrangThai() {
+        return trangThai;
     }
 
-    public void setTrangthai(String trangthai) {
-        this.trangthai = trangthai;
+    public void setTrangThai(String trangThai) {
+        this.trangThai = trangThai;
+    }
+
+    @Override
+    public String toString() {
+        return "PhieuNhap{" + "maPN='" + maPN + '\'' + ", tongTien=" + tongTien + '}';
     }
 }
