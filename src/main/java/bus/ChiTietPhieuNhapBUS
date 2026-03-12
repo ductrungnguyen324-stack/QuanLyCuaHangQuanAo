@@ -1,7 +1,10 @@
-package BUS;
+package bus;
 
-import DTO.*;
-import DAO.*;
+import dao.MyConnection;
+import dao.PhieuNhapHangDAO;
+import dao.ChiTietPhieuNhapDAO;
+import entity.PhieuNhapHangDTO;
+import entity.ChiTietPhieuNhapDTO;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
