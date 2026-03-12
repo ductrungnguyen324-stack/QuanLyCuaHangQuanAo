@@ -1,6 +1,7 @@
-package DTO;
+package entity;
 
 import java.util.Date;
+
 
 public class PhieuNhapHangDTO {
 
