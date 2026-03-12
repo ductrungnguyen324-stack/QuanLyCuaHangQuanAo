@@ -5,6 +5,7 @@ import entity.ChiTietPhieuNhapDTO;
 import entity.PhieuNhapHangDTO;
 import java.util.ArrayList;
 
+
 public class PhieuNhapDialogController {
 
     private final ChiTietPhieuNhapBUS ctBus = new ChiTietPhieuNhapBUS();
