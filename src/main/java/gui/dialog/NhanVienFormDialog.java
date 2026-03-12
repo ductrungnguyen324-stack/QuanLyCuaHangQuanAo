@@ -7,239 +7,182 @@ import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.*;
 
-/**
- * NhanVienFormDialog.java
- * Package : gui.dialog
- * Chuc nang: Dialog dung chung cho ca Them moi va Cap nhat nhan vien.
- *
- * Su dung:
- *   // Them moi
- *   NhanVienFormDialog dlg = new NhanVienFormDialog(parentFrame, null);
- *   dlg.setVisible(true);
- *   NhanVien kq = dlg.getKetQua(); // null neu nguoi dung huy
- *
- *   // Cap nhat
- *   NhanVienFormDialog dlg = new NhanVienFormDialog(parentFrame, nvHienTai);
- *   dlg.setVisible(true);
- *   NhanVien kq = dlg.getKetQua();
- *
- * Luu y:
- *   - getKetQua().getMatkhau() == null nghia la nguoi dung bo trong mat khau
- *     (Controller can giu lai mat khau cu khi cap nhat)
- */
 public class NhanVienFormDialog extends JDialog {
 
-    // ── Mau (dong bo NhanVienPanel) ──────────────────────────
-    private static final Color BG      = new Color(7,  10, 20);
-    private static final Color SURFACE = new Color(11, 15, 30);
-    private static final Color CARD    = new Color(14, 20, 40);
-    private static final Color BORDER  = new Color(30, 42, 72);
-    private static final Color ACCENT  = new Color(99, 102, 241);
-    private static final Color GREEN   = new Color(16, 185, 129);
+    private static final Color BG      = new Color(7,   10,  20);
+    private static final Color SURFACE = new Color(11,  15,  30);
+    private static final Color CARD    = new Color(14,  20,  40);
+    private static final Color BORDER_C= new Color(30,  42,  72);
+    private static final Color ACCENT  = new Color(99,  102, 241);
     private static final Color RED     = new Color(239, 68,  68);
     private static final Color TEXT1   = new Color(226, 232, 240);
-    private static final Color TEXT2   = new Color(100, 116, 139);
+    private static final Color TEXT2   = new Color(140, 155, 175);
+    private static final Color COMBO_BG= new Color(14,  20,  40);
     private static final Color ERR_CLR = new Color(239, 68,  68);
 
-    // ── Trang thai ───────────────────────────────────────────
     private final boolean isEdit;
-    private NhanVien      ketQua = null;
+    private NhanVien ketQua = null;
 
-    // ── Input fields ─────────────────────────────────────────
     private JTextField     fMaNV, fHoten, fSdt, fTendangnhap;
     private JPasswordField fMatkhau, fXacNhanMK;
-    private JComboBox<String> cbChucVu, cbTrangThai;
+    private FakeCombo      cbChucVu, cbTrangThai;
+    private JLabel         errMaNV, errHoten, errSdt, errTendangnhap, errMatkhau, errXacNhan;
 
-    // ── Error labels ─────────────────────────────────────────
-    private JLabel errMaNV, errHoten, errSdt, errTendangnhap, errMatkhau;
-
-    // =========================================================
-    // Constructor
-    // =========================================================
-    /**
-     * @param parent    Frame cha
-     * @param nv        null = them moi | NhanVien = cap nhat
-     */
     public NhanVienFormDialog(Frame parent, NhanVien nv) {
-        super(parent, nv == null ? "Thêm nhân viên mới" : "Cập nhật nhân viên", true);
+        super(parent,
+                nv == null ? "Th\u00eam nh\u00e2n vi\u00ean m\u1edbi" : "C\u1eadp nh\u1eadt nh\u00e2n vi\u00ean",
+                true);
         this.isEdit = (nv != null);
-
-        setSize(540, isEdit ? 555 : 595);
-        setLocationRelativeTo(parent);
-        setResizable(false);
         getContentPane().setBackground(BG);
         setLayout(new BorderLayout());
-
-        add(buildHeader(),   BorderLayout.NORTH);
-        add(buildForm(nv),   BorderLayout.CENTER);
-        add(buildFooter(),   BorderLayout.SOUTH);
-
-        getRootPane().registerKeyboardAction(
-                e -> dispose(),
+        add(buildHeader(),  BorderLayout.NORTH);
+        add(buildForm(nv),  BorderLayout.CENTER);
+        add(buildFooter(),  BorderLayout.SOUTH);
+        pack();
+        setSize(600, isEdit ? 570 : 630);
+        setLocationRelativeTo(parent);
+        setResizable(false);
+        getRootPane().registerKeyboardAction(e -> dispose(),
                 KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-                JComponent.WHEN_IN_FOCUSED_WINDOW
-        );
+                JComponent.WHEN_IN_FOCUSED_WINDOW);
     }
 
     // =========================================================
-    // Header
+    // HEADER
     // =========================================================
     private JPanel buildHeader() {
         JPanel h = new JPanel(new BorderLayout());
         h.setBackground(SURFACE);
         h.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 1, 0, BORDER),
-                BorderFactory.createEmptyBorder(14, 22, 14, 22)
-        ));
+                new MatteBorder(0,0,1,0,BORDER_C),
+                BorderFactory.createEmptyBorder(14,22,14,22)));
 
-        JLabel icon = new JLabel(isEdit ? "✏" : "＋");
-        icon.setFont(new Font("Dialog", Font.PLAIN, 22));
-        icon.setForeground(ACCENT);
-        icon.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 12));
+        // Ti\u00eau \u0111\u1ec1 - tho\u00e1t Unicode
+        String title = isEdit
+                ? "C\u1eadp nh\u1eadt nh\u00e2n vi\u00ean"
+                : "Th\u00eam nh\u00e2n vi\u00ean m\u1edbi";
+        String sub = isEdit
+                ? "Ch\u1ec9nh s\u1eeda th\u00f4ng tin nh\u00e2n vi\u00ean"
+                : "\u0110i\u1ec1n \u0111\u1ea7y \u0111\u1ee7 th\u00f4ng tin \u0111\u1ec3 th\u00eam nh\u00e2n vi\u00ean m\u1edbi";
 
-        JLabel lblTitle = new JLabel(isEdit ? "Cập nhật nhân viên" : "Thêm nhân viên mới");
-        lblTitle.setFont(new Font("Dialog", Font.BOLD, 16));
+        JLabel lblTitle = new JLabel(title);
+        lblTitle.setFont(new Font("Dialog", Font.BOLD, 17));
         lblTitle.setForeground(TEXT1);
 
-        JLabel lblSub = new JLabel(isEdit
-                ? "Chỉnh sửa thông tin nhân viên trong hệ thống"
-                : "Điền đầy đủ thông tin để tạo tài khoản nhân viên mới");
-        lblSub.setFont(new Font("Dialog", Font.PLAIN, 11));
+        JLabel lblSub = new JLabel(sub);
+        lblSub.setFont(new Font("Dialog", Font.PLAIN, 12));
         lblSub.setForeground(TEXT2);
 
-        JPanel pText = new JPanel(new BorderLayout(0, 3));
+        JPanel pText = new JPanel(new BorderLayout(0,4));
         pText.setOpaque(false);
         pText.add(lblTitle, BorderLayout.NORTH);
         pText.add(lblSub,   BorderLayout.SOUTH);
 
-        JPanel pLeft = new JPanel(new BorderLayout());
-        pLeft.setOpaque(false);
-        pLeft.add(icon,  BorderLayout.WEST);
-        pLeft.add(pText, BorderLayout.CENTER);
+        // Nut dong
+        FlatBtn btnX = new FlatBtn("X", new Color(40,50,80), TEXT2, 32, 32);
+        btnX.addClickListener(this::dispose);
 
-        JButton btnX = new JButton("✕");
-        btnX.setFont(new Font("Dialog", Font.BOLD, 13));
-        btnX.setForeground(TEXT2);
-        btnX.setBackground(SURFACE);
-        btnX.setBorderPainted(false);
-        btnX.setFocusPainted(false);
-        btnX.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btnX.addActionListener(e -> dispose());
-        btnX.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent e) { btnX.setForeground(RED); }
-            public void mouseExited(MouseEvent e)  { btnX.setForeground(TEXT2); }
-        });
-
-        h.add(pLeft, BorderLayout.WEST);
+        h.add(pText, BorderLayout.WEST);
         h.add(btnX,  BorderLayout.EAST);
         return h;
     }
 
     // =========================================================
-    // Form
+    // FORM
     // =========================================================
     private JScrollPane buildForm(NhanVien nv) {
         JPanel form = new JPanel();
         form.setBackground(BG);
         form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
-        form.setBorder(BorderFactory.createEmptyBorder(16, 22, 8, 22));
+        form.setBorder(BorderFactory.createEmptyBorder(16,24,10,24));
 
-        // ── Section 1: Thong tin co ban ──────────────────────
-        form.add(makeSectionPanel("Thông tin cơ bản"));
-        form.add(Box.createVerticalStrut(10));
+        // --- Section 1 ---
+        form.add(secLbl("TH\u00d4NG TIN C\u01a0 B\u1ea2N"));
+        form.add(vg(10));
 
-        // Hang 1: Ma NV + Ho ten
-        fMaNV    = makeField();
-        fHoten   = makeField();
-        errMaNV  = makeErrLabel();
-        errHoten = makeErrLabel();
-
+        fMaNV    = mkField(); errMaNV  = errLbl();
+        fHoten   = mkField(); errHoten = errLbl();
         if (isEdit && nv != null) {
-            fMaNV.setText(nv.getManv());
+            fMaNV.setText(s(nv.getManv()));
             fMaNV.setEnabled(false);
-            fMaNV.setBackground(new Color(20, 26, 50));
+            fMaNV.setBackground(new Color(20,26,52));
             fMaNV.setForeground(TEXT2);
         }
-        if (nv != null) fHoten.setText(nv.getHoten());
+        if (nv != null) fHoten.setText(s(nv.getHoten()));
 
-        form.add(makeRowDouble(
-                makeFieldPanel("Mã nhân viên *", fMaNV,  errMaNV),
-                makeFieldPanel("Họ và tên *",    fHoten, errHoten)
-        ));
-        form.add(Box.createVerticalStrut(4));
+        String lbMa = isEdit
+                ? "M\u00e3 nh\u00e2n vi\u00ean"
+                : "M\u00e3 nh\u00e2n vi\u00ean *  (VD: NV001)";
+        form.add(row2(
+                blk(lbMa,              fMaNV,  errMaNV),
+                blk("H\u1ecd v\u00e0 t\u00ean *", fHoten, errHoten)));
+        form.add(vg(6));
 
-        // Hang 2: SDT + Chuc vu
-        fSdt     = makeField();
-        errSdt   = makeErrLabel();
-        cbChucVu = makeCombo(new String[]{
-                "Quản lý", "Nhân viên bán hàng", "Kho", "Thu ngân"
-        });
-        if (nv != null) {
-            fSdt.setText(nv.getSdt());
-            cbChucVu.setSelectedItem(nv.getChucvu());
-        }
-        form.add(makeRowDouble(
-                makeFieldPanel("Số điện thoại", fSdt,     makeErrLabel()),
-                makeFieldPanel("Chức vụ *",     cbChucVu, makeErrLabel())
-        ));
-        form.add(Box.createVerticalStrut(16));
+        fSdt     = mkField(); errSdt = errLbl();
+        cbChucVu = new FakeCombo(
+                new String[]{"Qu\u1ea3n l\u00fd","Nh\u00e2n vi\u00ean","Thu ng\u00e2n"},
+                COMBO_BG, TEXT1);
+        if (nv != null) { fSdt.setText(s(nv.getSdt())); cbChucVu.setSelectedItem(nv.getChucvu()); }
+        form.add(row2(
+                blk("S\u1ed1 \u0111i\u1ec7n tho\u1ea1i  (VD: 0901234567)", fSdt, errSdt),
+                blk("Ch\u1ee9c v\u1ee5 *", cbChucVu, errLbl())));
+        form.add(vg(16));
 
-        // ── Section 2: Tai khoan dang nhap ───────────────────
-        form.add(makeSectionPanel("Tài khoản đăng nhập"));
-        form.add(Box.createVerticalStrut(10));
+        // --- Section 2 ---
+        form.add(secLbl("T\u00c0I KHO\u1ea2N \u0110\u0102NG NH\u1eadP"));
+        form.add(vg(10));
 
-        // Ten dang nhap (full width)
-        fTendangnhap   = makeField();
-        errTendangnhap = makeErrLabel();
-        if (nv != null) fTendangnhap.setText(nv.getTendannhap());
-        form.add(makeRowFull(makeFieldPanel("Tên đăng nhập *", fTendangnhap, errTendangnhap)));
-        form.add(Box.createVerticalStrut(4));
+        fTendangnhap = mkField(); errTendangnhap = errLbl();
+        if (nv != null) fTendangnhap.setText(s(nv.getTendannhap()));
+        form.add(row1(blk(
+                "T\u00ean \u0111\u0103ng nh\u1eadp *  (\u22654 k\u00fd t\u1ef1, a-z 0-9 _ .)",
+                fTendangnhap, errTendangnhap)));
+        form.add(vg(6));
 
-        // Mat khau + Xac nhan
-        fMatkhau   = makePassField();
-        fXacNhanMK = makePassField();
-        errMatkhau = makeErrLabel();
-        form.add(makeRowDouble(
-                makeFieldPanel(isEdit ? "Mật khẩu mới" : "Mật khẩu *", fMatkhau,   errMatkhau),
-                makeFieldPanel("Xác nhận mật khẩu",                      fXacNhanMK, makeErrLabel())
-        ));
-        form.add(Box.createVerticalStrut(16));
+        fMatkhau   = mkPassField(); errMatkhau = errLbl();
+        fXacNhanMK = mkPassField(); errXacNhan = errLbl();
+        String lbMk = isEdit
+                ? "M\u1eadt kh\u1ea9u m\u1edbi  (tr\u1ed1ng = gi\u1eef c\u0169)"
+                : "M\u1eadt kh\u1ea9u *  (\u22656 k\u00fd t\u1ef1)";
+        form.add(row2(
+                blk(lbMk, fMatkhau, errMatkhau),
+                blk("X\u00e1c nh\u1eadn m\u1eadt kh\u1ea9u", fXacNhanMK, errXacNhan)));
+        form.add(vg(16));
 
-        // ── Section 3: Trang thai ─────────────────────────────
-        form.add(makeSectionPanel("Trạng thái"));
-        form.add(Box.createVerticalStrut(10));
+        // --- Section 3 ---
+        form.add(secLbl("TR\u1ea0NG TH\u00c1I"));
+        form.add(vg(10));
 
-        cbTrangThai = makeCombo(new String[]{"Hoạt động", "Nghỉ việc"});
+        cbTrangThai = new FakeCombo(
+                new String[]{"Ho\u1ea1t \u0111\u1ed9ng","Ng\u1eebng ho\u1ea1t \u0111\u1ed9ng"},
+                COMBO_BG, TEXT1);
         if (nv != null) cbTrangThai.setSelectedItem(nv.getTrangthai());
-        form.add(makeRowFull(makeFieldPanel("Trạng thái *", cbTrangThai, makeErrLabel())));
-        form.add(Box.createVerticalStrut(8));
+        form.add(row1(blk("Tr\u1ea1ng th\u00e1i *", cbTrangThai, errLbl())));
+        form.add(vg(10));
 
-        JScrollPane scroll = new JScrollPane(form);
-        scroll.setBackground(BG);
-        scroll.getViewport().setBackground(BG);
-        scroll.setBorder(BorderFactory.createEmptyBorder());
-        scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        return scroll;
+        JScrollPane sc = new JScrollPane(form);
+        sc.setBackground(BG);
+        sc.getViewport().setBackground(BG);
+        sc.setBorder(BorderFactory.createEmptyBorder());
+        sc.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        return sc;
     }
 
     // =========================================================
-    // Footer
+    // FOOTER
     // =========================================================
     private JPanel buildFooter() {
         JPanel f = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 12));
         f.setBackground(SURFACE);
-        f.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER));
+        f.setBorder(new MatteBorder(1,0,0,0,BORDER_C));
 
-        JButton btnHuy = makeBtn("Hủy", CARD, TEXT2);
-        btnHuy.setBorder(BorderFactory.createCompoundBorder(
-                new LineBorder(BORDER, 1, true),
-                BorderFactory.createEmptyBorder(8, 20, 8, 20)
-        ));
-        btnHuy.addActionListener(e -> dispose());
+        FlatBtn btnHuy = new FlatBtn("H\u1ee7y", new Color(22,30,58), TEXT2, 90, 38);
+        btnHuy.setBorderColor(new Color(50,70,110));
+        btnHuy.addClickListener(this::dispose);
 
-        JButton btnLuu = makeBtn(isEdit ? "Cập nhật" : "Thêm mới", ACCENT, Color.WHITE);
-        btnLuu.addActionListener(e -> onSave());
-        getRootPane().setDefaultButton(btnLuu);
+        String lblLuu = isEdit ? "C\u1eadp nh\u1eadt" : "Th\u00eam m\u1edbi";
+        FlatBtn btnLuu = new FlatBtn(lblLuu, ACCENT, Color.WHITE, 120, 38);
+        btnLuu.addClickListener(this::onSave);
 
         f.add(btnHuy);
         f.add(btnLuu);
@@ -247,237 +190,254 @@ public class NhanVienFormDialog extends JDialog {
     }
 
     // =========================================================
-    // Xu ly luu
+    // SAVE / VALIDATE
     // =========================================================
     private void onSave() {
+        System.out.println("[DIALOG] onSave()");
         if (!doValidate()) return;
-
-        String maNV        = fMaNV.getText().trim();
-        String hoten       = fHoten.getText().trim();
-        String sdt         = fSdt.getText().trim();
-        String chucvu      = (String) cbChucVu.getSelectedItem();
-        String tendangnhap = fTendangnhap.getText().trim();
-        String matkhau     = new String(fMatkhau.getPassword()).trim();
-        String trangthai   = (String) cbTrangThai.getSelectedItem();
-
-        // matkhau == null -> Controller se giu lai mat khau cu
+        String mk = new String(fMatkhau.getPassword()).trim();
         ketQua = new NhanVien(
-                maNV, hoten, sdt, chucvu, tendangnhap,
-                matkhau.isEmpty() ? null : matkhau,
-                trangthai
-        );
+                fMaNV.getText().trim(), fHoten.getText().trim(),
+                fSdt.getText().trim(),  cbChucVu.getSelected(),
+                fTendangnhap.getText().trim(),
+                mk.isEmpty() ? null : mk,
+                cbTrangThai.getSelected());
+        System.out.println("[DIALOG] OK => " + ketQua.getManv());
         dispose();
     }
 
-    // =========================================================
-    // Validation
-    // =========================================================
     private boolean doValidate() {
-        clearErrors();
-        boolean ok = true;
-
-        // Ma NV (chi khi them moi)
+        clearErr(); boolean ok = true;
         if (!isEdit) {
-            String maNV = fMaNV.getText().trim();
-            if (maNV.isEmpty()) {
-                setErr(errMaNV, "Mã nhân viên không được để trống!");
-                ok = false;
-            } else if (!maNV.matches("NV\\d{3,}")) {
-                setErr(errMaNV, "Định dạng: NV + ít nhất 3 chữ số (VD: NV001)");
-                ok = false;
-            }
+            String v = fMaNV.getText().trim();
+            if (v.isEmpty())                  { setErr(errMaNV,"Kh\u00f4ng \u0111\u01b0\u1ee3c \u0111\u1ec3 tr\u1ed1ng!"); ok=false; }
+            else if (!v.matches("NV\\d{3,}")) { setErr(errMaNV,"D\u1ea1ng NV+\u22653 s\u1ed1. VD: NV001"); ok=false; }
         }
-
-        // Ho ten
-        String hoten = fHoten.getText().trim();
-        if (hoten.isEmpty()) {
-            setErr(errHoten, "Họ tên không được để trống!");
-            ok = false;
-        } else if (hoten.length() < 3) {
-            setErr(errHoten, "Họ tên phải có ít nhất 3 ký tự!");
-            ok = false;
-        }
-
-        // SDT (tuy chon)
+        String ht = fHoten.getText().trim();
+        if (ht.isEmpty())       { setErr(errHoten,"Kh\u00f4ng \u0111\u01b0\u1ee3c \u0111\u1ec3 tr\u1ed1ng!"); ok=false; }
+        else if (ht.length()<3) { setErr(errHoten,"\u00cdt nh\u1ea5t 3 k\u00fd t\u1ef1!"); ok=false; }
         String sdt = fSdt.getText().trim();
-        if (!sdt.isEmpty() && !sdt.matches("0[0-9]{9}")) {
-            setErr(errSdt, "SĐT không hợp lệ (VD: 0901234567)");
-            ok = false;
-        }
-
-        // Ten dang nhap
-        String tdnhap = fTendangnhap.getText().trim();
-        if (tdnhap.isEmpty()) {
-            setErr(errTendangnhap, "Tên đăng nhập không được để trống!");
-            ok = false;
-        } else if (tdnhap.length() < 4) {
-            setErr(errTendangnhap, "Tên đăng nhập phải có ít nhất 4 ký tự!");
-            ok = false;
-        } else if (!tdnhap.matches("[a-zA-Z0-9_.]+")) {
-            setErr(errTendangnhap, "Chỉ chấp nhận chữ, số, dấu chấm và _");
-            ok = false;
-        }
-
-        // Mat khau
-        String mk  = new String(fMatkhau.getPassword());
-        String mk2 = new String(fXacNhanMK.getPassword());
-        if (!isEdit && mk.isEmpty()) {
-            setErr(errMatkhau, "Mật khẩu không được để trống!");
-            ok = false;
-        } else if (!mk.isEmpty() && mk.length() < 6) {
-            setErr(errMatkhau, "Mật khẩu phải có ít nhất 6 ký tự!");
-            ok = false;
-        } else if (!mk.isEmpty() && !mk.equals(mk2)) {
-            setErr(errMatkhau, "Mật khẩu xác nhận không khớp!");
-            ok = false;
-        }
-
+        if (!sdt.isEmpty() && !sdt.matches("0[0-9]{9}")) { setErr(errSdt,"S\u0110T kh\u00f4ng h\u1ee3p l\u1ec7!"); ok=false; }
+        String tdn = fTendangnhap.getText().trim();
+        if (tdn.isEmpty())              { setErr(errTendangnhap,"Kh\u00f4ng \u0111\u01b0\u1ee3c \u0111\u1ec3 tr\u1ed1ng!"); ok=false; }
+        else if (tdn.length()<4)        { setErr(errTendangnhap,"\u00cdt nh\u1ea5t 4 k\u00fd t\u1ef1!"); ok=false; }
+        else if (!tdn.matches("[a-zA-Z0-9_.]+")) { setErr(errTendangnhap,"Ch\u1ec9 a-z, 0-9, _ v\u00e0 ."); ok=false; }
+        String mk=new String(fMatkhau.getPassword()).trim(),
+                mk2=new String(fXacNhanMK.getPassword()).trim();
+        if (!isEdit && mk.isEmpty())           { setErr(errMatkhau,"Kh\u00f4ng \u0111\u01b0\u1ee3c \u0111\u1ec3 tr\u1ed1ng!"); ok=false; }
+        else if (!mk.isEmpty()&&mk.length()<6) { setErr(errMatkhau,"\u00cdt nh\u1ea5t 6 k\u00fd t\u1ef1!"); ok=false; }
+        else if (!mk.isEmpty()&&!mk.equals(mk2)) { setErr(errXacNhan,"M\u1eadt kh\u1ea9u kh\u00f4ng kh\u1edbp!"); ok=false; }
         return ok;
     }
-
-    private void clearErrors() {
-        errMaNV.setText(" ");        errHoten.setText(" ");
-        errSdt.setText(" ");         errTendangnhap.setText(" ");
-        errMatkhau.setText(" ");
+    private void clearErr() {
+        for (JLabel l : new JLabel[]{errMaNV,errHoten,errSdt,errTendangnhap,errMatkhau,errXacNhan})
+            l.setText(" ");
     }
-
-    private void setErr(JLabel lbl, String msg) { lbl.setText("⚠  " + msg); }
-
-    // =========================================================
-    // Getter
-    // =========================================================
-    /** @return NhanVien neu Luu, null neu Huy/Dong */
+    private void setErr(JLabel l, String m) { l.setText("! " + m); }
     public NhanVien getKetQua() { return ketQua; }
 
     // =========================================================
-    // UI Helpers
+    // UI HELPERS
     // =========================================================
-    private JPanel makeSectionPanel(String text) {
-        JPanel p = new JPanel(new BorderLayout(10, 0));
-        p.setOpaque(false);
-        p.setAlignmentX(Component.LEFT_ALIGNMENT);
-        p.setMaximumSize(new Dimension(Integer.MAX_VALUE, 26));
-        JLabel lbl = new JLabel(text);
-        lbl.setFont(new Font("Dialog", Font.BOLD, 11));
-        lbl.setForeground(ACCENT);
-        JSeparator sep = new JSeparator();
-        sep.setForeground(BORDER);
-        p.add(lbl, BorderLayout.WEST);
-        p.add(sep, BorderLayout.CENTER);
-        return p;
+    private JLabel secLbl(String t) {
+        JLabel l = new JLabel(t);
+        l.setFont(new Font("Dialog", Font.BOLD, 10));
+        l.setForeground(new Color(130, 133, 255));
+        l.setAlignmentX(Component.LEFT_ALIGNMENT);
+        l.setMaximumSize(new Dimension(Integer.MAX_VALUE, 20));
+        l.setBorder(new MatteBorder(0,0,1,0,new Color(30,42,72,140)));
+        return l;
     }
-
-    private JPanel makeFieldPanel(String label, JComponent input, JLabel err) {
+    private JPanel blk(String lbTxt, JComponent input, JLabel err) {
         JPanel p = new JPanel();
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
         p.setOpaque(false);
-        JLabel lbl = new JLabel(label);
-        lbl.setFont(new Font("Dialog", Font.BOLD, 11));
-        lbl.setForeground(TEXT2);
-        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
-        input.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel lb = new JLabel(lbTxt);
+        lb.setFont(new Font("Dialog", Font.BOLD, 11));
+        lb.setForeground(TEXT2);
+        lb.setAlignmentX(LEFT_ALIGNMENT);
+        lb.setMaximumSize(new Dimension(Integer.MAX_VALUE, 16));
+
+        // Khoa chieu cao input = 36px, tranh FakeCombo bi BoxLayout keo giãn
+        input.setAlignmentX(LEFT_ALIGNMENT);
+        input.setPreferredSize(new Dimension(10, 36));   // width=10 se bi override boi BoxLayout
+        input.setMinimumSize(new Dimension(10, 36));
         input.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
-        err.setAlignmentX(Component.LEFT_ALIGNMENT);
-        p.add(lbl);
+
+        err.setAlignmentX(LEFT_ALIGNMENT);
+        err.setMaximumSize(new Dimension(Integer.MAX_VALUE, 18));
+
+        p.add(lb);
         p.add(Box.createVerticalStrut(4));
         p.add(input);
         p.add(err);
         return p;
     }
-
-    private JPanel makeRowDouble(JPanel left, JPanel right) {
-        JPanel row = new JPanel();
-        row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
-        row.setOpaque(false);
-        row.setAlignmentX(Component.LEFT_ALIGNMENT);
-        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 72));
-        row.add(left);
-        row.add(Box.createHorizontalStrut(14));
-        row.add(right);
-        return row;
+    private JPanel row2(JPanel l, JPanel r) {
+        JPanel p = new JPanel();
+        p.setLayout(new BoxLayout(p, BoxLayout.X_AXIS));
+        p.setOpaque(false);
+        p.setAlignmentX(LEFT_ALIGNMENT);
+        p.setMaximumSize(new Dimension(Integer.MAX_VALUE, 76));
+        // hai blk phai bang nhau chieu ngang
+        l.setAlignmentY(TOP_ALIGNMENT);
+        r.setAlignmentY(TOP_ALIGNMENT);
+        p.add(l); p.add(Box.createHorizontalStrut(14)); p.add(r);
+        return p;
     }
-
-    private JPanel makeRowFull(JPanel field) {
-        JPanel row = new JPanel();
-        row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
-        row.setOpaque(false);
-        row.setAlignmentX(Component.LEFT_ALIGNMENT);
-        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 72));
-        row.add(field);
-        return row;
+    private JPanel row1(JPanel f) {
+        JPanel p = new JPanel();
+        p.setLayout(new BoxLayout(p, BoxLayout.X_AXIS));
+        p.setOpaque(false);
+        p.setAlignmentX(LEFT_ALIGNMENT);
+        p.setMaximumSize(new Dimension(Integer.MAX_VALUE, 76));
+        f.setAlignmentY(TOP_ALIGNMENT);
+        p.add(f);
+        return p;
     }
-
-    private JTextField makeField() {
-        JTextField f = new JTextField();
-        f.setBackground(CARD);   f.setForeground(TEXT1);
-        f.setCaretColor(ACCENT); f.setFont(new Font("Dialog", Font.PLAIN, 13));
-        f.setBorder(BorderFactory.createCompoundBorder(
-                new LineBorder(BORDER, 1, true), BorderFactory.createEmptyBorder(7,10,7,10)));
-        addFocusBorder(f);
-        return f;
+    private JTextField mkField() {
+        JTextField f = new JTextField(); f.setBackground(CARD); f.setForeground(TEXT1); f.setCaretColor(ACCENT);
+        f.setFont(new Font("Dialog",Font.PLAIN,13));
+        f.setBorder(BorderFactory.createCompoundBorder(new LineBorder(BORDER_C,1,true),BorderFactory.createEmptyBorder(7,10,7,10)));
+        addFocusBorder(f); return f;
     }
-
-    private JPasswordField makePassField() {
-        JPasswordField f = new JPasswordField();
-        f.setBackground(CARD);   f.setForeground(TEXT1);
-        f.setCaretColor(ACCENT); f.setFont(new Font("Dialog", Font.PLAIN, 13));
-        f.setBorder(BorderFactory.createCompoundBorder(
-                new LineBorder(BORDER, 1, true), BorderFactory.createEmptyBorder(7,10,7,10)));
-        addFocusBorder(f);
-        return f;
+    private JPasswordField mkPassField() {
+        JPasswordField f = new JPasswordField(); f.setBackground(CARD); f.setForeground(TEXT1); f.setCaretColor(ACCENT);
+        f.setFont(new Font("Dialog",Font.PLAIN,13));
+        f.setBorder(BorderFactory.createCompoundBorder(new LineBorder(BORDER_C,1,true),BorderFactory.createEmptyBorder(7,10,7,10)));
+        addFocusBorder(f); return f;
     }
-
-    private JComboBox<String> makeCombo(String[] items) {
-        JComboBox<String> cb = new JComboBox<>(items);
-        cb.setBackground(CARD);  cb.setForeground(TEXT1);
-        cb.setFont(new Font("Dialog", Font.PLAIN, 13));
-        cb.setBorder(new LineBorder(BORDER, 1, true));
-        cb.setFocusable(false);
-        cb.setRenderer(new DefaultListCellRenderer() {
-            public Component getListCellRendererComponent(
-                    JList<?> l, Object v, int i, boolean s, boolean f) {
-                super.getListCellRendererComponent(l, v, i, s, f);
-                setBackground(s ? new Color(99,102,241,60) : CARD);
-                setForeground(TEXT1);
-                setBorder(BorderFactory.createEmptyBorder(5,10,5,10));
-                return this;
-            }
+    private JLabel errLbl() { JLabel l=new JLabel(" "); l.setFont(new Font("Dialog",Font.PLAIN,11)); l.setForeground(ERR_CLR); return l; }
+    private Component vg(int h) { return Box.createVerticalStrut(h); }
+    private void addFocusBorder(JComponent c) {
+        c.addFocusListener(new FocusAdapter(){
+            public void focusGained(FocusEvent e){ c.setBorder(BorderFactory.createCompoundBorder(new LineBorder(ACCENT,1,true),BorderFactory.createEmptyBorder(7,10,7,10))); }
+            public void focusLost(FocusEvent e)  { c.setBorder(BorderFactory.createCompoundBorder(new LineBorder(BORDER_C,1,true),BorderFactory.createEmptyBorder(7,10,7,10))); }
         });
-        return cb;
     }
+    private static String s(String v) { return v!=null?v:""; }
 
-    private JLabel makeErrLabel() {
-        JLabel l = new JLabel(" ");
-        l.setFont(new Font("Dialog", Font.PLAIN, 11));
-        l.setForeground(ERR_CLR);
-        return l;
-    }
+    // =========================================================
+    // INNER: FlatBtn — JPanel tu ve, khong dung JButton
+    // =========================================================
+    static class FlatBtn extends JPanel {
+        private final String text;
+        private final Color bg, fg;
+        private Color borderColor = null;
+        private boolean hover = false;
+        private Runnable onClick;
 
-    private JButton makeBtn(String text, Color bg, Color fg) {
-        JButton b = new JButton(text);
-        b.setFont(new Font("Dialog", Font.BOLD, 13));
-        b.setBackground(bg); b.setForeground(fg);
-        b.setOpaque(true); b.setBorderPainted(false); b.setFocusPainted(false);
-        b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        b.setBorder(BorderFactory.createEmptyBorder(9, 24, 9, 24));
-        b.addMouseListener(new MouseAdapter() {
-            final Color orig = bg;
-            public void mouseEntered(MouseEvent e) { b.setBackground(orig.brighter()); }
-            public void mouseExited(MouseEvent e)  { b.setBackground(orig); }
-        });
-        return b;
-    }
+        FlatBtn(String text, Color bg, Color fg, int w, int h) {
+            this.text = text; this.bg = bg; this.fg = fg;
+            setOpaque(false);
+            setPreferredSize(new Dimension(w, h));
+            setMaximumSize(new Dimension(w+40, h));
+            setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            addMouseListener(new MouseAdapter() {
+                public void mouseEntered(MouseEvent e) { hover=true;  repaint(); }
+                public void mouseExited(MouseEvent e)  { hover=false; repaint(); }
+                public void mouseClicked(MouseEvent e) { if (onClick!=null) onClick.run(); }
+            });
+        }
+        void setBorderColor(Color c)      { this.borderColor = c; }
+        void addClickListener(Runnable r) { this.onClick = r; }
 
-    private void addFocusBorder(JComponent f) {
-        f.addFocusListener(new FocusAdapter() {
-            public void focusGained(FocusEvent e) {
-                f.setBorder(BorderFactory.createCompoundBorder(
-                        new LineBorder(ACCENT, 1, true), BorderFactory.createEmptyBorder(7,10,7,10)));
+        @Override protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(hover ? bg.brighter() : bg);
+            g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+            if (borderColor != null) {
+                g2.setColor(borderColor);
+                g2.drawRoundRect(0, 0, getWidth()-1, getHeight()-1, 8, 8);
             }
-            public void focusLost(FocusEvent e) {
-                f.setBorder(BorderFactory.createCompoundBorder(
-                        new LineBorder(BORDER, 1, true), BorderFactory.createEmptyBorder(7,10,7,10)));
+            g2.setFont(new Font("Dialog", Font.BOLD, 13));
+            g2.setColor(fg);
+            FontMetrics fm = g2.getFontMetrics();
+            int tx = (getWidth()  - fm.stringWidth(text)) / 2;
+            int ty = (getHeight() + fm.getAscent() - fm.getDescent()) / 2;
+            g2.drawString(text, tx, ty);
+            g2.dispose();
+        }
+    }
+
+    // =========================================================
+    // INNER: FakeCombo — JPanel tu ve, khong dung JComboBox
+    // =========================================================
+    static class FakeCombo extends JPanel {
+        private final String[] items;
+        private int selectedIndex = 0;
+        private final Color bg, fg;
+
+        FakeCombo(String[] items, Color bg, Color fg) {
+            this.items = items; this.bg = bg; this.fg = fg;
+            setOpaque(false);
+            setPreferredSize(new Dimension(100, 36));
+            setMinimumSize(new Dimension(60,  36));
+            setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
+            setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            JPopupMenu popup = buildPopup();
+            addMouseListener(new MouseAdapter() {
+                public void mouseClicked(MouseEvent e) { popup.setPreferredSize(
+                        new Dimension(getWidth(), popup.getPreferredSize().height)
+                );
+
+                    Point p = getLocationOnScreen();
+                    popup.setLocation(p.x, p.y + getHeight());
+                    popup.setInvoker(FakeCombo.this);
+                    popup.setVisible(true);}
+            });
+        }
+
+        private JPopupMenu buildPopup() {
+            JPopupMenu pm = new JPopupMenu();
+            pm.setBackground(bg);
+            pm.setBorder(new LineBorder(new Color(50,68,110),1));
+            for (int i = 0; i < items.length; i++) {
+                final int idx = i;
+                JMenuItem mi = new JMenuItem(items[i]);
+                mi.setBackground(bg); mi.setForeground(fg);
+                mi.setFont(new Font("Dialog",Font.PLAIN,13));
+                mi.setBorder(BorderFactory.createEmptyBorder(6,10,6,6));
+                mi.setOpaque(true);
+                mi.addActionListener(e -> { selectedIndex=idx; repaint(); });
+                pm.add(mi);
             }
-        });
+            return pm;
+        }
+
+        String getSelected() { return items[selectedIndex]; }
+        void setSelectedItem(String val) {
+            if (val==null) return;
+            for (int i=0;i<items.length;i++)
+                if (items[i].equalsIgnoreCase(val)){selectedIndex=i;break;}
+            repaint();
+        }
+        void setSelectedIndex(int i) { if(i>=0&&i<items.length){selectedIndex=i;repaint();} }
+
+        @Override protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            // Nen
+            g2.setColor(bg);
+            g2.fillRoundRect(0,0,getWidth(),getHeight(),6,6);
+            // Vien
+            g2.setColor(new Color(50,68,110));
+            g2.drawRoundRect(0,0,getWidth()-1,getHeight()-1,6,6);
+            // Text
+            g2.setFont(new Font("Dialog",Font.PLAIN,13));
+            g2.setColor(fg);
+            FontMetrics fm = g2.getFontMetrics();
+            int ty = (getHeight()+fm.getAscent()-fm.getDescent())/2;
+            g2.drawString(items[selectedIndex], 12, ty);
+            // Mui ten
+            g2.setColor(new Color(140,155,175));
+            int ax = getWidth()-16, ay = getHeight()/2;
+            int[] px = {ax-4, ax+4, ax};
+            int[] py = {ay-2, ay-2, ay+3};
+            g2.fillPolygon(px, py, 3);
+            g2.dispose();
+        }
     }
 }

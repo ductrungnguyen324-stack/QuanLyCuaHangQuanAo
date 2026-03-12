@@ -114,8 +114,8 @@ public class NhanVienController {
                     || (nv.getSdt()        != null && nv.getSdt().contains(keyword))
                     || (nv.getTendannhap() != null && nv.getTendannhap().toLowerCase().contains(keyword));
 
-            boolean matchCV = "Tất cả chức vụ".equals(chucVu)    || chucVu.equals(nv.getChucvu());
-            boolean matchTT = "Tất cả trạng thái".equals(tt)      || tt.equals(nv.getTrangthai());
+            boolean matchCV = "T\u1ea5t c\u1ea3 ch\u1ee9c v\u1ee5".equals(chucVu)    || chucVu.equals(nv.getChucvu());
+            boolean matchTT = "T\u1ea5t c\u1ea3 tr\u1ea1ng th\u00e1i".equals(tt)     || tt.equals(nv.getTrangthai());
 
             if (matchKey && matchCV && matchTT) ketQua.add(nv);
         }
@@ -149,7 +149,7 @@ public class NhanVienController {
     private void hienThiThongKe(List<NhanVien> list) {
         int hoatDong = 0, nghiViec = 0;
         for (NhanVien nv : list) {
-            if ("Hoạt động".equals(nv.getTrangthai())) hoatDong++;
+            if ("Ho\u1ea1t \u0111\u1ed9ng".equals(nv.getTrangthai())) hoatDong++;
             else nghiViec++;
         }
         view.updateStats(list.size(), hoatDong, nghiViec);
@@ -164,68 +164,59 @@ public class NhanVienController {
      * Neu nguoi dung xac nhan → goi bus.add() → reload.
      */
     public void them() {
-        // 1. Đổi sang gọi đúng class ThemNhanVien mà bạn mới viết
-        gui.view.dialogs.ThemNhanVien dlg = new gui.view.dialogs.ThemNhanVien(view.getParentFrame());
+        NhanVienFormDialog dlg = new NhanVienFormDialog(view.getParentFrame(), null);
         dlg.setVisible(true);
 
-        // 2. Vì class ThemNhanVien của bạn tự gọi BUS.add() bên trong nó rồi,
-        // nên ở đây chỉ cần kiểm tra xem nó thêm thành công chưa để load lại bảng thôi.
-        if (dlg.isThemThanhCong()) {
-            loadDanhSach(); // Load lại bảng ở màn hình chính
+        NhanVien nv = dlg.getKetQua();
+        if (nv == null) return;
+
+        boolean ok = bus.add(nv);
+        if (ok) {
+            loadDanhSach();
+            showSuccess("Th\u00eam nh\u00e2n vi\u00ean " + nv.getManv() + " th\u00e0nh c\u00f4ng!");
+        } else {
+            showError("Th\u00eam th\u1ea5t b\u1ea1i!\nM\u00e3 nh\u00e2n vi\u00ean c\u00f3 th\u1ec3 \u0111\u00e3 t\u1ed3n t\u1ea1i.");
         }
     }
 
-    /**
-     * Lay NV hien tai tu BUS, mo dialog sua.
-     * Neu nguoi dung xac nhan → giu mat khau cu neu bo trong → goi bus.update().
-     */
     public void sua(String maNV) {
         NhanVien nvHienTai = bus.getById(maNV);
         if (nvHienTai == null) {
-            showError("Không tìm thấy nhân viên: " + maNV);
+            showError("Kh\u00f4ng t\u00ecm th\u1ea5y nh\u00e2n vi\u00ean: " + maNV);
             return;
         }
 
-        NhanVienFormDialog dlg = new NhanVienFormDialog(
-                view.getParentFrame(), nvHienTai);
+        NhanVienFormDialog dlg = new NhanVienFormDialog(view.getParentFrame(), nvHienTai);
         dlg.setVisible(true);
 
         NhanVien nvCapNhat = dlg.getKetQua();
-        if (nvCapNhat == null) return; // nguoi dung huy
+        if (nvCapNhat == null) return;
 
-        // Giu mat khau cu neu nguoi dung de trong truong mat khau
         if (nvCapNhat.getMatkhau() == null || nvCapNhat.getMatkhau().trim().isEmpty()) {
             nvCapNhat = new NhanVien(
-                    nvCapNhat.getManv(),
-                    nvCapNhat.getHoten(),
-                    nvCapNhat.getSdt(),
-                    nvCapNhat.getChucvu(),
-                    nvCapNhat.getTendannhap(),
-                    nvHienTai.getMatkhau(), // giu mat khau cu
-                    nvCapNhat.getTrangthai()
-            );
+                    nvCapNhat.getManv(), nvCapNhat.getHoten(), nvCapNhat.getSdt(),
+                    nvCapNhat.getChucvu(), nvCapNhat.getTendannhap(),
+                    nvHienTai.getMatkhau(),
+                    nvCapNhat.getTrangthai());
         }
 
         boolean ok = bus.update(nvCapNhat);
         if (ok) {
             loadDanhSach();
-            showSuccess("Cập nhật nhân viên " + maNV + " thành công!");
+            showSuccess("C\u1eadp nh\u1eadt nh\u00e2n vi\u00ean " + maNV + " th\u00e0nh c\u00f4ng!");
         } else {
-            showError("Cập nhật thất bại!");
+            showError("C\u1eadp nh\u1eadt th\u1ea5t b\u1ea1i!");
         }
     }
 
-    /**
-     * Hien hop thoai xac nhan, neu dong y → goi bus.delete().
-     */
     public void xoa(String maNV) {
         NhanVien nv       = bus.getById(maNV);
         String tenHienThi = (nv != null) ? nv.getHoten() : maNV;
 
         int confirm = JOptionPane.showConfirmDialog(
                 view.getComponent(),
-                "Bạn có chắc muốn xoá nhân viên:\n" + maNV + " — " + tenHienThi + "?",
-                "Xác nhận xoá",
+                "B\u1ea1n c\u00f3 ch\u1eafc mu\u1ed1n x\u00f3a nh\u00e2n vi\u00ean:\n" + maNV + " - " + tenHienThi + "?",
+                "X\u00e1c nh\u1eadn x\u00f3a",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.WARNING_MESSAGE);
 
@@ -234,22 +225,18 @@ public class NhanVienController {
         boolean ok = bus.delete(maNV);
         if (ok) {
             loadDanhSach();
-            showSuccess("Đã xoá nhân viên " + maNV + ".");
+            showSuccess("\u0110\u00e3 x\u00f3a nh\u00e2n vi\u00ean " + maNV + ".");
         } else {
-            showError("Xoá thất bại!\nNhân viên có thể đang được sử dụng trong hoá đơn.");
+            showError("X\u00f3a th\u1ea5t b\u1ea1i!\nNh\u00e2n vi\u00ean c\u00f3 th\u1ec3 \u0111ang \u0111\u01b0\u1ee3c s\u1eed d\u1ee5ng.");
         }
     }
 
-    // =========================================================
-    // Helpers thong bao
-    // =========================================================
     private void showSuccess(String msg) {
-        JOptionPane.showMessageDialog(
-                view.getComponent(), msg, "Thành công", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(view.getComponent(), msg,
+                "Th\u00e0nh c\u00f4ng", JOptionPane.INFORMATION_MESSAGE);
     }
-
     private void showError(String msg) {
-        JOptionPane.showMessageDialog(
-                view.getComponent(), msg, "Lỗi", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(view.getComponent(), msg,
+                "L\u1ed7i", JOptionPane.ERROR_MESSAGE);
     }
 }
