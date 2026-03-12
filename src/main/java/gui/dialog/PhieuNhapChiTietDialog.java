@@ -11,16 +11,10 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
-/**
- * PhieuNhapChiTietDialog — Chỉ chứa code giao diện.
- * Mọi logic gọi qua PhieuNhapChiTietController.
- */
 public class PhieuNhapChiTietDialog extends JDialog {
 
-    // ── Controller ───────────────────────────────────────
     private final PhieuNhapChiTietController controller = new PhieuNhapChiTietController();
 
-    // ── Màu sắc ──────────────────────────────────────────
     private static final Color BG     = new Color(10, 14, 30);
     private static final Color CARD   = new Color(14, 20, 40);
     private static final Color CARD2  = new Color(18, 26, 52);
@@ -30,11 +24,9 @@ public class PhieuNhapChiTietDialog extends JDialog {
     private static final Color TEXT1  = new Color(226, 232, 240);
     private static final Color TEXT2  = new Color(100, 116, 139);
 
-    // ── Format ───────────────────────────────────────────
     private final DecimalFormat    df  = new DecimalFormat("#,### đ");
     private final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 
-    // ── Constructor ──────────────────────────────────────
     public PhieuNhapChiTietDialog(Frame parent, PhieuNhapHangDTO pn) {
         super(parent, true);
         setTitle("Chi tiết phiếu nhập: " + pn.getMaPN());
@@ -44,7 +36,6 @@ public class PhieuNhapChiTietDialog extends JDialog {
         buildUI(pn);
     }
 
-    // ── Build UI ─────────────────────────────────────────
     private void buildUI(PhieuNhapHangDTO pn) {
         // Lấy dữ liệu qua Controller
         ArrayList<ChiTietPhieuNhapDTO> listCT = controller.getChiTiet(pn.getMaPN());
@@ -57,7 +48,6 @@ public class PhieuNhapChiTietDialog extends JDialog {
         setContentPane(main);
     }
 
-    // ── Header ───────────────────────────────────────────
     private JPanel buildHeader(PhieuNhapHangDTO pn) {
         JPanel hdr = new JPanel(new BorderLayout());
         hdr.setBackground(new Color(11, 16, 35));
@@ -185,3 +175,4 @@ public class PhieuNhapChiTietDialog extends JDialog {
         return b;
     }
 }
+
