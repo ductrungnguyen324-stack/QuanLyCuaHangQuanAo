@@ -76,4 +76,11 @@ public class LoginController {
         return null; // hợp lệ
     }
 
+    public String getInfoNV() {
+        String user = view.getUsername();
+        String pass = view.getPassword();
+        NhanVien nv = nvbus.Login(user, pass);
+        return nv.getManv();
+    }
+
 }

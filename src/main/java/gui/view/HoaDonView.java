@@ -1,22 +1,20 @@
 package gui.view;
 
+import entity.HoaDon;
+import gui.controller.HoaDonController;
+import gui.controller.LoginController;
+
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.List;
 
-/**
- * HoaDonPanel.java — Danh sach hoa don
- * Cot theo SQL: maHD, maKH, maNV, maKM, ngaytao,
- *               tongtien, sotiengiam, thanhtoan, phuongthucTT, trangthai
- *
- * Ket noi BUS that:
- *   private final HoaDonBUS bus = new HoaDonBUS();
- *   Thay cac cho comment GỌI BUS
- */
 public class HoaDonView extends JFrame {
 
     // ── Mau ─────────────────────────────────────────────
@@ -70,6 +68,8 @@ public class HoaDonView extends JFrame {
 
         add(top,          BorderLayout.NORTH);
         add(buildTable(), BorderLayout.CENTER);
+
+        new HoaDonController(this, "NV001");
     }
 
     // ── Header ───────────────────────────────────────────
@@ -232,7 +232,7 @@ public class HoaDonView extends JFrame {
     }
 
 
-    private void updateStats() {
+    public void updateStats() {
         int total = tableModel.getRowCount();
         int chuaTT = 0;
         for (int i = 0; i < total; i++)
@@ -244,7 +244,7 @@ public class HoaDonView extends JFrame {
     // ── Helpers ──────────────────────────────────────────
     private JLabel makeTag(String text, Color color) {
         JLabel l = new JLabel(text);
-        l.setFont(new Font("Dialog", Font.BOLD, 10));
+        l.setFont(new Font("Sans serif", Font.BOLD, 10));
         l.setForeground(color);
         l.setBackground(new Color(color.getRed(), color.getGreen(), color.getBlue(), 25));
         l.setOpaque(true);
@@ -254,11 +254,11 @@ public class HoaDonView extends JFrame {
         ));
         l.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         return l;
-    }// chua hieu o day
+    }
 
     private JLabel makeChip(String text, Color color) {
         JLabel l = new JLabel(text);
-        l.setFont(new Font("Dialog", Font.BOLD, 11));
+        l.setFont(new Font("Sans serif", Font.BOLD, 11));
         l.setForeground(color);
         l.setBackground(new Color(color.getRed(), color.getGreen(), color.getBlue(), 30));
         l.setOpaque(true);
@@ -271,7 +271,7 @@ public class HoaDonView extends JFrame {
 
     private JButton makeButton(String text, Color bg, Color fg) {
         JButton b = new JButton(text);
-        b.setFont(new Font("Dialog", Font.BOLD, 12));
+        b.setFont(new Font("Sans serif", Font.BOLD, 12));
         b.setBackground(bg);
         b.setForeground(fg);
         b.setOpaque(true);
@@ -285,7 +285,7 @@ public class HoaDonView extends JFrame {
     private JLabel makeLabel(String text) {
         JLabel l = new JLabel(text);
         l.setForeground(TEXT2);
-        l.setFont(new Font("Dialog", Font.BOLD, 12));
+        l.setFont(new Font("Sans serif", Font.BOLD, 12));
         return l;
     }
 
@@ -293,7 +293,7 @@ public class HoaDonView extends JFrame {
         f.setBackground(CARD);
         f.setForeground(TEXT1);
         f.setCaretColor(ACCENT);
-        f.setFont(new Font("Dialog", Font.PLAIN, 12));
+        f.setFont(new Font("Sans serif", Font.PLAIN, 12));
         f.setBorder(BorderFactory.createCompoundBorder(
                 new LineBorder(BORDER, 1, true),
                 BorderFactory.createEmptyBorder(6, 10, 6, 10)
@@ -303,7 +303,62 @@ public class HoaDonView extends JFrame {
     private void styleCombo(JComboBox<String> cb) {
         cb.setBackground(CARD);
         cb.setForeground(TEXT2);
-        cb.setFont(new Font("Dialog", Font.BOLD, 12));
+        cb.setFont(new Font("Sans serif", Font.BOLD, 12));
+    }
+
+    public void renderDanhSach(List<HoaDon> list) {
+        tableModel.setRowCount(0);
+
+        if(list == null) {
+            return;
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+        for(HoaDon hd : list) {
+            tableModel.addRow(new Object[]{
+                    hd.getMaHD(),                                            // col 0 ẩn
+                    hd.getMaHD(),                                            // col 1 Mã HD
+                    hd.getMaKH(),                                            // col 2 Khách hàng
+                    hd.getMaNV(),                                            // col 3 Nhân viên
+                    hd.getKhuyenmai() != null ? hd.getKhuyenmai() : "-",              // col 4 Khuyến mãi
+                    hd.getNgaytao() != null ? hd.getNgaytao().format(formatter) : "-", // col 5
+                    String.format("%,.0f đ", hd.getTongtien()),              // col 6 Tổng tiền
+                    String.format("%,.0f đ", hd.getSotiengiam()),            // col 7 Giảm giá
+                    String.format("%,.0f đ", hd.getThanhtoan()),             // col 8 Thanh toán
+                    hd.getPhuongthucTT(),                                    // col 9
+                    hd.getTrangthai(),                                       // col 10
+                    ""
+            });
+        }
+    }
+
+    public void showError(String message) {
+        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    public void showSuccess(String message) {
+        JOptionPane.showMessageDialog(this, message, "Successful", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public JButton getBtnThem() {
+        return btnThem;
+    }
+    public JTextField getSearchField() {
+        return searchField;
+    }
+    public JComboBox<String> getCbPhuongThuc() {
+        return cbPhuongThuc;
+    }
+    public JComboBox<String> getCbTrangThai() {
+        return cbTrangThai;
+    }
+    public JTable getTable() {
+        return table;
+    }
+    public JButton getBtnReset() {
+        return btnReset;
+    }
+    public DefaultTableModel getTableModel() {
+        return tableModel;
     }
 
     public static void main(String[] args) {
