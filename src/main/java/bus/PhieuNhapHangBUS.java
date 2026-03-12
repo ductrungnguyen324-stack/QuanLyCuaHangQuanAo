@@ -2,7 +2,7 @@ package bus;
 
 import dao.PhieuNhapHangDAO;
 import dao.ChiTietPhieuNhapDAO;
-import dao.MyConnection;
+import dao.DBConnection;
 import entity.PhieuNhapHangDTO;
 import entity.ChiTietPhieuNhapDTO;
 import java.sql.Connection;
@@ -25,7 +25,7 @@ public class PhieuNhapHangBUS {
     public boolean themPhieuNhap(PhieuNhapHangDTO pn, ArrayList<ChiTietPhieuNhapDTO> dsCT) {
         Connection conn = null;
         try {
-            conn = MyConnection.getConnection();
+            conn = DBConnection.getConnection();
             conn.setAutoCommit(false);
 
             if (!pnDAO.insert(pn, conn)) {
@@ -67,7 +67,7 @@ public class PhieuNhapHangBUS {
     public boolean xoaPhieuNhap(String maPN) {
         Connection conn = null;
         try {
-            conn = MyConnection.getConnection();
+            conn = DBConnection.getConnection();
             conn.setAutoCommit(false);
 
             ctpnDAO.deleteByMaPN(maPN, conn);
