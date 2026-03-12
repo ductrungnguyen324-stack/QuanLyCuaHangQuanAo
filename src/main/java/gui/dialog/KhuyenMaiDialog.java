@@ -7,17 +7,8 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 
-/**
- * JDialog bọc ThemKhuyenMaiView.
- *  - kmEdit == null  → chế độ Thêm mới
- *  - kmEdit != null  → chế độ Sửa (điền sẵn dữ liệu)
- *
- * Sau khi dialog đóng, gọi getKetQua() để lấy KhuyenMai.
- * Trả về null nếu người dùng hủy.
- */
 public class KhuyenMaiDialog extends JDialog {
 
-    // ── Palette ───────────────────────────────────────────
     private static final Color BG      = new Color(7,  10, 20);
     private static final Color SURFACE = new Color(11, 15, 30);
     private static final Color CARD    = new Color(14, 20, 40);
@@ -28,13 +19,10 @@ public class KhuyenMaiDialog extends JDialog {
     private static final Color TEXT2   = new Color(100, 116, 139);
 
     private final ThemKhuyenMaiView formPanel;
-    private final String            maKMGoc;   // maKM khi sửa, null khi thêm (DAO tự sinh)
-    private       KhuyenMai         ketQua;    // kết quả trả ra ngoài
+    private final String            maKMGoc;   
+    private       KhuyenMai         ketQua;    
 
-    /**
-     * @param parent  Frame cha để căn giữa dialog
-     * @param kmEdit  null = thêm mới, not-null = sửa
-     */
+    
     public KhuyenMaiDialog(Frame parent, KhuyenMai kmEdit) {
         super(parent, kmEdit == null ? "Thêm khuyến mãi" : "Cập nhật khuyến mãi", true);
 
@@ -45,10 +33,10 @@ public class KhuyenMaiDialog extends JDialog {
         setLayout(new BorderLayout(0, 0));
         getRootPane().setBorder(BorderFactory.createLineBorder(BORDER));
 
-        // Form
+       
         add(formPanel, BorderLayout.CENTER);
 
-        // Footer: nút hành động
+     
         add(buildFooter(kmEdit == null), BorderLayout.SOUTH);
 
         pack();
@@ -57,7 +45,6 @@ public class KhuyenMaiDialog extends JDialog {
         setLocationRelativeTo(parent);
     }
 
-    // ── Footer: nút Lưu / Hủy ────────────────────────────
     private JPanel buildFooter(boolean isAdd) {
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 12));
         footer.setBackground(SURFACE);
@@ -79,7 +66,6 @@ public class KhuyenMaiDialog extends JDialog {
         return footer;
     }
 
-    // ── Xử lý nút Lưu ────────────────────────────────────
     private void onLuu() {
         try {
             // maKMGoc == null khi thêm → DAO sẽ tự sinh mã (truyền "" cho an toàn)
@@ -95,13 +81,12 @@ public class KhuyenMaiDialog extends JDialog {
         }
     }
 
-    // ── Getter kết quả ────────────────────────────────────
-    /** Trả về KhuyenMai nếu user nhấn Lưu, hoặc null nếu user nhấn Hủy / đóng. */
+   
     public KhuyenMai getKetQua() {
         return ketQua;
     }
 
-    // ── Helpers ──────────────────────────────────────────
+  
     private JButton makeButton(String text, Color bg, Color fg) {
         JButton b = new JButton(text);
         b.setFont(new Font("Dialog", Font.BOLD, 12));
@@ -113,7 +98,7 @@ public class KhuyenMaiDialog extends JDialog {
         b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         b.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
 
-        // Hover effect
+      
         Color hover = bg.brighter();
         b.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override public void mouseEntered(java.awt.event.MouseEvent e) {
