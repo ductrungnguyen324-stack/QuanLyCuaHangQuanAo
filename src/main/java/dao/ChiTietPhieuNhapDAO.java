@@ -11,7 +11,7 @@ public class ChiTietPhieuNhapDAO {
         ArrayList<ChiTietPhieuNhapDTO> list = new ArrayList<>();
         String sql = "SELECT * FROM chitietphieunhap WHERE maPN = ?";
 
-        try (Connection con = MyConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, maPN);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -59,7 +59,7 @@ public class ChiTietPhieuNhapDAO {
 
     public String getMaMax() {
         String sql = "SELECT MAX(maCTPN) FROM chitietphieunhap";
-        try (Connection con = MyConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+        try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 return rs.getString(1);
             }
