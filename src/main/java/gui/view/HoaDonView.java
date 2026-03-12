@@ -59,8 +59,8 @@ public class HoaDonView extends JFrame {
     public HoaDonView() {
         setBackground(BG);
         setLayout(new BorderLayout(0, 0));
-        setVisible(true);
-
+        setSize(1200, 700);
+        setMinimumSize(new Dimension(900, 500));
         JPanel top = new JPanel(new BorderLayout());
         top.setOpaque(false);
         top.add(buildHeader(),  BorderLayout.NORTH);
@@ -82,7 +82,7 @@ public class HoaDonView extends JFrame {
                 BorderFactory.createEmptyBorder(16, 22, 16, 22)
         ));
 
-        JLabel title = new JLabel("Quản lý Hoá đơn");
+        JLabel title = new JLabel("Quản lý Hoá Đơn");
         title.setFont(new Font("Sans serif", Font.BOLD, 20));
         title.setForeground(TEXT1);
 
@@ -235,9 +235,18 @@ public class HoaDonView extends JFrame {
     public void updateStats() {
         int total = tableModel.getRowCount();
         int chuaTT = 0;
-        for (int i = 0; i < total; i++)
+        double tongThu = 0;
+        for (int i = 0; i < total; i++) {
             if ("CHUATHANHTOAN".equals(tableModel.getValueAt(i, 10))) chuaTT++;
+            // col 8 = "Thanh toán" dạng "1,000 đ" → cần parse
+            try {
+                String val = tableModel.getValueAt(i, 8).toString()
+                        .replaceAll("[^\\d]", "");
+                tongThu += Double.parseDouble(val);
+            } catch (Exception ignored) {}
+        }
         lblTongHD.setText("HD: " + total);
+        lblTongThu.setText(String.format("Doanh thu: %,.0f đ", tongThu));
         lblChuaTT.setText("Chưa TT: " + chuaTT);
     }
 

@@ -5,6 +5,7 @@ import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import entity.*;
@@ -72,7 +73,7 @@ public class ChiTietHoaDonDialog extends JDialog {
 
         // Ngày tạo + nhân viên từ object thật
         String ngay = hd.getNgaytao() != null
-                ? new SimpleDateFormat("dd/MM/yyyy HH:mm").format(hd.getNgaytao())
+                ? hd.getNgaytao().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
                 : "--";
         JLabel sub = new JLabel("Ngày tạo: " + ngay + "  |  Nhân viên: " + hd.getMaNV());
         sub.setFont(new Font("Dialog", Font.PLAIN, 12));

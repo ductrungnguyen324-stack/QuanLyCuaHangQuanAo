@@ -3,9 +3,11 @@ import entity.NhanVien;
 import gui.view.*;
 import bus.*;
 
+
 import javax.swing.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import gui.*;
 
 public class LoginController {
     private LoginView view;
@@ -65,7 +67,8 @@ public class LoginController {
         // dn thanh cong
         view.showError("");
         view.dispose();
-
+        String maNV = nv.getManv();
+        SwingUtilities.invokeLater(() -> new MainFrame(maNV));
     }
 
     private String validate(String username, String password) {

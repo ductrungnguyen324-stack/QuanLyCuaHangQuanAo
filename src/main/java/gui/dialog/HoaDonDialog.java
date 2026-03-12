@@ -207,35 +207,39 @@ public class HoaDonDialog extends JDialog {
                 BorderFactory.createEmptyBorder(12, 20, 16, 20)
         ));
 
-        // Tổng tiền
+        // Hàng 1: 3 label tổng tiền
         JPanel tong = new JPanel(new GridLayout(1, 3, 20, 0));
         tong.setOpaque(false);
-        lblTongTien  = makeTongLabel("Tổng tiền:", "0 VNĐ");
-        lblGiamGia   = makeTongLabel("Giảm giá:", "0 VNĐ");
+        lblTongTien  = makeTongLabel("Tổng tiền:",  "0 VNĐ");
+        lblGiamGia   = makeTongLabel("Giảm giá:",   "0 VNĐ");
         lblThanhToan = makeTongLabel("Thanh toán:", "0 VNĐ");
         tong.add(lblTongTien);
         tong.add(lblGiamGia);
         tong.add(lblThanhToan);
 
+        // Hàng 2: lblStatus riêng, căn trái, có margin trên
         lblStatus = new JLabel(" ");
         lblStatus.setFont(new Font("Dialog", Font.BOLD, 12));
         lblStatus.setForeground(DANGER);
+        lblStatus.setBorder(BorderFactory.createEmptyBorder(6, 0, 0, 0)); // ← margin top
 
-        JPanel topFt = new JPanel(new BorderLayout());
-        topFt.setOpaque(false);
-        topFt.add(tong,      BorderLayout.WEST);
-        topFt.add(lblStatus, BorderLayout.CENTER);
-
+        // Hàng 3: nút
         JPanel btns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         btns.setOpaque(false);
-        JButton btnHuy = makeButton("Huỷ",        CARD,   TEXT2);
+        JButton btnHuy = makeButton("Huỷ",         CARD,   TEXT2);
         JButton btnLuu = makeButton("Tạo hoá đơn", ACCENT, Color.WHITE);
         btnHuy.addActionListener(e -> dispose());
         btnLuu.addActionListener(e -> save());
         btns.add(btnHuy);
         btns.add(btnLuu);
 
-        footer.add(topFt, BorderLayout.NORTH);
+        // Gộp tong + status vào 1 panel dọc
+        JPanel left = new JPanel(new BorderLayout());
+        left.setOpaque(false);
+        left.add(tong,      BorderLayout.NORTH);  // ← tổng tiền
+        left.add(lblStatus, BorderLayout.CENTER); // ← lỗi xuống dòng riêng ✅
+
+        footer.add(left,  BorderLayout.CENTER);
         footer.add(btns,  BorderLayout.SOUTH);
         return footer;
     }
@@ -344,7 +348,13 @@ public HoaDon buildHoaDon() {
     double tongTien = getTongTien();
     hd.setTongtien(tongTien);
     // Tính giảm giá từ mã KM nếu có
-    double soTienGiam = kmbus.getByID(fMaHD.getText().trim()).tinhSoTienGiam(tongTien);
+    String maKM = fMaKM.getText().trim();
+    double soTienGiam = 0;
+    if (!maKM.isEmpty()) {
+        KhuyenMai km = kmbus.getByID(maKM);
+        if (km != null) soTienGiam = km.tinhSoTienGiam(tongTien);
+    }
+
     hd.setSotiengiam(soTienGiam);
     hd.setThanhtoan(tongTien - soTienGiam);
     return hd;

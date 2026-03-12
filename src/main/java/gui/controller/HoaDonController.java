@@ -133,6 +133,8 @@ public class HoaDonController {
             // Nếu người dùng bấm "Duyệt thanh toán" bên trong dialog
             if (dialog.isDuyet()) {
                 hd.setTrangthai("DATHANHTOAN");
+                hoadonbus.update(hd);
+                loadDanhSach();
                 view.showSuccess("Hoá đơn " + maHD + " đã thanh toán thành công!");
             }
 
@@ -145,29 +147,22 @@ public class HoaDonController {
     }
 
     private void handleLoc() {
-
-        String keyword = view.getSearchField().getText().trim();
+        String keyword    = view.getSearchField().getText().trim();
         String phuongThuc = (String) view.getCbPhuongThuc().getSelectedItem();
-        String trangThai = (String) view.getCbTrangThai().getSelectedItem();
+        String trangThai  = (String) view.getCbTrangThai().getSelectedItem();
 
-        List<RowFilter<Object,Object>> filters = new ArrayList<>();
+        List<RowFilter<Object, Object>> filters = new ArrayList<>();
 
-        // lọc keyword (tìm mọi cột)
-        if (!keyword.isEmpty()) {
+        if (!keyword.isEmpty())
             filters.add(RowFilter.regexFilter("(?i)" + keyword));
-        }
 
-        // ví dụ cột phương thức là cột 3
-        if (!"Tất cả".equals(phuongThuc)) {
-            filters.add(RowFilter.regexFilter(phuongThuc, 3));
-        }
+        if (!"Tất cả phương thức".equals(phuongThuc))
+            filters.add(RowFilter.regexFilter("^" + phuongThuc + "$", 9));  // col 9
 
-        // ví dụ cột trạng thái là cột 4
-        if (!"Tất cả".equals(trangThai)) {
-            filters.add(RowFilter.regexFilter(trangThai, 4));
-        }
+        if (!"Tất cả trạng thái".equals(trangThai))
+            filters.add(RowFilter.regexFilter("^" + trangThai + "$", 10)); // col 10
 
-        sorter.setRowFilter(RowFilter.andFilter(filters));
+        sorter.setRowFilter(filters.isEmpty() ? null : RowFilter.andFilter(filters));
     }
 
     private void handleThem() {

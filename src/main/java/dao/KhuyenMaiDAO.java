@@ -97,6 +97,7 @@ public class KhuyenMaiDAO
         {
             pstmt.setString(1, km.getTenKM());
             pstmt.setString(2, km.getLoaiKM());
+            pstmt.setDouble(3, km.getGiatrigiam());
             pstmt.setDouble(4, km.getGiamtoida());
             pstmt.setDouble(5, km.getGiatridonhangtoithieu());
             pstmt.setTimestamp(6, Timestamp.valueOf(km.getNgaybatdau()));
@@ -233,7 +234,7 @@ public class KhuyenMaiDAO
 
             if (rs.next())
             {
-                String makhuyenmai = rs.getString("MaKhuyenMai");
+                String makhuyenmai = rs.getString("maKM");
                 int num = Integer.parseInt(makhuyenmai.substring(2));
                 return String.format("KM%03d", num + 1);
             }
@@ -252,7 +253,7 @@ public class KhuyenMaiDAO
         km.setTenKM(rs.getString("tenKM"));
         km.setLoaiKM(rs.getString("loaiKM"));
         km.setGiatrigiam(rs.getDouble("giatrigiam"));
-        km.setGiamtoida(rs.getDouble("giatoida"));
+        km.setGiamtoida(rs.getDouble("giamtoida"));
         km.setGiatridonhangtoithieu(rs.getDouble("giatridonhangtoithieu"));
 
         // Chuyển đổi SQL Timestamp sang Java LocalDateTime
