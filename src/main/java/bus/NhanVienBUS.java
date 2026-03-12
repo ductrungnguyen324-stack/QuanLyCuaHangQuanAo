@@ -56,7 +56,7 @@ public class NhanVienBUS {
         return nvDAO.getById(maNV);
     }
 
-    public NhanVien login(String username, String password) {
+    public NhanVien Login(String username, String password) {
         return nvDAO.checkLogin(username, password);
     }
 }
