@@ -1,23 +1,24 @@
-package entity;
+package DTO;
 
-public class ChiTietPhieuNhap
-{
-    String maCTPN;
-    String maPN;
-    String maSP;
-    double soluong;
-    double gianhap;
-    double thanhtien;
+public class ChiTietPhieuNhapDTO {
 
-    public ChiTietPhieuNhap() {}
+    private String maCTPN;
+    private String maPN;
+    private String maSP;
+    private int soLuong;
+    private double donGia;
+    private double thanhTien;
 
-    public ChiTietPhieuNhap(String maCTPN, String maPN, String maSP, double soluong, double gianhap, double thanhtien) {
+    public ChiTietPhieuNhapDTO() {
+    }
+
+    public ChiTietPhieuNhapDTO(String maCTPN, String maPN, String maSP, int soLuong, double donGia, double thanhTien) {
         this.maCTPN = maCTPN;
         this.maPN = maPN;
         this.maSP = maSP;
-        this.soluong = soluong;
-        this.gianhap = gianhap;
-        this.thanhtien = soluong * gianhap;
+        this.soLuong = soLuong;
+        this.donGia = donGia;
+        this.thanhTien = thanhTien;
     }
 
     public String getMaCTPN() {
@@ -44,34 +45,31 @@ public class ChiTietPhieuNhap
         this.maSP = maSP;
     }
 
-    public double getSoluong() {
-        return soluong;
+    public int getSoLuong() {
+        return soLuong;
     }
 
-    public void setSoluong(double soluong) {
-        this.soluong = soluong;
-        TinhThanhTien();
+    public void setSoLuong(int soLuong) {
+        this.soLuong = soLuong;
     }
 
-    public double getGianhap() {
-        return gianhap;
+    public double getDonGia() {
+        return donGia;
     }
 
-    public void setGianhap(double gianhap) {
-        this.gianhap = gianhap;
-        TinhThanhTien();
+    public void setDonGia(double donGia) {
+        this.donGia = donGia;
     }
 
-    public double getThanhtien() {
-        return thanhtien;
+    public double getThanhTien() {
+        return thanhTien;
     }
 
-    public void setThanhtien(double thanhtien) {
-        this.thanhtien = thanhtien;
+    public void setThanhTien(double thanhTien) {
+        this.thanhTien = thanhTien;
     }
 
-    public void TinhThanhTien()
-    {
-        this.thanhtien = this.soluong * this.gianhap;
+    public double tinhThanhTien() {
+        return this.soLuong * this.donGia;
     }
 }
