@@ -10,7 +10,7 @@ public class PhieuNhapHangDAO {
         ArrayList<PhieuNhapHangDTO> list = new ArrayList<>();
         String sql = "SELECT * FROM phieunhap ORDER BY ngaytao DESC";
 
-        try (Connection con = MyConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+        try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 PhieuNhapHangDTO pn = new PhieuNhapHangDTO();
@@ -48,7 +48,7 @@ public class PhieuNhapHangDAO {
 
     public boolean updateTrangThai(String maPN, String trangThai) {
         String sql = "UPDATE phieunhap SET trangthai = ? WHERE maPN = ?";
-        try (Connection con = MyConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, trangThai);
             ps.setString(2, maPN);
@@ -74,7 +74,7 @@ public class PhieuNhapHangDAO {
     public PhieuNhapHangDTO getPhieuNhapById(String maPN) {
         PhieuNhapHangDTO pn = null;
         String sql = "SELECT * FROM phieunhap WHERE maPN = ?";
-        try (Connection conn = MyConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, maPN);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
