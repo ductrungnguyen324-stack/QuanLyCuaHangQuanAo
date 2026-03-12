@@ -65,6 +65,7 @@ public class HoaDonView extends JFrame {
         top.setOpaque(false);
         top.add(buildHeader(),  BorderLayout.NORTH);
         top.add(buildToolbar(), BorderLayout.SOUTH);
+        setVisible(true);
 
         add(top,          BorderLayout.NORTH);
         add(buildTable(), BorderLayout.CENTER);
