@@ -6,6 +6,7 @@ import dao.ChiTietPhieuNhapDAO;
 import entity.PhieuNhapHangDTO;
 import entity.ChiTietPhieuNhapDTO;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -18,22 +19,21 @@ public class ChiTietPhieuNhapBUS {
         return ctpnDAO.getByMaPN(maPN);
     }
 
-    public boolean insert(ChiTietPhieuNhapDTO ctpn) {
-        Connection conn = null;
-        try {
-            conn = DBConnection.getConnection();
-            return ctpnDAO.insert(ctpn, conn);
-        } catch (Exception e) {
+    public boolean insert(ChiTietPhieuNhapDTO ct, Connection conn) {
+        String sql = "INSERT INTO chitietphieunhap (maCTPN, maPN, maSP, soluong, dongia, thanhtien) "
+                + "VALUES (?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, ct.getMaCTPN());
+            ps.setString(2, ct.getMaPN());
+            ps.setString(3, ct.getMaSP());
+            ps.setInt(4, ct.getSoLuong());
+            ps.setDouble(5, ct.getDonGia());
+            ps.setDouble(6, ct.getThanhTien());
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
             e.printStackTrace();
             return false;
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
     }
 
@@ -115,17 +115,27 @@ public class ChiTietPhieuNhapBUS {
     }
 
     public String taoMaMoi() {
-        String maxMa = ctpnDAO.getMaMax();
+        String maxMa = ctpnDAO.getLastMaCTPN();
+
         if (maxMa == null || maxMa.isEmpty()) {
             return "CTPN001";
         }
 
-        String prefix = maxMa.replaceAll("\\d", "");
-        String numberPart = maxMa.replaceAll("\\D", "");
+        try {
+            String numberPart = maxMa.replaceAll("\\D", "");
+            String prefix = maxMa.replaceAll("\\d", "");
 
-        int nextNumber = Integer.parseInt(numberPart) + 1;
+            if (numberPart.isEmpty()) {
+                return "CTPN001";
+            }
 
-        return String.format("%s%03d", prefix, nextNumber);
+            int nextNumber = Integer.parseInt(numberPart) + 1;
+            return String.format("%s%03d", prefix, nextNumber);
+
+        } catch (NumberFormatException e) {
+
+            return "CTPN001";
+        }
     }
 
     public boolean updatePhieuFull(PhieuNhapHangDTO pn, ArrayList<ChiTietPhieuNhapDTO> dsCT) {

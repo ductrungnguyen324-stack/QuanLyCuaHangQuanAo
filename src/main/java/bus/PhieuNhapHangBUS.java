@@ -22,16 +22,83 @@ public class PhieuNhapHangBUS {
         return ctpnDAO.getByMaPN(maPN);
     }
 
+    public PhieuNhapHangDTO getPhieuNhapById(String maPN) {
+        return pnDAO.getPhieuNhapById(maPN);
+    }
+
     public boolean themPhieuNhap(PhieuNhapHangDTO pn, ArrayList<ChiTietPhieuNhapDTO> dsCT) {
         Connection conn = null;
         try {
             conn = DBConnection.getConnection();
+            if (conn == null) {
+                System.out.println("[BUS] Không thể kết nối database!");
+                return false;
+            }
             conn.setAutoCommit(false);
 
-            if (!pnDAO.insert(pn, conn)) {
+            System.out.println("[BUS] Insert phieu: " + pn.getMaPN());
+            boolean insertPN = pnDAO.insert(pn, conn);
+            System.out.println("[BUS] Insert phieu result: " + insertPN);
+            if (!insertPN) {
                 conn.rollback();
                 return false;
             }
+
+            for (ChiTietPhieuNhapDTO ct : dsCT) {
+                System.out.println("[BUS] Insert chiTiet: maSP=" + ct.getMaSP()
+                        + ", sl=" + ct.getSoLuong() + ", gia=" + ct.getDonGia());
+                boolean insertCT = ctpnDAO.insert(ct, conn);
+                System.out.println("[BUS] Insert chiTiet result: " + insertCT);
+                if (!insertCT) {
+                    conn.rollback();
+                    return false;
+                }
+            }
+
+            conn.commit();
+            System.out.println("[BUS] Commit thành công: " + pn.getMaPN());
+            return true;
+
+        } catch (Exception e) {
+            System.out.println("[BUS] Exception: " + e.getMessage());
+            e.printStackTrace();
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            return false;
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public boolean capNhatPhieu(PhieuNhapHangDTO pn, ArrayList<ChiTietPhieuNhapDTO> dsCT) {
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection();
+            if (conn == null) {
+                return false;
+            }
+            conn.setAutoCommit(false);
+
+            boolean updatePN = pnDAO.update(pn, conn);
+            System.out.println("[BUS] Update phieu result: " + updatePN);
+            if (!updatePN) {
+                conn.rollback();
+                return false;
+            }
+
+            ctpnDAO.deleteByMaPN(pn.getMaPN(), conn);
 
             for (ChiTietPhieuNhapDTO ct : dsCT) {
                 if (!ctpnDAO.insert(ct, conn)) {
@@ -42,7 +109,10 @@ public class PhieuNhapHangBUS {
 
             conn.commit();
             return true;
+
         } catch (Exception e) {
+            System.out.println("[BUS] capNhatPhieu Exception: " + e.getMessage());
+            e.printStackTrace();
             try {
                 if (conn != null) {
                     conn.rollback();
@@ -50,7 +120,6 @@ public class PhieuNhapHangBUS {
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
-            e.printStackTrace();
             return false;
         } finally {
             try {
@@ -68,10 +137,12 @@ public class PhieuNhapHangBUS {
         Connection conn = null;
         try {
             conn = DBConnection.getConnection();
+            if (conn == null) {
+                return false;
+            }
             conn.setAutoCommit(false);
 
             ctpnDAO.deleteByMaPN(maPN, conn);
-
             if (!pnDAO.delete(maPN, conn)) {
                 conn.rollback();
                 return false;
@@ -79,7 +150,10 @@ public class PhieuNhapHangBUS {
 
             conn.commit();
             return true;
+
         } catch (Exception e) {
+            System.out.println("[BUS] xoaPhieuNhap Exception: " + e.getMessage());
+            e.printStackTrace();
             try {
                 if (conn != null) {
                     conn.rollback();
@@ -87,7 +161,6 @@ public class PhieuNhapHangBUS {
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
-            e.printStackTrace();
             return false;
         } finally {
             try {
@@ -96,6 +169,7 @@ public class PhieuNhapHangBUS {
                     conn.close();
                 }
             } catch (SQLException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -107,16 +181,16 @@ public class PhieuNhapHangBUS {
     public ArrayList<PhieuNhapHangDTO> timKiemVaLoc(String keyword, String trangThaiLoc) {
         ArrayList<PhieuNhapHangDTO> all = pnDAO.getAll();
         ArrayList<PhieuNhapHangDTO> result = new ArrayList<>();
-
-        String keyLower = keyword.toLowerCase();
-
+        String keyLower = (keyword == null) ? "" : keyword.toLowerCase();
         for (PhieuNhapHangDTO pn : all) {
-            boolean matchKey = pn.getMaPN().toLowerCase().contains(keyLower)
-                    || pn.getNhaCungCap().toLowerCase().contains(keyLower);
-
-            boolean matchStatus = trangThaiLoc == null || trangThaiLoc.isEmpty()
+            boolean matchKey = keyLower.isEmpty()
+                    || pn.getMaPN().toLowerCase().contains(keyLower)
+                    || pn.getNhaCungCap().toLowerCase().contains(keyLower)
+                    || pn.getMaNV().toLowerCase().contains(keyLower);
+            boolean matchStatus = trangThaiLoc == null
+                    || trangThaiLoc.isEmpty()
+                    || trangThaiLoc.equals("Tất cả trạng thái")
                     || pn.getTrangThai().equals(trangThaiLoc);
-
             if (matchKey && matchStatus) {
                 result.add(pn);
             }
@@ -124,7 +198,16 @@ public class PhieuNhapHangBUS {
         return result;
     }
 
-    public PhieuNhapHangDTO getPhieuNhapById(String maPN) {
-        return pnDAO.getPhieuNhapById(maPN);
+    public String generateNextMaPN() {
+        String lastMa = PhieuNhapHangDAO.getInstance().getLastMaPhieuNhap();
+        if (lastMa == null || lastMa.isEmpty()) {
+            return "PN001";
+        }
+        try {
+            int nextNumber = Integer.parseInt(lastMa.substring(2)) + 1;
+            return String.format("PN%03d", nextNumber);
+        } catch (NumberFormatException e) {
+            return "PN001";
+        }
     }
 }

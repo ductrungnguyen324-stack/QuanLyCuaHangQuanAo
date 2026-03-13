@@ -1,16 +1,21 @@
 package gui.controller;
 
 import bus.PhieuNhapHangBUS;
+import dao.DBConnection;
+import dao.PhieuNhapHangDAO;
 import entity.PhieuNhapHangDTO;
 import java.util.ArrayList;
+import dao.PhieuNhapHangDAO;
+import java.sql.Connection;
 
 /**
- * PhieuNhapPanelController
- * Toàn bộ logic nghiệp vụ cho màn hình danh sách Phiếu nhập.
+ * PhieuNhapPanelController Toàn bộ logic nghiệp vụ cho màn hình danh sách Phiếu
+ * nhập.
  */
 public class PhieuNhapPanelController {
 
     private final PhieuNhapHangBUS bus = new PhieuNhapHangBUS();
+    private PhieuNhapHangDAO dao = new PhieuNhapHangDAO();
 
     // ── Lấy toàn bộ danh sách ────────────────────────────
     public ArrayList<PhieuNhapHangDTO> getAll() {
@@ -21,16 +26,18 @@ public class PhieuNhapPanelController {
     public ArrayList<PhieuNhapHangDTO> locDuLieu(String keyword, String trangThai) {
         String kw = keyword.trim().toLowerCase();
         ArrayList<PhieuNhapHangDTO> listGoc = bus.getAll();
-        ArrayList<PhieuNhapHangDTO> ketQua  = new ArrayList<>();
+        ArrayList<PhieuNhapHangDTO> ketQua = new ArrayList<>();
 
         for (PhieuNhapHangDTO pn : listGoc) {
             boolean matchTT = trangThai.equals("Tất cả trạng thái")
-                           || pn.getTrangThai().equalsIgnoreCase(trangThai);
+                    || pn.getTrangThai().equalsIgnoreCase(trangThai);
             boolean matchKW = kw.isEmpty()
-                           || pn.getMaPN().toLowerCase().contains(kw)
-                           || pn.getMaNV().toLowerCase().contains(kw)
-                           || pn.getNhaCungCap().toLowerCase().contains(kw);
-            if (matchTT && matchKW) ketQua.add(pn);
+                    || pn.getMaPN().toLowerCase().contains(kw)
+                    || pn.getMaNV().toLowerCase().contains(kw)
+                    || pn.getNhaCungCap().toLowerCase().contains(kw);
+            if (matchTT && matchKW) {
+                ketQua.add(pn);
+            }
         }
         return ketQua;
     }
@@ -62,9 +69,15 @@ public class PhieuNhapPanelController {
         stats[0] = list.size();
         for (PhieuNhapHangDTO pn : list) {
             String tt = pn.getTrangThai();
-            if ("Chờ xử lý".equals(tt))   stats[1]++;
-            if ("Đã nhập kho".equals(tt)) stats[2]++;
-            if ("Đã huỷ".equals(tt))      stats[3]++;
+            if ("Chờ xử lý".equals(tt)) {
+                stats[1]++;
+            }
+            if ("Đã nhập kho".equals(tt)) {
+                stats[2]++;
+            }
+            if ("Đã huỷ".equals(tt)) {
+                stats[3]++;
+            }
         }
         return stats;
     }
@@ -72,7 +85,32 @@ public class PhieuNhapPanelController {
     // ── Tính tổng chi từ danh sách ───────────────────────
     public double tinhTongChi(ArrayList<PhieuNhapHangDTO> list) {
         double tong = 0;
-        for (PhieuNhapHangDTO pn : list) tong += pn.getTongTien();
+        for (PhieuNhapHangDTO pn : list) {
+            tong += pn.getTongTien();
+        }
         return tong;
     }
+
+    public boolean themPhieuNhap(PhieuNhapHangDTO pn) {
+
+        try {
+            Connection conn = DBConnection.getConnection();
+
+            return dao.insert(pn, conn);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public int[] tinhThongKeAll() {
+        return tinhThongKe(bus.getAll());
+    }
+
+    public double tinhTongChiAll() {
+        return tinhTongChi(bus.getAll());
+    }
+
 }

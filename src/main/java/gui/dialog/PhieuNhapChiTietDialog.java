@@ -11,27 +11,23 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
-/**
- * PhieuNhapChiTietDialog — Chỉ chứa code giao diện.
- * Mọi logic gọi qua PhieuNhapChiTietController.
- */
 public class PhieuNhapChiTietDialog extends JDialog {
 
     // ── Controller ───────────────────────────────────────
     private final PhieuNhapChiTietController controller = new PhieuNhapChiTietController();
 
     // ── Màu sắc ──────────────────────────────────────────
-    private static final Color BG     = new Color(10, 14, 30);
-    private static final Color CARD   = new Color(14, 20, 40);
-    private static final Color CARD2  = new Color(18, 26, 52);
+    private static final Color BG = new Color(10, 14, 30);
+    private static final Color CARD = new Color(14, 20, 40);
+    private static final Color CARD2 = new Color(18, 26, 52);
     private static final Color BORDER = new Color(30, 42, 72);
-    private static final Color GREEN  = new Color(16, 185, 129);
-    private static final Color CYAN   = new Color(6, 182, 212);
-    private static final Color TEXT1  = new Color(226, 232, 240);
-    private static final Color TEXT2  = new Color(100, 116, 139);
+    private static final Color GREEN = new Color(16, 185, 129);
+    private static final Color CYAN = new Color(6, 182, 212);
+    private static final Color TEXT1 = new Color(226, 232, 240);
+    private static final Color TEXT2 = new Color(100, 116, 139);
 
     // ── Format ───────────────────────────────────────────
-    private final DecimalFormat    df  = new DecimalFormat("#,### đ");
+    private final DecimalFormat df = new DecimalFormat("#,### đ");
     private final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 
     // ── Constructor ──────────────────────────────────────
@@ -51,9 +47,9 @@ public class PhieuNhapChiTietDialog extends JDialog {
 
         JPanel main = new JPanel(new BorderLayout(0, 0));
         main.setBackground(BG);
-        main.add(buildHeader(pn),        BorderLayout.NORTH);
-        main.add(buildBody(pn, listCT),  BorderLayout.CENTER);
-        main.add(buildFooter(pn),        BorderLayout.SOUTH);
+        main.add(buildHeader(pn), BorderLayout.NORTH);
+        main.add(buildBody(pn, listCT), BorderLayout.CENTER);
+        main.add(buildFooter(pn), BorderLayout.SOUTH);
         setContentPane(main);
     }
 
@@ -81,8 +77,8 @@ public class PhieuNhapChiTietDialog extends JDialog {
         JPanel body = new JPanel(new BorderLayout(0, 14));
         body.setBackground(BG);
         body.setBorder(BorderFactory.createEmptyBorder(16, 20, 16, 20));
-        body.add(buildInfoCards(pn),   BorderLayout.NORTH);
-        body.add(buildTable(listCT),   BorderLayout.CENTER);
+        body.add(buildInfoCards(pn), BorderLayout.NORTH);
+        body.add(buildTable(listCT), BorderLayout.CENTER);
         return body;
     }
 
@@ -91,8 +87,8 @@ public class PhieuNhapChiTietDialog extends JDialog {
         JPanel info = new JPanel(new GridLayout(1, 3, 12, 0));
         info.setBackground(BG);
         Color colorTT = controller.isDaDuyet(pn) ? GREEN : CYAN;
-        info.add(makeInfoCard("Nhà cung cấp",    pn.getNhaCungCap(),          TEXT1));
-        info.add(makeInfoCard("Trạng thái",      pn.getTrangThai(),           colorTT));
+        info.add(makeInfoCard("Nhà cung cấp", pn.getNhaCungCap(), TEXT1));
+        info.add(makeInfoCard("Trạng thái", pn.getTrangThai(), colorTT));
         info.add(makeInfoCard("Tổng thành tiền", df.format(pn.getTongTien()), CYAN));
         return info;
     }
@@ -101,7 +97,10 @@ public class PhieuNhapChiTietDialog extends JDialog {
     private JScrollPane buildTable(ArrayList<ChiTietPhieuNhapDTO> listCT) {
         String[] cols = {"Mã CTPN", "Mã PN", "Mã SP", "Số lượng", "Giá nhập", "Thành tiền"};
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
+            @Override
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
         };
 
         for (ChiTietPhieuNhapDTO ct : listCT) {
@@ -112,14 +111,17 @@ public class PhieuNhapChiTietDialog extends JDialog {
         }
 
         JTable table = new JTable(model);
-        table.setBackground(CARD); table.setForeground(TEXT1);
+        table.setBackground(CARD);
+        table.setForeground(TEXT1);
         table.setRowHeight(36);
         table.setFont(new Font("Dialog", Font.PLAIN, 12));
-        table.setGridColor(BORDER); table.setShowVerticalLines(false);
+        table.setGridColor(BORDER);
+        table.setShowVerticalLines(false);
         table.setSelectionBackground(new Color(25, 35, 80));
 
         JTableHeader header = table.getTableHeader();
-        header.setBackground(CARD2); header.setForeground(TEXT2);
+        header.setBackground(CARD2);
+        header.setForeground(TEXT2);
         header.setFont(new Font("Dialog", Font.BOLD, 11));
 
         JScrollPane scroll = new JScrollPane(table);
@@ -134,7 +136,7 @@ public class PhieuNhapChiTietDialog extends JDialog {
         footer.setBackground(BG);
 
         JButton btnDuyet = makeButton("✓ Duyệt nhập kho", GREEN, Color.WHITE);
-        JButton btnDong  = makeButton("Đóng", CARD, TEXT2);
+        JButton btnDong = makeButton("Đóng", CARD, TEXT2);
 
         btnDuyet.setEnabled(!controller.isDaDuyet(pn));
         btnDuyet.addActionListener(e -> onDuyetClick(pn));
@@ -167,9 +169,11 @@ public class PhieuNhapChiTietDialog extends JDialog {
                 new LineBorder(BORDER, 1, true),
                 BorderFactory.createEmptyBorder(10, 14, 10, 14)));
         JLabel l = new JLabel(label);
-        l.setFont(new Font("Dialog", Font.BOLD, 10)); l.setForeground(TEXT2);
+        l.setFont(new Font("Dialog", Font.BOLD, 10));
+        l.setForeground(TEXT2);
         JLabel v = new JLabel(value);
-        v.setFont(new Font("Dialog", Font.BOLD, 13)); v.setForeground(color);
+        v.setFont(new Font("Dialog", Font.BOLD, 13));
+        v.setForeground(color);
         p.add(l, BorderLayout.NORTH);
         p.add(v, BorderLayout.CENTER);
         return p;
@@ -178,8 +182,11 @@ public class PhieuNhapChiTietDialog extends JDialog {
     private JButton makeButton(String text, Color bg, Color fg) {
         JButton b = new JButton(text);
         b.setFont(new Font("Dialog", Font.BOLD, 12));
-        b.setBackground(bg); b.setForeground(fg);
-        b.setOpaque(true); b.setBorderPainted(false); b.setFocusPainted(false);
+        b.setBackground(bg);
+        b.setForeground(fg);
+        b.setOpaque(true);
+        b.setBorderPainted(false);
+        b.setFocusPainted(false);
         b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         b.setBorder(BorderFactory.createEmptyBorder(9, 18, 9, 18));
         return b;

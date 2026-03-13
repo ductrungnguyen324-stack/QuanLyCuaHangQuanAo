@@ -94,8 +94,8 @@ public class PhieuNhapDialog extends JDialog {
         JPanel p = new JPanel(new GridLayout(2, 4, 12, 10));
         p.setBackground(BG);
 
-        fMaPN = addField(p, "Mã phiếu *", pn != null ? pn.getMaPN() : "PN001");
-        fMaNV = addField(p, "Mã nhân viên *", pn != null ? pn.getMaNV() : "NV001");
+        fMaPN = addField(p, "Mã phiếu *", pn != null ? pn.getMaPN() : "");
+        fMaNV = addField(p, "Mã nhân viên *", pn != null ? pn.getMaNV() : "");
         fNhaCungCap = addField(p, "Nhà cung cấp *", pn != null ? pn.getNhaCungCap() : "");
 
         JLabel lblNgay = new JLabel("Ngày tạo");
@@ -133,8 +133,15 @@ public class PhieuNhapDialog extends JDialog {
         JButton btnXoa = makeButton("Xoá dòng", RED, Color.WHITE);
 
         btnThem.addActionListener(e -> {
-            int n = ctModel.getRowCount() + 1;
-            ctModel.addRow(new Object[]{"SP00" + n, "Sản phẩm " + n, 1, 80000.0, 80000.0});
+            
+            ctModel.addRow(new Object[]{"SP001", "Sản phẩm 1", 1, 0.0, 0.0});
+            int newRow = ctModel.getRowCount() - 1;
+            ctTable.changeSelection(newRow, 0, false, false);
+            ctTable.editCellAt(newRow, 0);
+            Component editor = ctTable.getEditorComponent();
+            if (editor != null) {
+                editor.requestFocusInWindow();
+            }
             tinhTong();
         });
         btnXoa.addActionListener(e -> {
@@ -339,7 +346,9 @@ public class PhieuNhapDialog extends JDialog {
                 this.ketQua = maPN;
                 dispose();
             } else {
-                lblStatus.setText("Lỗi: Không thể lưu vào cơ sở dữ liệu!");
+
+                lblStatus.setText("❌ Lỗi: Không thể lưu vào cơ sở dữ liệu!");
+
             }
         } catch (Exception e) {
             e.printStackTrace();

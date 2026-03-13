@@ -8,10 +8,9 @@ import java.util.ArrayList;
 
 public class PhieuNhapChiTietController {
 
-    private final PhieuNhapHangBUS    pnBUS = new PhieuNhapHangBUS();
+    private final PhieuNhapHangBUS pnBUS = new PhieuNhapHangBUS();
     private final ChiTietPhieuNhapBUS ctBUS = new ChiTietPhieuNhapBUS();
 
-    // ── Lấy danh sách chi tiết ───────────────────────────
     public ArrayList<ChiTietPhieuNhapDTO> getChiTiet(String maPN) {
         ArrayList<ChiTietPhieuNhapDTO> list = ctBUS.getByMaPN(maPN);
         System.out.println("[Controller] getChiTiet(" + maPN + ") → " + list.size() + " dòng");
