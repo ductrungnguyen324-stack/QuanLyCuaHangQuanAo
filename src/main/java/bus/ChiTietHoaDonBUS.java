@@ -56,6 +56,10 @@ public class ChiTietHoaDonBUS {
         return dao.update(cthd);
     }
 
+    public Object[] getTopSanPham(int limit) {
+        return dao.getTopSanPham(limit);
+    }
+
     public ChiTietHoaDon getById(String maCTHD) {
         return dao.getById(maCTHD);
     }

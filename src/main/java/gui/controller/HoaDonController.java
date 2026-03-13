@@ -2,6 +2,7 @@ package gui.controller;
 
 import bus.HoaDonBUS;
 import bus.ChiTietHoaDonBUS;
+import bus.SanPhamBUS;
 import entity.ChiTietHoaDon;
 import entity.HoaDon;
 import gui.HoaDonDialog;
@@ -134,6 +135,13 @@ public class HoaDonController {
             if (dialog.isDuyet()) {
                 hd.setTrangthai("DATHANHTOAN");
                 hoadonbus.update(hd);
+                // giam so luong sp khi da thanh toan
+                List<ChiTietHoaDon> ctList = cthdbus.getAllByMaHD(maHD);
+                SanPhamBUS spbus = new SanPhamBUS();
+                for (ChiTietHoaDon cthd : ctList) {
+                    spbus.giamTonKho(cthd.getMaSP(), (int) cthd.getSoluong());
+                }
+
                 loadDanhSach();
                 view.showSuccess("Hoá đơn " + maHD + " đã thanh toán thành công!");
             }
@@ -181,9 +189,12 @@ public class HoaDonController {
 
         try {
             HoaDon hd              = dialog.buildHoaDon();
+            hoadonbus.add(hd);
             List<ChiTietHoaDon> cthd = dialog.buildChiTiet();
-            hoadonbus.add(hd);        // lưu hoá đơn trước
+//            hoadonbus.add(hd);        // lưu hoá đơn trước
+
             for(ChiTietHoaDon ct : cthd) {
+                ct.setMaHD(hd.getMaHD());
                 cthdbus.add(ct);
             }
             loadDanhSach();
@@ -240,13 +251,10 @@ public class HoaDonController {
     private String validate(HoaDonDialog dialog) {
         if (dialog.getMaHD() == null || dialog.getMaHD().isEmpty())
             return "Mã hoá đơn không được trống!";
-        if (dialog.getMaKH() == null || dialog.getMaKH().isEmpty())
-            return "Mã khách hàng không được trống!";
         if (dialog.getSoLuongSP() == 0)
             return "Hoá đơn phải có ít nhất 1 sản phẩm!";
         if (dialog.getTongTien() <= 0)
             return "Tổng tiền phải lớn hơn 0!";
         return null;
     }
-
 }

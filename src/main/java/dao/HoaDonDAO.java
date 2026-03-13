@@ -30,8 +30,8 @@ public class HoaDonDAO {
     public boolean insert (HoaDon hd) {
         String sql = "INSERT INTO HoaDon VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        String maHD = generateHD();
-        hd.setMaHD(maHD);
+//        String maHD = generateHD();
+//        hd.setMaHD(maHD);
 
         try(Connection conn = DBConnection.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -156,6 +156,77 @@ public class HoaDonDAO {
             hd.setNgaytao(ts.toLocalDateTime());
         }
         return hd;
+    }
+
+    /** Doanh thu 12 tháng của năm chỉ định (index 0=T1 ... 11=T12) */
+    public double[] getDoanhThuTheoThang(int nam) {
+        double[] result = new double[12];
+        String sql = "SELECT MONTH(ngaytao) AS thang, SUM(thanhtoan) AS tong " +
+                "FROM hoadon WHERE YEAR(ngaytao) = ? AND trangthai = 'DATHANHTOAN' " +
+                "GROUP BY MONTH(ngaytao)";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, nam);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                int thang = rs.getInt("thang");       // 1–12
+                result[thang - 1] = rs.getDouble("tong");
+            }
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public double[] getDoanhThuTheoQuy(int nam) {
+        double[] result = new double[4];
+        String sql = "SELECT QUARTER(ngaytao) AS quy, SUM(thanhtoan) AS tong " +
+                "FROM hoadon WHERE YEAR(ngaytao) = ? AND trangthai = 'DATHANHTOAN' " +
+                "GROUP BY QUARTER(ngaytao)";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, nam);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) result[rs.getInt("quy") - 1] = rs.getDouble("tong");
+            rs.close();
+        } catch (SQLException e) { e.printStackTrace(); }
+        return result;
+    }
+
+    public Object[] getDoanhThuTheoNam() {
+        String sql = "SELECT YEAR(ngaytao) AS nam, SUM(thanhtoan) AS tong " +
+                "FROM hoadon WHERE trangthai = 'DATHANHTOAN' " +
+                "GROUP BY YEAR(ngaytao) ORDER BY nam";
+        List<String> namList  = new ArrayList<>();
+        List<Double> tongList = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                namList.add(String.valueOf(rs.getInt("nam")));
+                tongList.add(rs.getDouble("tong"));
+            }
+            rs.close();
+        } catch (SQLException e) { e.printStackTrace(); }
+        return new Object[]{
+                namList.toArray(new String[0]),
+                tongList.stream().mapToDouble(d -> d).toArray()
+        };
+    }
+
+    public int countByNam(int nam) {
+        String sql = "SELECT COUNT(*) FROM hoadon WHERE YEAR(ngaytao) = ? AND trangthai = 'DATHANHTOAN'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, nam);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     public static void main(String[] args) {

@@ -1,7 +1,8 @@
 package gui;
 
-import gui.view.HoaDonView;
-import gui.view.LoginView;
+import entity.KhachHang;
+import gui.view.*;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -25,6 +26,9 @@ public class MainFrame extends JFrame {
 
     // Sidebar buttons
     private JButton btnHoaDon;
+    private JButton btnKhuyenMai;
+    private JButton btnKhachHang;
+    private JButton btnNhanVien;
     // Thêm các module khác sau này ở đây
 
     public MainFrame(String maNV) {
@@ -41,6 +45,8 @@ public class MainFrame extends JFrame {
 
         // Mở mặc định HoaDonView
         showCard("HOADON");
+        showCard("KHUYENMAI");
+        showCard("NHANVIEN");
 
         setVisible(true);
     }
@@ -71,12 +77,18 @@ public class MainFrame extends JFrame {
         menu.setBackground(SIDEBAR);
         menu.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 
-        btnHoaDon = makeSideBtn("🧾  Hoá đơn", "HOADON");
+        btnHoaDon = makeSideBtn("Hoá đơn", "HOADON");
+        btnKhuyenMai = makeSideBtn("Khuyến Mãi", "KHUYENMAI");
+        btnKhachHang = makeSideBtn("Khách Hàng", "KHACHHANG");
+        btnNhanVien = makeSideBtn("Nhân viên", "NHANVIEN");
         // Thêm module sau:
         // JButton btnSanPham = makeSideBtn("📦  Sản phẩm", "SANPHAM");
         // JButton btnKhachHang = makeSideBtn("👤  Khách hàng", "KHACHHANG");
 
         menu.add(btnHoaDon);
+        menu.add(btnKhuyenMai);
+        menu.add(btnKhachHang);
+        menu.add(btnNhanVien);
         // menu.add(btnSanPham);
         // menu.add(btnKhachHang);
 
@@ -173,12 +185,24 @@ public class MainFrame extends JFrame {
         cardLayout   = new CardLayout();
         contentPanel = new JPanel(cardLayout);
         contentPanel.setBackground(BG);
-
+        // them khach hang view
+        KhachHangView khachHangView = new KhachHangView();
+        JPanel khview = wrapView(khachHangView);
+        contentPanel.add(khview, "KHACHHANG");
         // Thêm HoaDonView vào card "HOADON"
         HoaDonView hoaDonView = new HoaDonView();
+        // thêm KhuyenMaiView
+        KhuyenMaiView khuyenmaiview = new KhuyenMaiView();
+        JPanel kmview = wrapView(khuyenmaiview);
+        contentPanel.add(kmview, "KHUYENMAI");
         // HoaDonView là JFrame → cần lấy contentPane ra nhúng vào
         JPanel hdPanel = wrapView(hoaDonView);
         contentPanel.add(hdPanel, "HOADON");
+
+        NhanVienView nvview = new NhanVienView();
+
+        JPanel Pnvview = wrapView(nvview);
+        contentPanel.add(Pnvview, "NHANVIEN");
 
         // Thêm module khác sau:
         // contentPanel.add(new SanPhamView().getContent(), "SANPHAM");
