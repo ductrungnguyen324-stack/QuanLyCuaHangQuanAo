@@ -8,7 +8,7 @@ import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class NhanVienView extends JPanel implements NhanVienController.IView {
+public class NhanVienView extends JFrame implements NhanVienController.IView {
 
     private static final Color BG      = new Color(7,   10,  20);
     private static final Color SURFACE = new Color(11,  15,  30);
