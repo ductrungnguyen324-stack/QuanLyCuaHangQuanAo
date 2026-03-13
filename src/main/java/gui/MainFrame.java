@@ -1,10 +1,8 @@
 package gui;
 
 import entity.KhachHang;
-import gui.view.HoaDonView;
-import gui.view.KhachHangView;
-import gui.view.KhuyenMaiView;
-import gui.view.LoginView;
+import gui.view.*;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -30,6 +28,7 @@ public class MainFrame extends JFrame {
     private JButton btnHoaDon;
     private JButton btnKhuyenMai;
     private JButton btnKhachHang;
+    private JButton btnNhanVien;
     // Thêm các module khác sau này ở đây
 
     public MainFrame(String maNV) {
@@ -47,6 +46,7 @@ public class MainFrame extends JFrame {
         // Mở mặc định HoaDonView
         showCard("HOADON");
         showCard("KHUYENMAI");
+        showCard("NHANVIEN");
 
         setVisible(true);
     }
@@ -80,6 +80,7 @@ public class MainFrame extends JFrame {
         btnHoaDon = makeSideBtn("Hoá đơn", "HOADON");
         btnKhuyenMai = makeSideBtn("Khuyến Mãi", "KHUYENMAI");
         btnKhachHang = makeSideBtn("Khách Hàng", "KHACHHANG");
+        btnNhanVien = makeSideBtn("Nhân viên", "NHANVIEN");
         // Thêm module sau:
         // JButton btnSanPham = makeSideBtn("📦  Sản phẩm", "SANPHAM");
         // JButton btnKhachHang = makeSideBtn("👤  Khách hàng", "KHACHHANG");
@@ -87,6 +88,7 @@ public class MainFrame extends JFrame {
         menu.add(btnHoaDon);
         menu.add(btnKhuyenMai);
         menu.add(btnKhachHang);
+        menu.add(btnNhanVien);
         // menu.add(btnSanPham);
         // menu.add(btnKhachHang);
 
@@ -196,6 +198,11 @@ public class MainFrame extends JFrame {
         // HoaDonView là JFrame → cần lấy contentPane ra nhúng vào
         JPanel hdPanel = wrapView(hoaDonView);
         contentPanel.add(hdPanel, "HOADON");
+
+        NhanVienView nvview = new NhanVienView();
+
+        JPanel Pnvview = wrapView(nvview);
+        contentPanel.add(Pnvview, "NHANVIEN");
 
         // Thêm module khác sau:
         // contentPanel.add(new SanPhamView().getContent(), "SANPHAM");
