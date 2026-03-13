@@ -10,12 +10,16 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 
+/**
+ * PhieuNhapDialog — Chỉ chứa code giao diện.
+ * Mọi logic gọi qua PhieuNhapDialogController.
+ */
 public class PhieuNhapDialog extends JDialog {
 
- 
+    // ── Controller ───────────────────────────────────────
     private final PhieuNhapDialogController controller = new PhieuNhapDialogController();
 
-
+    // ── Màu sắc ──────────────────────────────────────────
     private static final Color BG     = new Color(10, 14, 30);
     private static final Color CARD   = new Color(14, 20, 40);
     private static final Color CARD2  = new Color(18, 26, 52);
@@ -27,13 +31,14 @@ public class PhieuNhapDialog extends JDialog {
     private static final Color TEXT2  = new Color(100, 116, 139);
     private static final Color DANGER = new Color(239, 68, 68);
 
+    // ── Widgets ──────────────────────────────────────────
     private String            ketQua = null;
     private JTextField        fMaPN, fMaNV, fNhaCungCap;
     private JLabel            lblTongTien, lblStatus;
     private DefaultTableModel ctModel;
     private JTable            ctTable;
 
-
+    // ── Constructor ──────────────────────────────────────
     public PhieuNhapDialog(Frame parent, PhieuNhapHangDTO pn) {
         super(parent, true);
         setTitle(pn != null ? "Sửa phiếu nhập" : "Tạo phiếu nhập mới");
@@ -48,6 +53,7 @@ public class PhieuNhapDialog extends JDialog {
         );
     }
 
+    // ── Build UI ─────────────────────────────────────────
     private void buildUI(PhieuNhapHangDTO pn) {
         JPanel main = new JPanel(new BorderLayout(0, 0));
         main.setBackground(BG);
@@ -64,6 +70,7 @@ public class PhieuNhapDialog extends JDialog {
         setContentPane(main);
     }
 
+    // ── Header ───────────────────────────────────────────
     private JPanel buildHeader(PhieuNhapHangDTO pn) {
         JPanel h = new JPanel(new BorderLayout());
         h.setBackground(new Color(11, 16, 35));
@@ -82,6 +89,7 @@ public class PhieuNhapDialog extends JDialog {
         return h;
     }
 
+    // ── Info form ────────────────────────────────────────
     private JPanel buildInfoForm(PhieuNhapHangDTO pn) {
         JPanel p = new JPanel(new GridLayout(2, 4, 12, 10));
         p.setBackground(BG);
@@ -107,6 +115,7 @@ public class PhieuNhapDialog extends JDialog {
         return p;
     }
 
+    // ── Bảng chi tiết ────────────────────────────────────
     private JPanel buildCTTable() {
         JPanel wrap = new JPanel(new BorderLayout(0, 8));
         wrap.setBackground(BG);
@@ -174,6 +183,7 @@ public class PhieuNhapDialog extends JDialog {
             }
         });
 
+        // Tự động điền tên SP + giá khi nhập mã
         JTextField tfMaSP = new JTextField();
         tfMaSP.addActionListener(e -> {
             int row = ctTable.getSelectedRow();
@@ -203,6 +213,7 @@ public class PhieuNhapDialog extends JDialog {
         return wrap;
     }
 
+    // ── Footer ───────────────────────────────────────────
     private JPanel buildFooter(PhieuNhapHangDTO pn) {
         JPanel footer = new JPanel(new BorderLayout(0, 15));
         footer.setBackground(BG);
@@ -243,11 +254,13 @@ public class PhieuNhapDialog extends JDialog {
         return footer;
     }
 
+    // ── Sự kiện Lưu ──────────────────────────────────────
     private void onSave(PhieuNhapHangDTO pn) {
         String maPN = fMaPN.getText().trim();
         String maNV = fMaNV.getText().trim();
         String ncc  = fNhaCungCap.getText().trim();
 
+        // Validate qua Controller
         String errForm = controller.validate(maPN, maNV, ncc, ctModel.getRowCount());
         if (errForm != null) { lblStatus.setText(errForm); return; }
 
@@ -263,9 +276,11 @@ public class PhieuNhapDialog extends JDialog {
                 double gia       = controller.parseDouble(ctModel.getValueAt(i, 3));
                 double thanhTien = sl * gia;
 
+                // Validate từng dòng qua Controller
                 String errDong = controller.validateDong(i + 1, sl, gia);
                 if (errDong != null) { lblStatus.setText(errDong); return; }
 
+                // Giữ mã cũ nếu tồn tại
                 String maCTPN = null;
                 for (ChiTietPhieuNhapDTO old : dsCTCu)
                     if (old.getMaSP().equals(maSP)) { maCTPN = old.getMaCTPN(); break; }
@@ -298,6 +313,7 @@ public class PhieuNhapDialog extends JDialog {
         }
     }
 
+    // ── Tính tổng ─────────────────────────────────────────
     private void tinhTong() {
         double tong = 0;
         for (int i = 0; i < ctModel.getRowCount(); i++)
@@ -305,6 +321,7 @@ public class PhieuNhapDialog extends JDialog {
         lblTongTien.setText(String.format("%,.0f đ", tong));
     }
 
+    // ── Helpers UI ────────────────────────────────────────
     private JTextField addField(JPanel form, String label, String value) {
         JLabel l = new JLabel(label);
         l.setFont(new Font("Dialog", Font.BOLD, 11)); l.setForeground(TEXT2);

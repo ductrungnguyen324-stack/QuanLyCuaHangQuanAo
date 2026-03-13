@@ -23,6 +23,7 @@ public class PhieuNhapDialogController {
         return null;
     }
 
+    // ── Parse an toàn (xử lý Double, dấu phẩy, null) ─────
     public double parseDouble(Object value) {
         if (value == null) return 0.0;
         String str = value.toString().replace(",", "").trim();
@@ -31,24 +32,29 @@ public class PhieuNhapDialogController {
         catch (NumberFormatException e) { return 0.0; }
     }
 
+    // ── Tính tổng tiền từ cột thành tiền ─────────────────
     public double tinhTong(ArrayList<Double> dsThanhTien) {
         double tong = 0;
         for (Double tt : dsThanhTien) if (tt != null) tong += tt;
         return tong;
     }
 
+    // ── Tạo mã chi tiết mới ──────────────────────────────
     public String taoMaCTPN() {
         return ctBus.taoMaMoi();
     }
 
+    // ── Lấy danh sách chi tiết cũ (dùng khi sửa) ─────────
     public ArrayList<ChiTietPhieuNhapDTO> getChiTietCu(String maPN) {
         return ctBus.getByMaPN(maPN);
     }
 
+    // ── Lưu phiếu mới ────────────────────────────────────
     public boolean themPhieuMoi(PhieuNhapHangDTO pn, ArrayList<ChiTietPhieuNhapDTO> dsCT) {
         return ctBus.themPhieuFull(pn, dsCT);
     }
 
+    // ── Cập nhật phiếu đã có ─────────────────────────────
     public boolean capNhatPhieu(PhieuNhapHangDTO pn, ArrayList<ChiTietPhieuNhapDTO> dsCT) {
         return ctBus.updatePhieuFull(pn, dsCT);
     }

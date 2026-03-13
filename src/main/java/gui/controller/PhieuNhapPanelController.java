@@ -4,6 +4,10 @@ import bus.PhieuNhapHangBUS;
 import entity.PhieuNhapHangDTO;
 import java.util.ArrayList;
 
+/**
+ * PhieuNhapPanelController
+ * Toàn bộ logic nghiệp vụ cho màn hình danh sách Phiếu nhập.
+ */
 public class PhieuNhapPanelController {
 
     private final PhieuNhapHangBUS bus = new PhieuNhapHangBUS();
