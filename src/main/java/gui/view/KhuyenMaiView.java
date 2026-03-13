@@ -87,7 +87,7 @@ public class KhuyenMaiView extends JFrame {
                 BorderFactory.createEmptyBorder(16, 22, 16, 22)
         ));
 
-        JLabel title = new JLabel("Quản lý Khuyến mãi");
+        JLabel title = new JLabel("Quản lý Khuyến Mãi");
         title.setFont(new Font("Dialog", Font.BOLD, 20));
         title.setForeground(TEXT1);
 

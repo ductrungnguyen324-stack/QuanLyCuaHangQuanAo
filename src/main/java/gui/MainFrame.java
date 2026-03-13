@@ -81,16 +81,13 @@ public class MainFrame extends JFrame {
         btnKhuyenMai = makeSideBtn("Khuyến Mãi", "KHUYENMAI");
         btnKhachHang = makeSideBtn("Khách Hàng", "KHACHHANG");
         btnNhanVien = makeSideBtn("Nhân viên", "NHANVIEN");
-        // Thêm module sau:
-        // JButton btnSanPham = makeSideBtn("📦  Sản phẩm", "SANPHAM");
-        // JButton btnKhachHang = makeSideBtn("👤  Khách hàng", "KHACHHANG");
+        JButton btnSanPham = makeSideBtn("Sản phẩm", "SANPHAM");
 
         menu.add(btnHoaDon);
         menu.add(btnKhuyenMai);
         menu.add(btnKhachHang);
         menu.add(btnNhanVien);
-        // menu.add(btnSanPham);
-        // menu.add(btnKhachHang);
+        menu.add(btnSanPham);
 
         // Chọn mặc định
         setSelected(btnHoaDon);
@@ -200,12 +197,12 @@ public class MainFrame extends JFrame {
         contentPanel.add(hdPanel, "HOADON");
 
         NhanVienView nvview = new NhanVienView();
-
         JPanel Pnvview = wrapView(nvview);
         contentPanel.add(Pnvview, "NHANVIEN");
 
-        // Thêm module khác sau:
-        // contentPanel.add(new SanPhamView().getContent(), "SANPHAM");
+        SanPhamView sanPhamView = new SanPhamView();
+        JPanel spPanel = wrapView(sanPhamView);
+        contentPanel.add(spPanel, "SANPHAM");
 
         return contentPanel;
     }

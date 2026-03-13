@@ -78,7 +78,7 @@ public class KhachHangView extends JFrame {
                 BorderFactory.createEmptyBorder(16, 22, 16, 22)
         ));
 
-        JLabel title = new JLabel("Quản lý Khách hàng");
+        JLabel title = new JLabel("Quản lý Khách Hàng");
         title.setFont(new Font("Dialog", Font.BOLD, 20));
         title.setForeground(TEXT1);
 
