@@ -10,10 +10,16 @@ import java.awt.event.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
+/**
+ * PhieuNhapPanel — Chỉ chứa code giao diện.
+ * Mọi logic gọi qua PhieuNhapPanelController.
+ */
 public class PhieuNhapPanel extends JPanel {
 
+    // ── Controller ───────────────────────────────────────
     private final PhieuNhapPanelController controller = new PhieuNhapPanelController();
 
+    // ── Màu sắc ──────────────────────────────────────────
     private static final Color BG      = new Color(7, 10, 20);
     private static final Color SURFACE = new Color(11, 15, 30);
     private static final Color CARD    = new Color(14, 20, 40);
@@ -28,6 +34,7 @@ public class PhieuNhapPanel extends JPanel {
     private static final Color ROW_ODD = new Color(10, 14, 28);
     private static final Color ROW_SEL = new Color(25, 35, 80);
 
+    // ── Widgets ──────────────────────────────────────────
     private JTable             table;
     private DefaultTableModel  tableModel;
     private JTextField         searchField;
@@ -39,6 +46,7 @@ public class PhieuNhapPanel extends JPanel {
         "Ngày tạo", "Thành tiền", "Trạng thái", "Thao tác"
     };
 
+    // ── Constructor ──────────────────────────────────────
     public PhieuNhapPanel() {
         setBackground(BG);
         setLayout(new BorderLayout(0, 0));
@@ -54,6 +62,7 @@ public class PhieuNhapPanel extends JPanel {
         loadDanhSach();
     }
 
+    // ── Header ───────────────────────────────────────────
     private JPanel buildHeader() {
         JPanel h = new JPanel(new BorderLayout());
         h.setBackground(SURFACE);
@@ -93,6 +102,7 @@ public class PhieuNhapPanel extends JPanel {
         return h;
     }
 
+    // ── Toolbar ──────────────────────────────────────────
     private JPanel buildToolbar() {
         JPanel bar = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
         bar.setBackground(BG);
@@ -128,6 +138,7 @@ public class PhieuNhapPanel extends JPanel {
         return bar;
     }
 
+    // ── Table ────────────────────────────────────────────
     private JScrollPane buildTable() {
         tableModel = new DefaultTableModel(COLUMNS, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
@@ -261,6 +272,7 @@ public class PhieuNhapPanel extends JPanel {
         lblTongTien.setText(String.format("Tổng chi: %,.0f đ", tongChi));
     }
 
+    // ── Sự kiện ──────────────────────────────────────────
     private void moDialogThem() {
         PhieuNhapDialog dialog = new PhieuNhapDialog(
                 (Frame) SwingUtilities.getWindowAncestor(this), null);
@@ -366,7 +378,7 @@ public class PhieuNhapPanel extends JPanel {
         cb.setBackground(CARD); cb.setForeground(TEXT2);
         cb.setFont(new Font("Dialog", Font.BOLD, 12));
     }
-    /*
+    /* 
     public static void main(String[] args) {
         try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); }
         catch (Exception ignored) {}
@@ -378,5 +390,6 @@ public class PhieuNhapPanel extends JPanel {
             frame.setVisible(true);
         });
     }
-*/
+        */
+
 }
