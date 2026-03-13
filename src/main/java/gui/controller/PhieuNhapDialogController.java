@@ -4,7 +4,10 @@ import bus.ChiTietPhieuNhapBUS;
 import entity.ChiTietPhieuNhapDTO;
 import entity.PhieuNhapHangDTO;
 import java.util.ArrayList;
-
+import dao.SanPhamDAO;
+import entity.SanPham;
+import java.util.ArrayList;
+ 
 public class PhieuNhapDialogController {
 
     private final ChiTietPhieuNhapBUS ctBus = new ChiTietPhieuNhapBUS();
@@ -59,12 +62,30 @@ public class PhieuNhapDialogController {
         return ctBus.updatePhieuFull(pn, dsCT);
     }
 
-    // ── Tự động điền tên SP + giá theo mã (giả lập) ──────
-    // TODO: Thay bằng SanPhamBUS.getByMa(maSP) khi có module sản phẩm
-    public String[] tuDongDienThongTin(String maSP) {
-        // [0] = tên SP, [1] = giá nhập (String)
-        if (maSP.equalsIgnoreCase("SP001")) return new String[]{"Sản phẩm 1", "100000.0"};
-        if (maSP.equalsIgnoreCase("SP002")) return new String[]{"Sản phẩm 2", "250000.0"};
-        return new String[]{"Không tìm thấy", "0"};
+    private final SanPhamDAO sanPhamDAO = new SanPhamDAO();
+ 
+public ArrayList<String> tuDongDienThongTin(String maSP) {
+        ArrayList<String> result = new ArrayList<>();
+ 
+        if (maSP == null || maSP.trim().isEmpty()) {
+            result.add("");
+            result.add("0");
+            return result;
+        }
+ 
+        try {
+            SanPham sp = sanPhamDAO.getById(maSP.trim());
+            if (sp != null) {
+                result.add(sp.getTensp());
+                result.add(String.valueOf(sp.getGiaban()));
+                return result;
+            }
+        } catch (Exception e) {
+            System.err.println("[Controller] Lỗi tra cứu SP '" + maSP + "': " + e.getMessage());
+        }
+ 
+        result.add("Không tìm thấy");
+        result.add("0");
+        return result;
     }
 }
