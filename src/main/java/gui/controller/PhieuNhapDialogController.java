@@ -4,15 +4,14 @@ import bus.ChiTietPhieuNhapBUS;
 import entity.ChiTietPhieuNhapDTO;
 import entity.PhieuNhapHangDTO;
 import java.util.ArrayList;
-<<<<<<< ngocthi2608-patch-1
 
 
-=======
+
+
 import dao.SanPhamDAO;
 import entity.SanPham;
 import java.util.ArrayList;
- 
->>>>>>> main
+
 public class PhieuNhapDialogController {
 
     private final ChiTietPhieuNhapBUS ctBus = new ChiTietPhieuNhapBUS();

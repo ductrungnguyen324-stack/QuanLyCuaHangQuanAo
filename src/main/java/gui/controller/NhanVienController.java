@@ -2,7 +2,7 @@ package gui.controller;
 
 import bus.NhanVienBUS;
 import entity.NhanVien;
-import gui.dialog.NhanVienFormDialog;
+
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
