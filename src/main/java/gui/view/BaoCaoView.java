@@ -1,5 +1,8 @@
 package gui.view;
 
+import bus.ChiTietHoaDonBUS;
+import bus.HoaDonBUS;
+import bus.SanPhamBUS;
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
@@ -8,16 +11,6 @@ import java.awt.geom.*;
 import java.text.NumberFormat;
 import java.util.*;
 
-/**
- * BaoCaoPanel.java — Báo cáo & Thống kê
- * 3 mục:
- *   1. Doanh thu theo ngày/tháng/năm (Bar chart)
- *   2. Top sản phẩm bán chạy         (Bar chart ngang)
- *   3. Tồn kho sản phẩm              (Bar chart + màu cảnh báo)
- *
- * Tất cả biểu đồ vẽ thủ công bằng Graphics2D — không cần thư viện ngoài.
- * Kết nối BUS: thay các chỗ comment "TODO: bus..."
- */
 public class BaoCaoView extends JFrame {
 
     // ── Màu ─────────────────────────────────────────────
@@ -36,36 +29,29 @@ public class BaoCaoView extends JFrame {
     private static final Color TEXT3   = new Color(30, 42, 72);
     private static final Color GRID    = new Color(20, 28, 55);
 
-    // ── Dữ liệu mẫu ─────────────────────────────────────
-    // TODO: thay bằng bus.getDoanhThuTheoThang(), bus.getTopSanPham(), bus.getTonKho()
-
-    // Doanh thu 12 tháng (triệu đồng)
-    private static final double[] DOANH_THU_THANG = {
-            12.5, 18.2, 15.8, 22.1, 19.4, 28.6,
-            24.3, 31.7, 27.9, 35.2, 29.8, 42.0
-    };
     private static final String[] THANG_LABEL = {
             "T1","T2","T3","T4","T5","T6","T7","T8","T9","T10","T11","T12"
     };
 
-    // Top 6 sản phẩm bán chạy
-    private static final String[] TOP_SP_TEN = {
-            "Áo thun basic","Quần jean slim","Váy hoa mùa hè",
-            "Áo sơ mi kẻ","Áo khoác bomber","Áo hoodie"
-    };
-    private static final int[] TOP_SP_SL = { 145, 98, 87, 76, 65, 54 };
+    // ── BUS ──────────────────────────────────────────────
+    private final HoaDonBUS        hdBUS  = new HoaDonBUS();
+    private final ChiTietHoaDonBUS ctBUS  = new ChiTietHoaDonBUS();
+    private final SanPhamBUS       spBUS  = new SanPhamBUS();
 
-    // Tồn kho (nhóm theo loại)
-    private static final String[] TON_KHO_LOAI = {
-            "Áo thun","Áo sơ mi","Quần","Váy","Áo khoác","Phụ kiện"
-    };
-    private static final int[] TON_KHO_SO = { 83, 45, 33, 25, 20, 60 };
+    // ── Dữ liệu thật (load từ DB) ────────────────────────
+    private double[] doanhThuThang = new double[12];
+    private double[] doanhThuQuy   = new double[4];
+    private String[] doanhThuNamLabel = new String[0];
+    private double[] doanhThuNamTong  = new double[0];
+    private String[] topSpTen      = new String[0];
+    private int[]    topSpSl       = new int[0];
+    private String[] tonKhoLoai    = new String[0];
+    private int[]    tonKhoSo      = new int[0];
 
     // ── Components ───────────────────────────────────────
     private JComboBox<String> cbNam, cbLoaiThoiGian;
     private JLabel lblTongDT, lblTongHD, lblTBNgay;
 
-    // Tab đang chọn
     private int activeTab = 0;
     private JPanel[] tabBtns = new JPanel[3];
     private JPanel chartArea;
@@ -75,7 +61,35 @@ public class BaoCaoView extends JFrame {
         setLayout(new BorderLayout(0, 0));
         add(buildHeader(),  BorderLayout.NORTH);
         add(buildBody(),    BorderLayout.CENTER);
+        loadData(); // load DB sau khi UI đã build xong
         setVisible(true);
+    }
+
+    private void loadData() {
+        int nam = Integer.parseInt((String) cbNam.getSelectedItem());
+        try {
+            doanhThuThang = hdBUS.getDoanhThuTheoThang(nam);
+        } catch (Exception e) { doanhThuThang = new double[12]; }
+        try {
+            doanhThuQuy = hdBUS.getDoanhThuTheoQuy(nam);
+        } catch (Exception e) { doanhThuQuy = new double[4]; }
+        try {
+            Object[] nhieu = hdBUS.getDoanhThuTheoNam();
+            doanhThuNamLabel = (String[]) nhieu[0];
+            doanhThuNamTong  = (double[]) nhieu[1];
+        } catch (Exception e) { doanhThuNamLabel = new String[0]; doanhThuNamTong = new double[0]; }
+        try {
+            Object[] top = ctBUS.getTopSanPham(6);
+            topSpTen = (String[]) top[0];
+            topSpSl  = (int[])    top[1];
+        } catch (Exception e) { topSpTen = new String[0]; topSpSl = new int[0]; }
+        try {
+            Object[] tk = spBUS.getTonKhoTheoLoai();
+            tonKhoLoai = (String[]) tk[0];
+            tonKhoSo   = (int[])    tk[1];
+        } catch (Exception e) { tonKhoLoai = new String[0]; tonKhoSo = new int[0]; }
+        updateSummaryChips();
+        chartArea.repaint();
     }
 
     // ── Header ───────────────────────────────────────────
@@ -87,7 +101,7 @@ public class BaoCaoView extends JFrame {
                 BorderFactory.createEmptyBorder(16, 22, 16, 22)
         ));
 
-        JLabel title = new JLabel("Báo cáo & Thống kê");
+        JLabel title = new JLabel("Thống kê");
         title.setFont(new Font("Dialog", Font.BOLD, 20));
         title.setForeground(TEXT1);
 
@@ -95,7 +109,7 @@ public class BaoCaoView extends JFrame {
         lblTongDT  = makeChip("Doanh thu: --",  ACCENT);
         lblTongHD  = makeChip("Hoá đơn: --",    GREEN);
         lblTBNgay  = makeChip("TB/ngày: --",    CYAN);
-        updateSummaryChips();
+        // updateSummaryChips() sẽ gọi sau khi cbNam được khởi tạo bên dưới
 
         JPanel chips = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         chips.setOpaque(false);
@@ -115,6 +129,8 @@ public class BaoCaoView extends JFrame {
         cbNam = new JComboBox<>(new String[]{"2025","2024","2023"});
         styleCombo(cbLoaiThoiGian);
         styleCombo(cbNam);
+        // cbNam đã sẵn sàng — giờ mới gọi được
+        updateSummaryChips();
         cbLoaiThoiGian.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) chartArea.repaint();
         });
@@ -122,7 +138,7 @@ public class BaoCaoView extends JFrame {
             if (e.getStateChange() == ItemEvent.SELECTED) chartArea.repaint();
         });
         JButton btnLoc = makeButton("Cập nhật", ACCENT, Color.WHITE);
-        btnLoc.addActionListener(e -> { updateSummaryChips(); chartArea.repaint(); });
+        btnLoc.addActionListener(e -> loadData());
         filters.add(new JLabel("Năm:") {{ setForeground(TEXT2); setFont(new Font("Dialog",Font.BOLD,12)); }});
         filters.add(cbNam);
         filters.add(cbLoaiThoiGian);
@@ -212,75 +228,102 @@ public class BaoCaoView extends JFrame {
     }
 
     // ════════════════════════════════════════════════════
-    // CHART 1: Doanh thu theo tháng — Bar chart dọc
+    // CHART 1: Doanh thu — 3 chế độ: tháng / quý / năm
     // ════════════════════════════════════════════════════
     private void drawDoanhThu(Graphics2D g2, int W, int H) {
         int padL = 80, padR = 40, padT = 60, padB = 60;
         int chartW = W - padL - padR;
         int chartH = H - padT - padB;
 
-        // Tiêu đề
-        drawChartTitle(g2, "Doanh thu theo tháng — " + cbNam.getSelectedItem(), W, padT);
+        String loai = (String) cbLoaiThoiGian.getSelectedItem();
+        int nam = Integer.parseInt((String) cbNam.getSelectedItem());
 
-        // Vẽ grid ngang
-        double maxVal = Arrays.stream(DOANH_THU_THANG).max().getAsDouble() * 1.2;
+        double[] data;
+        String[] labels;
+        String tieude;
+
+        if ("Theo quý".equals(loai)) {
+            data   = doanhThuQuy;
+            labels = new String[]{"Quý 1", "Quý 2", "Quý 3", "Quý 4"};
+            tieude = "Doanh thu theo quý — " + nam;
+        } else if ("Theo năm".equals(loai)) {
+            data   = doanhThuNamTong;
+            labels = doanhThuNamLabel;
+            tieude = "Doanh thu theo từng năm";
+        } else {
+            data   = doanhThuThang;
+            labels = THANG_LABEL;
+            tieude = "Doanh thu theo tháng — " + nam;
+        }
+
+        drawChartTitle(g2, tieude, W, padT);
+
+        if (data == null || data.length == 0 || Arrays.stream(data).sum() == 0) {
+            drawNoData(g2, W, H, "Chưa có dữ liệu doanh thu"); return;
+        }
+
+        double maxVal = Arrays.stream(data).max().getAsDouble() * 1.2;
+        if (maxVal == 0) maxVal = 1;
+
         int gridLines = 5;
         for (int i = 0; i <= gridLines; i++) {
             int y = padT + chartH - (int)(chartH * i / gridLines);
             g2.setColor(GRID);
             g2.setStroke(new BasicStroke(1f));
             g2.drawLine(padL, y, padL + chartW, y);
-            // Label trục Y
             double val = maxVal * i / gridLines;
             g2.setColor(TEXT2);
             g2.setFont(new Font("Dialog", Font.PLAIN, 10));
-            String label = String.format("%.0fM", val);
+            String label = String.format("%.0fM", val / 1_000_000.0);
             g2.drawString(label, padL - 38, y + 4);
         }
 
-        // Vẽ cột
-        int n = DOANH_THU_THANG.length;
+        int n    = data.length;
         int barW = (int)(chartW * 0.55 / n);
         int gap  = chartW / n;
+        Color[] quyColors = {ACCENT, GREEN, CYAN, YELLOW};
 
         for (int i = 0; i < n; i++) {
-            int barH    = (int)(chartH * DOANH_THU_THANG[i] / maxVal);
-            int x       = padL + i * gap + (gap - barW) / 2;
-            int y       = padT + chartH - barH;
+            int barH = (int)(chartH * data[i] / maxVal);
+            int x    = padL + i * gap + (gap - barW) / 2;
+            int y    = padT + chartH - barH;
 
-            // Gradient cột
-            GradientPaint gp = new GradientPaint(
-                    x, y, new Color(120, 130, 255),
-                    x, y + barH, ACCENT
-            );
+            Color c1, c2;
+            if ("Theo quý".equals(loai)) {
+                c1 = quyColors[i % 4].brighter();
+                c2 = quyColors[i % 4];
+            } else if ("Theo năm".equals(loai)) {
+                c1 = CYAN.brighter(); c2 = CYAN;
+            } else {
+                c1 = new Color(120, 130, 255); c2 = ACCENT;
+            }
+
+            GradientPaint gp = new GradientPaint(x, y, c1, x, y + Math.max(barH, 1), c2);
             g2.setPaint(gp);
             g2.fill(new RoundRectangle2D.Float(x, y, barW, barH, 6, 6));
 
-            // Giá trị trên đầu cột
             g2.setColor(TEXT1);
             g2.setFont(new Font("Dialog", Font.BOLD, 10));
-            String val = String.format("%.1f", DOANH_THU_THANG[i]);
+            String val = String.format("%.1fM", data[i] / 1_000_000.0);
             int valW = g2.getFontMetrics().stringWidth(val);
-            g2.drawString(val, x + (barW - valW) / 2, y - 6);
+            if (barH > 0) g2.drawString(val, x + (barW - valW) / 2, y - 6);
 
-            // Label tháng dưới cột
             g2.setColor(TEXT2);
             g2.setFont(new Font("Dialog", Font.BOLD, 11));
-            int lblW = g2.getFontMetrics().stringWidth(THANG_LABEL[i]);
-            g2.drawString(THANG_LABEL[i], x + (barW - lblW) / 2, padT + chartH + 20);
+            if (i < labels.length) {
+                int lblW = g2.getFontMetrics().stringWidth(labels[i]);
+                g2.drawString(labels[i], x + (barW - lblW) / 2, padT + chartH + 20);
+            }
         }
 
-        // Trục X
         g2.setColor(BORDER);
         g2.setStroke(new BasicStroke(1.5f));
         g2.drawLine(padL, padT + chartH, padL + chartW, padT + chartH);
-        // Trục Y
         g2.drawLine(padL, padT, padL, padT + chartH);
 
-        // Ghi chú đơn vị
         g2.setColor(TEXT2);
         g2.setFont(new Font("Dialog", Font.ITALIC, 10));
-        g2.drawString("Đơn vị: triệu đồng", padL, padT - 10);
+        g2.drawString("Đơn vị: triệu đồng (VNĐ)", padL, padT - 10);
     }
 
     // ════════════════════════════════════════════════════
@@ -293,8 +336,12 @@ public class BaoCaoView extends JFrame {
 
         drawChartTitle(g2, "Top sản phẩm bán chạy", W, padT);
 
-        int n    = TOP_SP_TEN.length;
-        int maxV = Arrays.stream(TOP_SP_SL).max().getAsInt();
+        if (topSpTen == null || topSpTen.length == 0) {
+            drawNoData(g2, W, H, "Chưa có dữ liệu bán hàng"); return;
+        }
+        int n    = topSpTen.length;
+        int maxV = Arrays.stream(topSpSl).max().getAsInt();
+        if (maxV == 0) maxV = 1;
         int barH = (int)(chartH * 0.55 / n);
         int gap  = chartH / n;
 
@@ -313,16 +360,14 @@ public class BaoCaoView extends JFrame {
         Color[] barColors = { ACCENT, GREEN, CYAN, YELLOW, new Color(236,72,153), new Color(168,85,247) };
 
         for (int i = 0; i < n; i++) {
-            int barW = (int)(chartW * TOP_SP_SL[i] / (double) maxV);
+            int barW = (int)(chartW * topSpSl[i] / (double) maxV);
             int y    = padT + i * gap + (gap - barH) / 2;
 
-            // Tên sản phẩm
             g2.setColor(TEXT1);
             g2.setFont(new Font("Dialog", Font.BOLD, 12));
-            String ten = TOP_SP_TEN[i];
+            String ten = topSpTen[i];
             g2.drawString(ten, padL - g2.getFontMetrics().stringWidth(ten) - 12, y + barH/2 + 4);
 
-            // Cột ngang
             GradientPaint gp = new GradientPaint(
                     padL, y, barColors[i % barColors.length].brighter(),
                     padL + barW, y, barColors[i % barColors.length]
@@ -330,10 +375,9 @@ public class BaoCaoView extends JFrame {
             g2.setPaint(gp);
             g2.fill(new RoundRectangle2D.Float(padL, y, barW, barH, 6, 6));
 
-            // Số lượng cuối cột
             g2.setColor(TEXT1);
             g2.setFont(new Font("Dialog", Font.BOLD, 11));
-            g2.drawString(TOP_SP_SL[i] + " cái", padL + barW + 8, y + barH/2 + 4);
+            g2.drawString(topSpSl[i] + " cái", padL + barW + 8, y + barH/2 + 4);
         }
 
         // Trục Y
@@ -357,8 +401,12 @@ public class BaoCaoView extends JFrame {
 
         drawChartTitle(g2, "Tồn kho theo loại sản phẩm", W, padT);
 
-        int maxVal = Arrays.stream(TON_KHO_SO).max().getAsInt();
-        int n      = TON_KHO_LOAI.length;
+        if (tonKhoLoai == null || tonKhoLoai.length == 0) {
+            drawNoData(g2, W, H, "Chưa có dữ liệu tồn kho"); return;
+        }
+        int maxVal = Arrays.stream(tonKhoSo).max().getAsInt();
+        if (maxVal == 0) maxVal = 1;
+        int n = tonKhoLoai.length;
 
         // Grid ngang
         for (int i = 0; i <= 5; i++) {
@@ -386,33 +434,24 @@ public class BaoCaoView extends JFrame {
         int gap  = chartW / n;
 
         for (int i = 0; i < n; i++) {
-            int barH = (int)(chartH * TON_KHO_SO[i] / (double) maxVal);
+            int barH = (int)(chartH * tonKhoSo[i] / (double) maxVal);
             int x    = padL + i * gap + (gap - barW) / 2;
             int y    = padT + chartH - barH;
 
-            // Màu theo mức tồn kho
-            Color col = TON_KHO_SO[i] <= 20 ? RED
-                    : TON_KHO_SO[i] <= 30 ? YELLOW
-                    : GREEN;
-
-            GradientPaint gp = new GradientPaint(
-                    x, y, col.brighter(),
-                    x, y + barH, col.darker()
-            );
+            Color col = tonKhoSo[i] <= 20 ? RED : tonKhoSo[i] <= 30 ? YELLOW : GREEN;
+            GradientPaint gp = new GradientPaint(x, y, col.brighter(), x, y + barH, col.darker());
             g2.setPaint(gp);
             g2.fill(new RoundRectangle2D.Float(x, y, barW, barH, 6, 6));
 
-            // Số lượng trên đầu cột
             g2.setColor(TEXT1);
             g2.setFont(new Font("Dialog", Font.BOLD, 11));
-            String val = String.valueOf(TON_KHO_SO[i]);
+            String val = String.valueOf(tonKhoSo[i]);
             int vW = g2.getFontMetrics().stringWidth(val);
             g2.drawString(val, x + (barW - vW) / 2, y - 6);
 
-            // Tên loại dưới cột — xuống 2 dòng nếu dài
             g2.setColor(TEXT2);
             g2.setFont(new Font("Dialog", Font.BOLD, 11));
-            String ten = TON_KHO_LOAI[i];
+            String ten = tonKhoLoai[i];
             int tW = g2.getFontMetrics().stringWidth(ten);
             g2.drawString(ten, x + (barW - tW) / 2, padT + chartH + 20);
         }
@@ -431,6 +470,13 @@ public class BaoCaoView extends JFrame {
     }
 
     // ── Helpers vẽ ───────────────────────────────────────
+    private void drawNoData(Graphics2D g2, int W, int H, String msg) {
+        g2.setColor(TEXT2);
+        g2.setFont(new Font("Dialog", Font.BOLD, 14));
+        int w = g2.getFontMetrics().stringWidth(msg);
+        g2.drawString(msg, (W - w) / 2, H / 2);
+    }
+
     private void drawChartTitle(Graphics2D g2, String title, int W, int padT) {
         g2.setColor(TEXT1);
         g2.setFont(new Font("Dialog", Font.BOLD, 15));
@@ -453,10 +499,14 @@ public class BaoCaoView extends JFrame {
     }
 
     private void updateSummaryChips() {
-        double tongDT = Arrays.stream(DOANH_THU_THANG).sum();
-        lblTongDT.setText(String.format("Doanh thu: %.0fM đ", tongDT));
-        lblTongHD.setText("Hoá đơn: 248");
-        lblTBNgay.setText(String.format("TB/ngày: %.1fM đ", tongDT / 365));
+        int nam = Integer.parseInt((String) cbNam.getSelectedItem());
+        double tongDT = Arrays.stream(doanhThuThang).sum();
+        int soHD = 0;
+        try { soHD = hdBUS.countByNam(nam); } catch (Exception ignored) {}
+        lblTongDT.setText(String.format("Doanh thu: %,.0f đ", tongDT));
+        lblTongHD.setText("Hoá đơn: " + soHD);
+        double tbNgay = tongDT / 365.0;
+        lblTBNgay.setText(String.format("TB/ngày: %,.0f đ", tbNgay));
     }
 
     // ── UI Helpers ───────────────────────────────────────

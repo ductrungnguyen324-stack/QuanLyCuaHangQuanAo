@@ -60,11 +60,11 @@ public class SanPhamDAO {
     }
 
     public boolean update(SanPham sp) {
-        SanPham check = new SanPham();
-        if(check == null) throw new RuntimeException("San Pham chua ton tai");
+        SanPham check = getById(sp.getMasp());
+        if (check == null) throw new RuntimeException("Sản phẩm chưa tồn tại!");
 
         String sql = "UPDATE sanpham SET tenSP=?, loaiSP=?, giaban=?, thuonghieu=?, kichco=?," +
-                "mausac=?, trangthai=?, tonkho=?" +
+                "mausac=?, trangthai=?, tonkho=? " +
                 "WHERE maSP = ?";
 
         try(Connection conn = DBConnection.getConnection();
@@ -165,6 +165,27 @@ public class SanPhamDAO {
             throw new RuntimeException("Lỗi generateSP SanPham: " + e.getMessage());
         }
         return "SP001";
+    }
+
+    public Object[] getTonKhoTheoLoai() {
+        String sql = "SELECT loaiSP, SUM(tonkho) AS tong FROM sanpham GROUP BY loaiSP ORDER BY tong DESC";
+        List<String> loaiList = new ArrayList<>();
+        List<Integer> soList  = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                loaiList.add(rs.getString("loaiSP"));
+                soList.add(rs.getInt("tong"));
+            }
+            rs.close();
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi getTonKhoTheoLoai: " + e.getMessage());
+        }
+        return new Object[]{
+                loaiList.toArray(new String[0]),
+                soList.stream().mapToInt(i -> i).toArray()
+        };
     }
 
     public SanPham mapResultSetToEntity(ResultSet rs) throws SQLException {

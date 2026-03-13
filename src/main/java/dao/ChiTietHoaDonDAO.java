@@ -66,7 +66,7 @@ public class ChiTietHoaDonDAO {
             pstmt.setDouble(5, cthd.getSoluong());
             pstmt.setDouble(6, cthd.getDongia());
             pstmt.setDouble(7, cthd.getThanhtien());
-            pstmt.setString(8, cthd.getKhuyenmai().getMaKM());
+            pstmt.setObject(8, cthd.getKhuyenmai());
 
             return pstmt.executeUpdate() > 0;
         } catch(Exception e ) {
@@ -163,6 +163,30 @@ public class ChiTietHoaDonDAO {
             System.out.println(e.getMessage());
         }
         return "CTHD001";
+    }
+
+    public Object[] getTopSanPham(int limit) {
+        String sql = "SELECT tenSP, SUM(soluong) AS tong " +
+                "FROM chitiethoadon GROUP BY maSP, tenSP " +
+                "ORDER BY tong DESC LIMIT ?";
+        List<String> tenList = new ArrayList<>();
+        List<Integer> slList  = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, limit);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                tenList.add(rs.getString("tenSP"));
+                slList.add((int) rs.getDouble("tong"));
+            }
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return new Object[]{
+                tenList.toArray(new String[0]),
+                slList.stream().mapToInt(i -> i).toArray()
+        };
     }
 
     public ChiTietHoaDon mapResultSetToEntity(ResultSet rs) throws SQLException {

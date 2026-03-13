@@ -18,11 +18,6 @@ public class HoaDonBUS {
     // Thêm hóa đơn
     public boolean add(HoaDon hd) {
 
-        if (hd.getMaKH() == null || hd.getMaKH().isEmpty()) {
-            System.out.println("Mã khách hàng không được rỗng");
-            return false;
-        }
-
         if (hd.getMaNV() == null || hd.getMaNV().isEmpty()) {
             System.out.println("Mã nhân viên không được rỗng");
             return false;
@@ -52,6 +47,21 @@ public class HoaDonBUS {
 
         // xóa hóa đơn
         return hoaDonDAO.delete(maHD);
+    }
+
+    public double[] getDoanhThuTheoThang(int nam) {
+        return hoaDonDAO.getDoanhThuTheoThang(nam);
+    }
+    public double[] getDoanhThuTheoQuy(int nam) {
+        return hoaDonDAO.getDoanhThuTheoQuy(nam);
+    }
+
+    public Object[] getDoanhThuTheoNam() {
+        return hoaDonDAO.getDoanhThuTheoNam();
+    }
+
+    public int countByNam(int nam) {
+        return hoaDonDAO.countByNam(nam);
     }
 
     public boolean update(HoaDon hd) {
