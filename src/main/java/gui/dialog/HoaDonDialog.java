@@ -1,13 +1,16 @@
 package gui;
+import bus.ChiTietHoaDonBUS;
 import dao.ChiTietHoaDonDAO;
 import dao.HoaDonDAO;
 import gui.dialog.*;
 import bus.KhuyenMaiBUS;
 import bus.SanPhamBUS;
+import bus.KhachHangBUS;
 import entity.ChiTietHoaDon;
 import entity.HoaDon;
 import entity.KhuyenMai;
 import entity.SanPham;
+import entity.KhachHang;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -39,7 +42,9 @@ public class HoaDonDialog extends JDialog {
     private String maNV   = null; // nhận từ session
 
     // Thong tin HD
-    private JTextField     fMaHD, fMaKH;
+    private JTextField     fMaHD;
+    private JButton        btnKHChon;   // nút chọn KH, text đổi thành mã sau khi chọn
+    private KhachHang      selectedKH;  // object KH đang chọn
     private JButton        btnKMChon;   // nút chọn KM, text đổi thành mã sau khi chọn
     private KhuyenMai      selectedKM;  // object KM đang chọn
     private JLabel         lblKMInfo;   // chip info KM
@@ -53,7 +58,9 @@ public class HoaDonDialog extends JDialog {
     // model
     KhuyenMaiBUS kmbus = new KhuyenMaiBUS();
     SanPhamBUS   spbus = new SanPhamBUS();
+    KhachHangBUS khbus = new KhachHangBUS();
     HoaDonDAO hddao = new HoaDonDAO();
+    ChiTietHoaDonDAO cthddao = new ChiTietHoaDonDAO();
 
     public HoaDonDialog(Frame parent, String maHD, String maNV) {
         super(parent, true);
@@ -113,9 +120,10 @@ public class HoaDonDialog extends JDialog {
         JPanel p = new JPanel(new GridLayout(3, 4, 12, 10));
         p.setBackground(BG);
 
-        // Hàng 1: Mã HD | Mã KH
+        // Hàng 1: Mã HD | Mã KH (picker)
         fMaHD = addField(p, "Mã HD *", hddao.generateHD());
-        fMaKH = addField(p, "Mã KH *", "");
+        p.add(makeLabel("Mã KH"));
+        p.add(buildKHPicker());
 
         // Hàng 2: Mã KM (readonly + nút chọn) | Phương thức TT
         p.add(makeLabel("Mã KM"));
@@ -318,6 +326,196 @@ public class HoaDonDialog extends JDialog {
         tinhTong();
     }
 
+    // ── KH Picker ─────────────────────────────────────────────────────────────
+
+    /** 2 nút KH: "Chọn KH" + "✕", tỉ lệ 7:3 */
+    private JPanel buildKHPicker() {
+        JPanel wrap = new JPanel(new GridBagLayout());
+        wrap.setBackground(BG);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.gridy = 0; gbc.insets = new Insets(0, 0, 0, 6);
+
+        btnKHChon = makeButton("Chọn KH", new Color(16, 185, 129), Color.WHITE);
+        btnKHChon.setFont(new Font("Dialog", Font.BOLD, 11));
+        btnKHChon.addActionListener(e -> openKHPicker());
+        gbc.gridx = 0; gbc.weightx = 7;
+        wrap.add(btnKHChon, gbc);
+
+        JButton btnXoa = makeButton("✕", new Color(30, 40, 30), new Color(16, 185, 129));
+        btnXoa.setFont(new Font("Dialog", Font.BOLD, 11));
+        btnXoa.setToolTipText("Bỏ khách hàng");
+        btnXoa.addActionListener(e -> clearKH());
+        gbc.gridx = 1; gbc.weightx = 3; gbc.insets = new Insets(0, 0, 0, 0);
+        wrap.add(btnXoa, gbc);
+
+        return wrap;
+    }
+
+    private void openKHPicker() {
+        ArrayList<KhachHang> danhSach;
+        try {
+            danhSach = khbus.getAll();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Không thể tải danh sách khách hàng!\n" + ex.getMessage(),
+                    "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if (danhSach == null || danhSach.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "Không có khách hàng nào trong hệ thống.",
+                    "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        JDialog picker = new JDialog(this, "Chọn khách hàng", true);
+        picker.setSize(560, 420);
+        picker.setLocationRelativeTo(this);
+        picker.setResizable(false);
+
+        JPanel main = new JPanel(new BorderLayout());
+        main.setBackground(BG);
+
+        // Header
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(new Color(11, 16, 35));
+        header.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 1, 0, BORDER),
+                BorderFactory.createEmptyBorder(14, 18, 14, 18)
+        ));
+        JLabel title = new JLabel("Danh sách khách hàng");
+        title.setFont(new Font("Dialog", Font.BOLD, 15));
+        title.setForeground(TEXT1);
+        JLabel sub = new JLabel("Nhấp đúp hoặc chọn rồi bấm 'Áp dụng'  —  để trống = khách vãng lai");
+        sub.setFont(new Font("Dialog", Font.PLAIN, 11));
+        sub.setForeground(TEXT2);
+        header.add(title, BorderLayout.NORTH);
+        header.add(sub,   BorderLayout.SOUTH);
+
+        // Search bar
+        JTextField txtSearch = new JTextField();
+        txtSearch.setBackground(CARD2); txtSearch.setForeground(TEXT1);
+        txtSearch.setCaretColor(ACCENT);
+        txtSearch.setFont(new Font("Dialog", Font.PLAIN, 12));
+        txtSearch.setBorder(BorderFactory.createCompoundBorder(
+                new LineBorder(BORDER, 1, true),
+                BorderFactory.createEmptyBorder(6, 10, 6, 10)
+        ));
+        JPanel searchPanel = new JPanel(new BorderLayout(6, 0));
+        searchPanel.setBackground(BG);
+        searchPanel.setBorder(BorderFactory.createEmptyBorder(8, 16, 4, 16));
+        searchPanel.add(new JLabel("🔍 ") {{ setForeground(TEXT2); }}, BorderLayout.WEST);
+        searchPanel.add(txtSearch, BorderLayout.CENTER);
+
+        JPanel northWrap = new JPanel(new BorderLayout());
+        northWrap.setBackground(BG);
+        northWrap.add(header,      BorderLayout.NORTH);
+        northWrap.add(searchPanel, BorderLayout.SOUTH);
+        main.add(northWrap, BorderLayout.NORTH);
+
+        // Bảng KH
+        String[] cols = {"Mã KH", "Họ tên", "SĐT", "Ngày tham gia"};
+        DefaultTableModel khModel = new DefaultTableModel(cols, 0) {
+            @Override public boolean isCellEditable(int r, int c) { return false; }
+        };
+        for (KhachHang kh : danhSach) {
+            khModel.addRow(new Object[]{
+                    kh.getMaKH(),
+                    kh.getHoten(),
+                    kh.getSdt(),
+                    kh.getNgaythamgia() != null ? kh.getNgaythamgia().toString() : ""
+            });
+        }
+
+        JTable khTable = new JTable(khModel) {
+            @Override public Component prepareRenderer(TableCellRenderer r, int row, int col) {
+                Component c = super.prepareRenderer(r, row, col);
+                c.setBackground(isRowSelected(row)
+                        ? new Color(25, 35, 80) : row % 2 == 0 ? CARD : new Color(11, 16, 30));
+                c.setForeground(col == 0 ? GREEN : TEXT1);
+                return c;
+            }
+        };
+        khTable.setBackground(CARD); khTable.setForeground(TEXT1);
+        khTable.setGridColor(BORDER); khTable.setRowHeight(36);
+        khTable.setFont(new Font("Dialog", Font.PLAIN, 12));
+        khTable.setShowVerticalLines(false);
+        khTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        khTable.getTableHeader().setBackground(CARD2);
+        khTable.getTableHeader().setForeground(TEXT2);
+        khTable.getTableHeader().setFont(new Font("Dialog", Font.BOLD, 11));
+        int[] widths = {80, 180, 110, 120};
+        for (int i = 0; i < widths.length; i++)
+            khTable.getColumnModel().getColumn(i).setPreferredWidth(widths[i]);
+
+        // Live search
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(khModel);
+        khTable.setRowSorter(sorter);
+        txtSearch.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            void filter() {
+                String kw = txtSearch.getText().trim();
+                sorter.setRowFilter(kw.isEmpty() ? null : RowFilter.regexFilter("(?i)" + kw));
+            }
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { filter(); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { filter(); }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { filter(); }
+        });
+
+        JScrollPane scroll = new JScrollPane(khTable);
+        scroll.getViewport().setBackground(CARD);
+        scroll.setBorder(new LineBorder(BORDER, 1));
+        JPanel body = new JPanel(new BorderLayout());
+        body.setBackground(BG);
+        body.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
+        body.add(scroll, BorderLayout.CENTER);
+        main.add(body, BorderLayout.CENTER);
+
+        // Footer
+        JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+        footer.setBackground(BG);
+        footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER));
+        JButton btnHuy    = makeButton("Huỷ",      CARD,              TEXT2);
+        JButton btnApDung = makeButton("Áp dụng",  new Color(16,185,129), Color.WHITE);
+        btnHuy.addActionListener(e2 -> picker.dispose());
+        btnApDung.addActionListener(e2 -> {
+            int row = khTable.getSelectedRow();
+            if (row < 0) {
+                JOptionPane.showMessageDialog(picker, "Vui lòng chọn một khách hàng!",
+                        "Thông báo", JOptionPane.WARNING_MESSAGE); return;
+            }
+            applyKH(danhSach.get(khTable.convertRowIndexToModel(row)));
+            picker.dispose();
+        });
+        khTable.addMouseListener(new MouseAdapter() {
+            @Override public void mouseClicked(MouseEvent e2) {
+                if (e2.getClickCount() == 2 && khTable.getSelectedRow() >= 0) {
+                    applyKH(danhSach.get(khTable.convertRowIndexToModel(khTable.getSelectedRow())));
+                    picker.dispose();
+                }
+            }
+        });
+        footer.add(btnHuy); footer.add(btnApDung);
+        main.add(footer, BorderLayout.SOUTH);
+
+        picker.setContentPane(main);
+        picker.setVisible(true);
+    }
+
+    private void applyKH(KhachHang kh) {
+        selectedKH = kh;
+        btnKHChon.setText(kh.getMaKH() + " — " + kh.getHoten());
+        btnKHChon.setBackground(GREEN);
+        btnKHChon.setForeground(Color.WHITE);
+    }
+
+    private void clearKH() {
+        selectedKH = null;
+        btnKHChon.setText("Chọn KH");
+        btnKHChon.setBackground(GREEN);
+        btnKHChon.setForeground(Color.WHITE);
+    }
+
     /** Mở popup danh sách sản phẩm để chọn thêm vào hoá đơn */
     private void openSPPicker() {
         List<SanPham> danhSach;
@@ -487,7 +685,9 @@ public class HoaDonDialog extends JDialog {
                 }
             }
             // SP chưa có → thêm dòng mới
+            String macthd = "CTHD" + String.format("%03d",Integer.parseInt(cthddao.generate().substring(4)) + ctModel.getRowCount());
             ctModel.addRow(new Object[]{
+                    macthd,
                     sp.getMasp(),
                     sp.getTensp(),
                     1,
@@ -539,10 +739,10 @@ public class HoaDonDialog extends JDialog {
         wrap.add(toolbar, BorderLayout.NORTH);
 
         // Bang CTHD
-        String[] cols = {"Mã SP", "Tên SP", "Số lượng", "Đơn giá", "Thành tiền"};
+        String[] cols = {"Mã CTHD","Mã SP", "Tên SP", "Số lượng", "Đơn giá", "Thành tiền"};
         ctModel = new DefaultTableModel(cols, 0) {
             @Override public boolean isCellEditable(int r, int c) {
-                return c == 2; // chi cho sua so luong
+                return c == 3; // chi cho sua so luong
             }
         };
 
@@ -551,7 +751,17 @@ public class HoaDonDialog extends JDialog {
                 Component c = super.prepareRenderer(r, row, col);
                 c.setBackground(isRowSelected(row)
                         ? new Color(25, 35, 80) : new Color(14, 20, 40));
-                c.setForeground(TEXT1);
+                // Format cột Đơn giá (4) và Thành tiền (5)
+                if (c instanceof JLabel lbl && (col == 4 || col == 5)) {
+                    try {
+                        double val = Double.parseDouble(getValueAt(row, col).toString());
+                        lbl.setText(String.format("%,.0f VNĐ", val));
+                        lbl.setHorizontalAlignment(SwingConstants.RIGHT);
+                        lbl.setForeground(col == 5 ? GREEN : YELLOW);
+                    } catch (Exception ignored) {}
+                } else {
+                    c.setForeground(TEXT1);
+                }
                 return c;
             }
         };
@@ -567,7 +777,7 @@ public class HoaDonDialog extends JDialog {
 
         // Cap nhat thanh tien khi sua so luong
         ctModel.addTableModelListener(e -> {
-            if (e.getColumn() == 2) tinhTong();
+            if (e.getColumn() == 3) tinhTong();
         });
 
         JScrollPane scroll = new JScrollPane(ctTable);
@@ -591,9 +801,9 @@ public class HoaDonDialog extends JDialog {
         lblTongTien  = makeTongLabel("Tổng tiền:",  "0 VNĐ");
         lblGiamGia   = makeTongLabel("Giảm giá:",   "0 VNĐ");
         lblThanhToan = makeTongLabel("Thanh toán:", "0 VNĐ");
-        tong.add(lblTongTien);
-        tong.add(lblGiamGia);
-        tong.add(lblThanhToan);
+        tong.add((JPanel) lblTongTien.getClientProperty("panel"));
+        tong.add((JPanel) lblGiamGia.getClientProperty("panel"));
+        tong.add((JPanel) lblThanhToan.getClientProperty("panel"));
 
         // Hàng 2: lblStatus riêng, căn trái, có margin trên
         lblStatus = new JLabel(" ");
@@ -623,29 +833,31 @@ public class HoaDonDialog extends JDialog {
     }
 
     private JLabel makeTongLabel(String title, String value) {
-        JPanel p = new JPanel(new BorderLayout(4, 0));
+        JPanel p = new JPanel(new BorderLayout(0, 2));
         p.setOpaque(false);
         JLabel t = new JLabel(title);
         t.setFont(new Font("Dialog", Font.PLAIN, 11));
         t.setForeground(TEXT2);
         JLabel v = new JLabel(value);
-        v.setFont(new Font("Dialog", Font.BOLD, 14));
+        v.setFont(new Font("Dialog", Font.BOLD, 15));
         v.setForeground(TEXT1);
-        // Tra ve label value de update sau
-        v.putClientProperty("title", t);
+        p.add(t, BorderLayout.NORTH);
+        p.add(v, BorderLayout.CENTER);
+        // Trả về label value để update sau, đính kèm panel
+        v.putClientProperty("panel", p);
         return v;
     }
 
     private void tinhTong() {
         double tong = 0;
         for (int i = 0; i < ctModel.getRowCount(); i++) {
-            Object sl = ctModel.getValueAt(i, 2);
-            Object dg = ctModel.getValueAt(i, 3);
+            Object sl = ctModel.getValueAt(i, 3);
+            Object dg = ctModel.getValueAt(i, 4);
             try {
                 double soLuong = Double.parseDouble(sl.toString());
                 double donGia  = Double.parseDouble(dg.toString());
                 double tt = soLuong * donGia;
-                ctModel.setValueAt(tt, i, 4);
+                ctModel.setValueAt(tt, i, 5);
                 tong += tt;
             } catch (Exception ignored) {}
         }
@@ -660,16 +872,13 @@ public class HoaDonDialog extends JDialog {
 
     private void save() {
         if (fMaHD.getText().trim().isEmpty()) {
-            lblStatus.setText("Mã HD khong duoc trong!"); return;
-        }
-        if (fMaKH.getText().trim().isEmpty()) {
-            lblStatus.setText("Mã KH không được trống!"); return;
+            lblStatus.setText("Mã HD không được trống!"); return;
         }
         if (ctModel.getRowCount() == 0) {
             lblStatus.setText("Chưa có sản phẩm nào!"); return;
         }
-        // Controller sẽ gọi buildHoaDon() + buildChiTiet() + bus.them()
         ketQua = fMaHD.getText().trim();
+
         dispose();
     }
 
@@ -712,7 +921,7 @@ public class HoaDonDialog extends JDialog {
     }
     public String getKetQua() { return ketQua; }
     public String getMaHD()      { return fMaHD.getText().trim(); }
-    public String getMaKH()      { return fMaKH.getText().trim(); }
+    public String getMaKH()      { return selectedKH != null ? selectedKH.getMaKH() : null; }
     public int    getSoLuongSP() { return ctModel.getRowCount(); }
     public double getTongTien() {
         double tong = 0;
@@ -726,7 +935,7 @@ public class HoaDonDialog extends JDialog {
     public HoaDon buildHoaDon() {
         HoaDon hd = new HoaDon();
         hd.setMaHD(fMaHD.getText().trim());
-        hd.setMaKH(fMaKH.getText().trim());
+        hd.setMaKH(selectedKH != null ? selectedKH.getMaKH() : null);
         // Lấy maNV từ session — truyền vào Dialog qua constructor
         hd.setMaNV(maNV != null ? maNV : "NV001");
         hd.setKhuyenmai(selectedKM != null ? selectedKM.getMaKM() : null);
@@ -751,19 +960,17 @@ public class HoaDonDialog extends JDialog {
 
 
         ChiTietHoaDonDAO cthdDAO = new ChiTietHoaDonDAO();
-        String maDau = cthdDAO.generate();
-        int soThu    = Integer.parseInt(maDau.substring(4));
 
         for (int i = 0; i < ctModel.getRowCount(); i++) {
             ChiTietHoaDon ct = new ChiTietHoaDon();
-            ct.setMaCTHD(String.format("CTHD%03d", soThu + i));
+            ct.setMaCTHD(ctModel.getValueAt(i, 0).toString());
             ct.setMaHD(maHD);
-            ct.setMaSP(ctModel.getValueAt(i, 0).toString());
-            ct.setTenSP(ctModel.getValueAt(i, 1).toString());
+            ct.setMaSP(ctModel.getValueAt(i, 1).toString());
+            ct.setTenSP(ctModel.getValueAt(i, 2).toString());
             try {
-                ct.setSoluong(Double.parseDouble(ctModel.getValueAt(i, 2).toString()));
-                ct.setDongia(Double.parseDouble(ctModel.getValueAt(i, 3).toString()));
-                ct.setThanhtien(Double.parseDouble(ctModel.getValueAt(i, 4).toString()));
+                ct.setSoluong(Double.parseDouble(ctModel.getValueAt(i, 3).toString()));
+                ct.setDongia(Double.parseDouble(ctModel.getValueAt(i, 4).toString()));
+                ct.setThanhtien(Double.parseDouble(ctModel.getValueAt(i, 5).toString()));
             } catch (Exception ignored) {}
             ct.setKhuyenmai(null);
             list.add(ct);

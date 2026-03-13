@@ -2,7 +2,8 @@ package gui.controller;
 
 import bus.NhanVienBUS;
 import entity.NhanVien;
-import gui.dialog.NhanVienFormDialog;
+import gui.dialog.NhanVienDialog;
+
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -160,11 +161,11 @@ public class NhanVienController {
     // =========================================================
 
     /**
-     * Mo NhanVienFormDialog de them nhan vien moi.
+     * Mo NhanVienDialog de them nhan vien moi.
      * Neu nguoi dung xac nhan → goi bus.add() → reload.
      */
     public void them() {
-        NhanVienFormDialog dlg = new NhanVienFormDialog(view.getParentFrame(), null);
+        NhanVienDialog dlg = new NhanVienDialog(view.getParentFrame(), null);
         dlg.setVisible(true);
 
         NhanVien nv = dlg.getKetQua();
@@ -186,7 +187,7 @@ public class NhanVienController {
             return;
         }
 
-        NhanVienFormDialog dlg = new NhanVienFormDialog(view.getParentFrame(), nvHienTai);
+        NhanVienDialog dlg = new NhanVienDialog(view.getParentFrame(), nvHienTai);
         dlg.setVisible(true);
 
         NhanVien nvCapNhat = dlg.getKetQua();

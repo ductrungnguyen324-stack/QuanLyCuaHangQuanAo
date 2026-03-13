@@ -24,7 +24,7 @@ public class KhachHang
     }
 
     public void setMaKH(String makh) {
-        this.maKH = maKH;
+        this.maKH = makh;
     }
 
     public String getHoten() {
@@ -51,6 +51,3 @@ public class KhachHang
         this.ngaythamgia = ngaythamgia;
     }
 }
-
-
-

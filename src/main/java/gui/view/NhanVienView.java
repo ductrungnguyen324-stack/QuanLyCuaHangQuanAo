@@ -1,7 +1,6 @@
 package gui.view;
 
 import gui.controller.NhanVienController;
-import gui.dialog.NhanVienFormDialog;
 
 import javax.swing.*;
 import javax.swing.border.*;
@@ -9,7 +8,7 @@ import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class NhanVienPanel extends JPanel implements NhanVienController.IView {
+public class NhanVienView extends JPanel implements NhanVienController.IView {
 
     private static final Color BG      = new Color(7,   10,  20);
     private static final Color SURFACE = new Color(11,  15,  30);
@@ -56,7 +55,7 @@ public class NhanVienPanel extends JPanel implements NhanVienController.IView {
             "Thao t\u00e1c"
     };
 
-    public NhanVienPanel() {
+    public NhanVienView() {
         setBackground(BG);
         setLayout(new BorderLayout(0, 0));
         this.controller = new NhanVienController(this);
@@ -444,7 +443,7 @@ public class NhanVienPanel extends JPanel implements NhanVienController.IView {
             JFrame f = new JFrame("Qu\u1ea3n l\u00fd Nh\u00e2n vi\u00ean");
             f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             f.setSize(1150, 680); f.setLocationRelativeTo(null);
-            f.setContentPane(new NhanVienPanel());
+            f.setContentPane(new NhanVienView());
             f.setVisible(true);
         });
     }
