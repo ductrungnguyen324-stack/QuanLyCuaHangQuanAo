@@ -1,43 +1,109 @@
+package dao;
 
-
-package DAO;
-
-import entity.PhieuNhapHang;
+import entity.PhieuNhapHangDTO;
 import java.sql.*;
 import java.util.ArrayList;
 
 public class PhieuNhapHangDAO {
-    public ArrayList<PhieuNhapHang> getAll() {
-        ArrayList<PhieuNhapHang> ds = new ArrayList<>();
-        String sql = "SELECT * FROM PhieuNhapHang";
-        try (Connection con = MyConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+
+    public ArrayList<PhieuNhapHangDTO> getAll() {
+        ArrayList<PhieuNhapHangDTO> list = new ArrayList<>();
+        String sql = "SELECT * FROM phieunhap ORDER BY ngaytao DESC";
+
+        try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
             while (rs.next()) {
-                PhieuNhapHang pn = new PhieuNhapHang();
+                PhieuNhapHangDTO pn = new PhieuNhapHangDTO();
                 pn.setMaPN(rs.getString("maPN"));
                 pn.setMaNV(rs.getString("maNV"));
-                pn.setNhacungcap(rs.getString("nhacungcap"));
-                pn.setNgaytao(rs.getTimestamp("ngaytao").toLocalDateTime());
-                pn.setThanhtien(rs.getDouble("thanhtien"));
-                pn.setTrangthai(rs.getString("trangthai"));
-                ds.add(pn);
+                pn.setNhaCungCap(rs.getString("nhacungcap"));
+                pn.setNgayTao(rs.getTimestamp("ngaytao"));
+                pn.setTongTien(rs.getDouble("thanhtien"));
+                pn.setTrangThai(rs.getString("trangthai"));
+
+                list.add(pn);
             }
-        } catch (SQLException e) { e.printStackTrace(); }
-        return ds;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 
-    public boolean insert(PhieuNhapHang pn) {
-        String sql = "INSERT INTO PhieuNhapHang VALUES (?, ?, ?, ?, ?, ?)";
-        try (Connection con = MyConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+    public boolean insert(PhieuNhapHangDTO pn, Connection conn) {
+        String sql = "INSERT INTO phieunhap (maPN, maNV, nhacungcap, ngaytao, thanhtien, trangthai) VALUES (?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, pn.getMaPN());
             ps.setString(2, pn.getMaNV());
-            ps.setString(3, pn.getNhacungcap());
-            ps.setTimestamp(4, Timestamp.valueOf(pn.getNgaytao()));
-            ps.setDouble(5, pn.getThanhtien());
-            ps.setString(6, pn.getTrangthai());
+            ps.setString(3, pn.getNhaCungCap());
+            ps.setTimestamp(4, new java.sql.Timestamp(pn.getNgayTao().getTime()));
+            ps.setDouble(5, pn.getTongTien());
+            ps.setString(6, pn.getTrangThai());
+
             return ps.executeUpdate() > 0;
-        } catch (SQLException e) { e.printStackTrace(); return false; }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean updateTrangThai(String maPN, String trangThai) {
+        String sql = "UPDATE phieunhap SET trangthai = ? WHERE maPN = ?";
+        try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, trangThai);
+            ps.setString(2, maPN);
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean delete(String maPN, Connection conn) {
+        String sql = "DELETE FROM phieunhaphang WHERE maPN = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, maPN);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public PhieuNhapHangDTO getPhieuNhapById(String maPN) {
+        PhieuNhapHangDTO pn = null;
+        String sql = "SELECT * FROM phieunhap WHERE maPN = ?";
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, maPN);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                pn = new PhieuNhapHangDTO(
+                        rs.getString("maPN"),
+                        rs.getString("maNV"),
+                        rs.getString("nhaCungCap"),
+                        rs.getTimestamp("ngayTao"),
+                        rs.getDouble("thanhTien"),
+                        rs.getString("trangThai")
+                );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return pn;
+    }
+
+    public boolean update(PhieuNhapHangDTO pn, Connection conn) throws SQLException {
+        String sql = "UPDATE phieunhap SET maNV = ?, nhacungcap = ?, thanhtien = ?, trangthai = ? WHERE maPN = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, pn.getMaNV());
+            ps.setString(2, pn.getNhaCungCap());
+            ps.setDouble(3, pn.getTongTien());
+            ps.setString(4, pn.getTrangThai());
+            ps.setString(5, pn.getMaPN());
+
+            return ps.executeUpdate() > 0;
+        }
     }
 }

@@ -182,4 +182,12 @@ public class SanPhamDAO {
 
         return sp;
     }
+
+    public static void main(String[] args) {
+        SanPhamDAO sp = new SanPhamDAO();
+        List<SanPham> list = sp.getALL();
+        for(SanPham sps : list) {
+            System.out.println(sps.getTensp());
+        }
+    }
 }

@@ -27,12 +27,34 @@ public class ChiTietHoaDonDAO {
         }
         return list;
     }
+    public List<ChiTietHoaDon> getAllByMaHD(String maHD) {
+        List<ChiTietHoaDon> list = new ArrayList<>();
+
+        String sql = "SELECT * from ChiTietHoaDon where maHD = ?";
+
+        try(Connection conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, maHD);
+
+            try(ResultSet rs = pstmt.executeQuery()) {
+                while(rs.next()) {
+                    ChiTietHoaDon cthd = mapResultSetToEntity(rs);
+                    list.add(cthd);
+                }
+                rs.close();
+            }
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 
     public boolean insert(ChiTietHoaDon cthd) {
         String sql = "INSERT INTO ChiTietHoaDon VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         String maCTHD = generate();
 
-        cthd.setMaHD(maCTHD);
+        cthd.setMaCTHD(maCTHD);
 
         try(Connection conn = DBConnection.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -82,6 +104,22 @@ public class ChiTietHoaDonDAO {
             return pstmt.executeUpdate() > 0;
 
         }catch(Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean delete(String maHD) {
+        String sql = "DELETE FROM ChiTietHoaDon WHERE maHD = ?";
+
+        try(Connection conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, maHD);
+
+            return pstmt.executeUpdate() > 0;
+
+        } catch(Exception e) {
             e.printStackTrace();
         }
         return false;

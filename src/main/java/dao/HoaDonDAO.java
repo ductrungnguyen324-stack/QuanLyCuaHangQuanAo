@@ -122,6 +122,21 @@ public class HoaDonDAO {
 
         return null;
     }
+    public boolean delete(String maHD) {
+        String sql = "DELETE FROM HoaDon WHERE maHD = ?";
+
+        try(Connection conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, maHD);
+
+            return pstmt.executeUpdate() > 0;
+
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
     public HoaDon mapResultSetToEntity(ResultSet rs) throws SQLException {
         HoaDon hd = new HoaDon();
