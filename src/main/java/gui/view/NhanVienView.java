@@ -38,6 +38,7 @@ public class NhanVienView extends JFrame implements NhanVienController.IView {
     };
 
     private final NhanVienController controller;
+    private boolean chiXem = false; // phân quyền
     private JTable            table;
     private DefaultTableModel tableModel;
     private JTextField        searchField;
@@ -56,9 +57,14 @@ public class NhanVienView extends JFrame implements NhanVienController.IView {
     };
 
     public NhanVienView() {
+        this("Nhan vien"); // mặc định
+    }
+
+    public NhanVienView(String chucvu) {
         setBackground(BG);
         setLayout(new BorderLayout(0, 0));
-        this.controller = new NhanVienController(this);
+        this.controller = new NhanVienController(this, chucvu);
+        this.chiXem = !("Quan ly".equals(chucvu));
 
         JPanel top = new JPanel(new BorderLayout());
         top.setOpaque(false);
@@ -69,6 +75,9 @@ public class NhanVienView extends JFrame implements NhanVienController.IView {
         add(buildTable(), BorderLayout.CENTER);
         controller.loadDanhSach();
     }
+
+    public void setChiXem(boolean chiXem) { this.chiXem = chiXem; table.repaint(); }
+    public boolean isChiXem() { return chiXem; }
 
     @Override public DefaultTableModel getTableModel()  { return tableModel; }
     @Override public Frame  getParentFrame()            { return (Frame) SwingUtilities.getWindowAncestor(this); }
@@ -112,6 +121,7 @@ public class NhanVienView extends JFrame implements NhanVienController.IView {
         FlatBtn btnThem = new FlatBtn(
                 "+ Th\u00eam nh\u00e2n vi\u00ean", ACCENT, Color.WHITE, 170, 36);
         btnThem.addClickListener(() -> controller.them());
+        if (chiXem) btnThem.setVisible(false);
 
         h.add(left,    BorderLayout.WEST);
         h.add(btnThem, BorderLayout.EAST);
@@ -241,12 +251,16 @@ public class NhanVienView extends JFrame implements NhanVienController.IView {
             l.setForeground("Ho\u1ea1t \u0111\u1ed9ng".equals(s) ? GREEN : RED);
             return l;
         });
-        // col7 Thao tac
+        // col7 Thao tac — ẩn nút nếu chiXem=true
         table.getColumnModel().getColumn(7).setCellRenderer((t,val,sel,foc,row,col) -> {
             JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER,4,8));
             p.setBackground(sel?ROW_SEL:row%2==0?SURFACE:ROW_ODD);
-            p.add(tag("S\u1eeda", ACCENT));
-            p.add(tag("X\u00f3a", RED));
+            if (!chiXem) {
+                p.add(tag("Sửa", ACCENT));
+                p.add(tag("Xóa", RED));
+            } else {
+                p.add(tag("Chỉ xem", TEXT2));
+            }
             return p;
         });
 
@@ -257,10 +271,11 @@ public class NhanVienView extends JFrame implements NhanVienController.IView {
                 if (row < 0) return;
                 String maNV = (String) tableModel.getValueAt(table.convertRowIndexToModel(row), 0);
                 if (col == 7) {
+                    if (chiXem) return; // chặn thao tác
                     Rectangle rect = table.getCellRect(row, col, true);
                     if (e.getX() - rect.x < rect.width/2) controller.sua(maNV);
                     else                                   controller.xoa(maNV);
-                } else if (e.getClickCount() == 2) controller.sua(maNV);
+                } else if (e.getClickCount() == 2 && !chiXem) controller.sua(maNV);
             }
         });
 

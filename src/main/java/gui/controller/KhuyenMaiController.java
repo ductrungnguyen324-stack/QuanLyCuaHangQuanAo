@@ -16,12 +16,33 @@ public class KhuyenMaiController {
     private static final DateTimeFormatter FMT =
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-    private final KhuyenMaiView    view;
-    private final KhuyenMaiBUS     bus;
+    private final KhuyenMaiView view;
+    private final KhuyenMaiBUS  bus;
 
+    // ── THÊM MỚI: lưu chức vụ ──
+    private String chucvu;
+
+    public KhuyenMaiController(KhuyenMaiView view, String chucvu) {
+        this.view   = view;
+        this.bus    = new KhuyenMaiBUS();
+        this.chucvu = chucvu;
+    }
+
+    // Constructor cũ (tương thích)
     public KhuyenMaiController(KhuyenMaiView view) {
-        this.view = view;
-        this.bus  = new KhuyenMaiBUS();
+        this(view, "Quan ly");
+    }
+
+    // ── THÊM MỚI: kiểm tra quyền ──
+    // Chỉ Quản lý mới được thêm/sửa/xoá khuyến mãi
+    private boolean coQuyen() {
+        return "Quan ly".equals(chucvu);
+    }
+
+    private void showNoQuyen() {
+        JOptionPane.showMessageDialog(view,
+                "Bạn không có quyền thực hiện thao tác này!",
+                "Không có quyền", JOptionPane.WARNING_MESSAGE);
     }
 
     // ── Tải toàn bộ danh sách ─────────────────────────────
@@ -37,19 +58,16 @@ public class KhuyenMaiController {
     // ── Lọc theo loại và trạng thái ─────────────────────
     public void locDuLieu(String keyword, String loaiKM, String trangThai) {
         try {
-            // Lấy base list: tìm kiếm hoặc getAll
             List<KhuyenMai> list = (keyword == null || keyword.trim().isEmpty())
                     ? bus.getAll()
                     : bus.searchKhuyenMai(keyword.trim());
 
-            // Lọc loại
             if (!"Tất cả loại".equals(loaiKM)) {
                 list = list.stream()
                         .filter(km -> loaiKM.equals(km.getLoaiKM()))
                         .collect(java.util.stream.Collectors.toList());
             }
 
-            // Lọc trạng thái
             if ("Còn hiệu lực".equals(trangThai)) {
                 list = list.stream()
                         .filter(KhuyenMai::isKhaDung)
@@ -68,6 +86,8 @@ public class KhuyenMaiController {
 
     // ── Thêm mới ─────────────────────────────────────────
     public void moDialogThem() {
+        if (!coQuyen()) { showNoQuyen(); return; }
+
         KhuyenMaiDialog dialog = new KhuyenMaiDialog(view, null);
         dialog.setVisible(true);
 
@@ -85,6 +105,8 @@ public class KhuyenMaiController {
 
     // ── Sửa ──────────────────────────────────────────────
     public void suaKhuyenMai(String maKM) {
+        if (!coQuyen()) { showNoQuyen(); return; }
+
         KhuyenMai km = bus.getByID(maKM);
         if (km == null) { showError("Không tìm thấy khuyến mãi: " + maKM); return; }
 
@@ -103,7 +125,7 @@ public class KhuyenMaiController {
         }
     }
 
-    // ── Xem chi tiết ─────────────────────────────────────
+    // ── Xem chi tiết (tất cả đều xem được) ──────────────
     public void xemChiTiet(String maKM) {
         KhuyenMai km = bus.getByID(maKM);
         if (km == null) { showError("Không tìm thấy khuyến mãi: " + maKM); return; }
@@ -143,6 +165,8 @@ public class KhuyenMaiController {
 
     // ── Xóa ──────────────────────────────────────────────
     public void xoaKhuyenMai(String maKM) {
+        if (!coQuyen()) { showNoQuyen(); return; }
+
         int confirm = JOptionPane.showConfirmDialog(view,
                 "Bạn có chắc muốn xóa khuyến mãi: " + maKM + "?",
                 "Xác nhận xóa", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
@@ -181,15 +205,12 @@ public class KhuyenMaiController {
                     km.getSoluong(),
                     km.getDasudung(),
                     km.isKhaDung() ? "Còn hiệu lực" : "Hết hạn",
-                    ""   // cột thao tác (renderer tự vẽ)
+                    ""
             });
         }
-
-        // Stats luôn tính từ toàn bộ DB
         refreshStats();
     }
 
-    // ── Tính stats từ toàn bộ DB ───────────────────
     private void refreshStats() {
         try {
             List<KhuyenMai> all = bus.getAll();
@@ -202,7 +223,6 @@ public class KhuyenMaiController {
         }
     }
 
-    // ── Tiện ích ─────────────────────────────────────────
     private void showError(String msg) {
         JOptionPane.showMessageDialog(view, msg, "Lỗi", JOptionPane.ERROR_MESSAGE);
     }

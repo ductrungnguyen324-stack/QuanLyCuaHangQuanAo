@@ -34,6 +34,9 @@ public class SanPhamView extends JFrame {
     private JLabel            lblTongSP, lblConHang, lblSapHet;
     private JButton           btnThem, btnReset;
 
+    // ── Phân quyền ──────────────────────────────────────
+    private boolean chiXem = false; // true = chỉ xem, ẩn nút Sửa/Ngừng bán
+
     private static final String[] COLUMNS = {
             "Mã SP",        // col 0
             "Tên sản phẩm", // col 1
@@ -61,7 +64,7 @@ public class SanPhamView extends JFrame {
         add(top,          BorderLayout.NORTH);
         add(buildTable(), BorderLayout.CENTER);
 
-        new SanPhamController(this);
+        // Controller được khởi tạo từ MainFrame (kèm chucvu)
     }
 
     // ── Header ────────────────────────────────────────────────────────────────
@@ -193,13 +196,17 @@ public class SanPhamView extends JFrame {
                 }
         );
 
-        // Renderer Thao tác (col 9)
+        // Renderer Thao tác (col 9) — ẩn nút nếu chiXem=true
         table.getColumnModel().getColumn(9).setCellRenderer(
                 (t, val, sel, foc, row, col) -> {
                     JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 8));
                     p.setBackground(sel ? ROW_SEL : row % 2 == 0 ? SURFACE : ROW_ODD);
-                    p.add(makeTag("Sửa",       CYAN));
-                    p.add(makeTag("Ngừng bán", RED));
+                    if (!chiXem) {
+                        p.add(makeTag("Sửa",       CYAN));
+                        p.add(makeTag("Ngừng bán", RED));
+                    } else {
+                        p.add(makeTag("Chỉ xem", TEXT2));
+                    }
                     return p;
                 }
         );
@@ -250,6 +257,16 @@ public class SanPhamView extends JFrame {
 
     public void showSuccess(String msg) {
         JOptionPane.showMessageDialog(this, msg, "Thành công", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    // ── Phân quyền: gọi từ Controller sau khi khởi tạo ──────────────────────
+    public void setChiXem(boolean chiXem) {
+        this.chiXem = chiXem;
+        table.repaint();
+    }
+
+    public boolean isChiXem() {
+        return chiXem;
     }
 
     // ── Getters cho Controller ────────────────────────────────────────────────

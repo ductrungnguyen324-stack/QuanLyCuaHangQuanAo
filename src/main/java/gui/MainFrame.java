@@ -1,6 +1,7 @@
 package gui;
 
-import entity.KhachHang;
+import entity.NhanVien;
+import gui.controller.*;
 import gui.view.*;
 
 import javax.swing.*;
@@ -20,19 +21,26 @@ public class MainFrame extends JFrame {
     private static final Color SIDEBAR  = new Color(9, 13, 26);
     private static final Color SEL      = new Color(25, 35, 80);
 
-    private JPanel      contentPanel;   // vùng nội dung bên phải
+    private JPanel      contentPanel;
     private CardLayout  cardLayout;
-    private String      maNV = "NV001"; // sau login sẽ được set
+
+    private String maNV;
+    private String chucvu; // ← THÊM MỚI
 
     // Sidebar buttons
     private JButton btnHoaDon;
     private JButton btnKhuyenMai;
     private JButton btnKhachHang;
     private JButton btnNhanVien;
-    // Thêm các module khác sau này ở đây
+    private JButton btnSanPham;
+    private JButton btnPhieuNhap;
+    private JButton btnBaoCao;
 
-    public MainFrame(String maNV) {
-        this.maNV = maNV;
+    // ── THAY ĐỔI: nhận NhanVien thay vì String maNV ──
+    public MainFrame(NhanVien nv) {
+        this.maNV   = nv.getManv();
+        this.chucvu = nv.getChucvu();
+
         setTitle("Quản lý bán quần áo");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -43,11 +51,7 @@ public class MainFrame extends JFrame {
         add(buildSidebar(),  BorderLayout.WEST);
         add(buildContent(),  BorderLayout.CENTER);
 
-        // Mở mặc định HoaDonView
-        showCard("HOADON");
-        showCard("KHUYENMAI");
         showCard("NHANVIEN");
-
         setVisible(true);
     }
 
@@ -58,7 +62,7 @@ public class MainFrame extends JFrame {
         side.setPreferredSize(new Dimension(210, 0));
         side.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, BORDER));
 
-        // Logo / tên app
+        // Logo
         JPanel logo = new JPanel(new BorderLayout());
         logo.setBackground(SIDEBAR);
         logo.setBorder(BorderFactory.createCompoundBorder(
@@ -70,29 +74,31 @@ public class MainFrame extends JFrame {
         appName.setForeground(ACCENT);
         logo.add(appName, BorderLayout.CENTER);
 
-
         // Menu items
         JPanel menu = new JPanel();
         menu.setLayout(new BoxLayout(menu, BoxLayout.Y_AXIS));
         menu.setBackground(SIDEBAR);
         menu.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 
-        btnHoaDon = makeSideBtn("Hoá đơn", "HOADON");
-        btnKhuyenMai = makeSideBtn("Khuyến Mãi", "KHUYENMAI");
-        btnKhachHang = makeSideBtn("Khách Hàng", "KHACHHANG");
-        btnNhanVien = makeSideBtn("Nhân viên", "NHANVIEN");
-        JButton btnSanPham = makeSideBtn("Sản phẩm", "SANPHAM");
+        btnHoaDon    = makeSideBtn("Hoá đơn",     "HOADON");
+        btnKhuyenMai = makeSideBtn("Khuyến Mãi",  "KHUYENMAI");
+        btnKhachHang = makeSideBtn("Khách Hàng",  "KHACHHANG");
+        btnNhanVien  = makeSideBtn("Nhân viên",   "NHANVIEN");
+        btnSanPham   = makeSideBtn("Sản phẩm",    "SANPHAM");
+        btnPhieuNhap = makeSideBtn("Phiếu nhập",  "PHIEUNHAP");
+        btnBaoCao = makeSideBtn("Báo cáo", "BAOCAO");
 
-        menu.add(btnHoaDon);
-        menu.add(btnKhuyenMai);
-        menu.add(btnKhachHang);
         menu.add(btnNhanVien);
         menu.add(btnSanPham);
+        menu.add(btnKhachHang);
+        menu.add(btnHoaDon);
+        menu.add(btnKhuyenMai);
+        menu.add(btnPhieuNhap);
+        menu.add(btnBaoCao);
 
-        // Chọn mặc định
-        setSelected(btnHoaDon);
+        setSelected(btnNhanVien);
 
-        // Footer sidebar: thông tin nhân viên + logout
+        // Footer: tên NV + chức vụ + logout
         JPanel footer = new JPanel(new BorderLayout());
         footer.setBackground(SIDEBAR);
         footer.setBorder(BorderFactory.createCompoundBorder(
@@ -100,7 +106,7 @@ public class MainFrame extends JFrame {
                 BorderFactory.createEmptyBorder(12, 16, 12, 16)
         ));
 
-        JLabel lblNV = new JLabel("NV: " + maNV);
+        JLabel lblNV = new JLabel("NV: " + maNV + "  [" + chucvu + "]");
         lblNV.setFont(new Font("Sans serif", Font.BOLD, 12));
         lblNV.setForeground(TEXT1);
 
@@ -152,7 +158,6 @@ public class MainFrame extends JFrame {
         });
 
         b.addActionListener(e -> {
-            // Bỏ chọn tất cả, chọn cái này
             clearSelected();
             setSelected(b);
             showCard(card);
@@ -182,40 +187,49 @@ public class MainFrame extends JFrame {
         cardLayout   = new CardLayout();
         contentPanel = new JPanel(cardLayout);
         contentPanel.setBackground(BG);
-        // them khach hang view
-        KhachHangView khachHangView = new KhachHangView();
-        JPanel khview = wrapView(khachHangView);
-        contentPanel.add(khview, "KHACHHANG");
-        // Thêm HoaDonView vào card "HOADON"
+
+        // ── Hoá đơn ──
         HoaDonView hoaDonView = new HoaDonView();
-        // thêm KhuyenMaiView
-        KhuyenMaiView khuyenmaiview = new KhuyenMaiView();
-        JPanel kmview = wrapView(khuyenmaiview);
-        contentPanel.add(kmview, "KHUYENMAI");
-        // HoaDonView là JFrame → cần lấy contentPane ra nhúng vào
-        JPanel hdPanel = wrapView(hoaDonView);
-        contentPanel.add(hdPanel, "HOADON");
+        new HoaDonController(hoaDonView, maNV, chucvu); // ← truyền chucvu
+        contentPanel.add(wrapView(hoaDonView), "HOADON");
 
-        NhanVienView nvview = new NhanVienView();
-        JPanel Pnvview = wrapView(nvview);
-        contentPanel.add(Pnvview, "NHANVIEN");
+        // ── Khuyến mãi ──
+        KhuyenMaiView khuyenmaiview = new KhuyenMaiView(chucvu);
+        new KhuyenMaiController(khuyenmaiview, chucvu); // ← truyền chucvu
+        contentPanel.add(wrapView(khuyenmaiview), "KHUYENMAI");
 
+        // ── Khách hàng ──
+        KhachHangView khachHangView = new KhachHangView(chucvu);
+        new KhachHangController(khachHangView, chucvu); // ← truyền chucvu
+        contentPanel.add(wrapView(khachHangView), "KHACHHANG");
+
+        // ── Nhân viên ──
+        NhanVienView nvview = new NhanVienView(chucvu);
+        new NhanVienController(nvview, chucvu); // ← truyền chucvu
+        contentPanel.add(wrapView(nvview), "NHANVIEN");
+
+        // ── Sản phẩm ──
         SanPhamView sanPhamView = new SanPhamView();
-        JPanel spPanel = wrapView(sanPhamView);
-        contentPanel.add(spPanel, "SANPHAM");
+        new SanPhamController(sanPhamView, chucvu); // ← truyền chucvu
+        contentPanel.add(wrapView(sanPhamView), "SANPHAM");
+
+        // ── Phiếu nhập ──
+//         (nếu có PhieuNhapView thì thêm tương tự — hiện để placeholder)
+         PhieuNhapView phieuNhapView = new PhieuNhapView();
+         new PhieuNhapController(chucvu);
+         contentPanel.add(wrapView(phieuNhapView), "PHIEUNHAP");
+
+         BaoCaoView baocaoview = new BaoCaoView();
+         contentPanel.add(wrapView(baocaoview), "BAOCAO");
 
         return contentPanel;
     }
 
-    /**
-     * HoaDonView extends JFrame nên không nhúng trực tiếp được.
-     * Dùng cách: lấy contentPane của nó, bọc vào JPanel mới.
-     */
     private JPanel wrapView(JFrame frame) {
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.setBackground(BG);
         Container content = frame.getContentPane();
-        frame.dispose(); // đóng JFrame gốc, chỉ giữ content
+        frame.dispose();
         wrapper.add(content, BorderLayout.CENTER);
         return wrapper;
     }
