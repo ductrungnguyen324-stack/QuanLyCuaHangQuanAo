@@ -629,6 +629,7 @@ public class HoaDonDialog extends JDialog {
         spTable.getTableHeader().setBackground(CARD2);
         spTable.getTableHeader().setForeground(TEXT2);
         spTable.getTableHeader().setFont(new Font("Dialog", Font.BOLD, 11));
+
         int[] widths = {65, 160, 80, 90, 100, 65, 90};
         for (int i = 0; i < widths.length; i++)
             spTable.getColumnModel().getColumn(i).setPreferredWidth(widths[i]);
@@ -680,6 +681,7 @@ public class HoaDonDialog extends JDialog {
                     int sl = Integer.parseInt(ctModel.getValueAt(i, 3).toString()); // cột 3 = SoLuong
                     ctModel.setValueAt(sl + 1, i, 3);
                     tinhTong();
+
                     picker.dispose();
                     return;
                 }

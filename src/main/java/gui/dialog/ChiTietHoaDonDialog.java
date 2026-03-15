@@ -191,7 +191,7 @@ public class ChiTietHoaDonDialog extends JDialog {
 
         // Nút duyệt chỉ hiện nếu chưa thanh toán
         if ("CHUATHANHTOAN".equals(hd.getTrangthai())) {
-            JButton btnDuyet = makeButton("✓ Xác nhận thanh toán", GREEN, Color.WHITE);
+            JButton btnDuyet = makeButton("Xác nhận thanh toán", GREEN, Color.WHITE);
             btnDuyet.addActionListener(e -> {
                 int ok = JOptionPane.showConfirmDialog(this,
                         "Xác nhận thanh toán hoá đơn " + hd.getMaHD() + "?\n"

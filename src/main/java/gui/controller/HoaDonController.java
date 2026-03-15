@@ -2,7 +2,9 @@ package gui.controller;
 
 import bus.HoaDonBUS;
 import bus.ChiTietHoaDonBUS;
+import bus.KhuyenMaiBUS;
 import bus.SanPhamBUS;
+import dao.KhuyenMaiDAO;
 import entity.ChiTietHoaDon;
 import entity.HoaDon;
 import gui.HoaDonDialog;
@@ -26,6 +28,8 @@ public class HoaDonController {
     private HoaDonView view;
     private HoaDonBUS hoadonbus = new HoaDonBUS();
     private ChiTietHoaDonBUS cthdbus = new ChiTietHoaDonBUS();
+    private KhuyenMaiDAO kmdao = new KhuyenMaiDAO();
+    private KhuyenMaiBUS kmbus = new KhuyenMaiBUS();
     private TableRowSorter<TableModel> sorter;
 
     // ── THÊM MỚI: lưu chức vụ để kiểm tra quyền ──
@@ -167,6 +171,9 @@ public class HoaDonController {
                 for (ChiTietHoaDon cthd : ctList) {
                     spbus.giamTonKho(cthd.getMaSP(), (int) cthd.getSoluong());
                 }
+                System.out.println(hd.getKhuyenmai());
+                // tru khuyen mai
+                kmbus.giamSoLuong(hd.getKhuyenmai(), 1);
                 loadDanhSach();
                 view.showSuccess("Hoá đơn " + maHD + " đã thanh toán thành công!");
             }
