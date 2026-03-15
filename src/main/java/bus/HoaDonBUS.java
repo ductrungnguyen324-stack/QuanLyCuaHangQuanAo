@@ -17,17 +17,16 @@ public class HoaDonBUS {
 
     // Thêm hóa đơn
     public boolean add(HoaDon hd) {
+        // maKH có thể null → khách vãng lai
 
-        if (hd.getMaNV() == null || hd.getMaNV().isEmpty()) {
-            System.out.println("Mã nhân viên không được rỗng");
-            return false;
-        }
+        if (hd.getMaNV() == null || hd.getMaNV().isEmpty())
+            throw new RuntimeException("Mã nhân viên không được rỗng!");
 
-        if (hd.getNgaytao() == null) {
+        if (hd.getNgaytao() == null)
             hd.setNgaytao(LocalDateTime.now());
-        }
 
         return hoaDonDAO.insert(hd);
+        // Sau khi insert(), hd.getMaHD() đã được set bởi generateHD() trong DAO
     }
 
     public boolean delete(String maHD) {

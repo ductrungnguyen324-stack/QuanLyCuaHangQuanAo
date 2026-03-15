@@ -41,6 +41,9 @@ public class HoaDonView extends JFrame {
     private JLabel            lblTongHD, lblTongThu, lblChuaTT;
     private JButton           btnThem, btnReset;
 
+    // ── Phân quyền ──────────────────────────────────────
+    private boolean chiXem = false; // true = chỉ xem, ẩn nút Xoá/In
+
     private static final String[] COLUMNS = {
             "ID",           // col 0 an (maHD)
             "Mã HD",        // col 1
@@ -70,7 +73,7 @@ public class HoaDonView extends JFrame {
         add(top,          BorderLayout.NORTH);
         add(buildTable(), BorderLayout.CENTER);
 
-        new HoaDonController(this, "NV001");
+        // Controller được khởi tạo từ MainFrame (kèm chucvu)
     }
 
     // ── Header ───────────────────────────────────────────
@@ -214,14 +217,16 @@ public class HoaDonView extends JFrame {
                 }
         );
 
-        // Renderer cot Thao tác (col 11)
+        // Renderer cot Thao tác (col 11) — ẩn nút In/Xoá nếu chiXem=true
         table.getColumnModel().getColumn(11).setCellRenderer(
                 (t, val, sel, foc, row, col) -> {
                     JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 8));
                     p.setBackground(sel ? ROW_SEL : row % 2 == 0 ? SURFACE : ROW_ODD);
                     p.add(makeTag("Chi tiết", CYAN));
-                    p.add(makeTag("In",       GREEN));
-                    p.add(makeTag("Xoa",      RED));
+                    if (!chiXem) {
+                        p.add(makeTag("In",  GREEN));
+                        p.add(makeTag("Xoá", RED));
+                    }
                     return p;
                 }
         );
@@ -347,6 +352,16 @@ public class HoaDonView extends JFrame {
 
     public void showSuccess(String message) {
         JOptionPane.showMessageDialog(this, message, "Successful", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    // ── Phân quyền: gọi từ Controller sau khi khởi tạo ──
+    public void setChiXem(boolean chiXem) {
+        this.chiXem = chiXem;
+        table.repaint(); // vẽ lại bảng để renderer cập nhật nút
+    }
+
+    public boolean isChiXem() {
+        return chiXem;
     }
 
     public JButton getBtnThem() {

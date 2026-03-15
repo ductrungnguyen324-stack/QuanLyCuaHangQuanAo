@@ -2,6 +2,8 @@ package bus;
 
 import dao.KhuyenMaiDAO;
 import entity.KhuyenMai;
+import entity.SanPham;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
@@ -80,5 +82,14 @@ public class KhuyenMaiBUS
 
     public boolean updateUsageCount(String makhuyemai, int amount) {
         return kmDAO.updateUsageCount(makhuyemai, amount);
+    }
+
+    public void giamSoLuong(String maKM, int soLuong) {
+        KhuyenMai km = kmDAO.getByID(maKM);
+        if (km == null) throw new RuntimeException("Không tìm thấy SP: " + maKM);
+        int soluong = km.getSoluong() - soLuong;
+        if (soluong < 0) throw new RuntimeException("Sản phẩm " + maKM + " không đủ tồn kho!");
+        km.setSoluong(soluong);
+        kmDAO.update(km);
     }
 }

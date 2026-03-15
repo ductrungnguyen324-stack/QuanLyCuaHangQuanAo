@@ -19,14 +19,10 @@ public class LoginController {
     }
 
     public void allListeners() {
-        // get btnDangNhap de xu li
         view.getBtnLogin().addActionListener(e -> handleLogin());
-        // ng dung an enter matkhau => dang nhap
         view.getPPassword().addActionListener(e -> handleLogin());
-        // enter trong o tk chuyen sang o pass
         view.getTUserName().addActionListener(e -> view.getPPassword().requestFocusInWindow());
 
-        // 4. KeyListener toàn form: Esc → thoát
         KeyAdapter escListener = new KeyAdapter() {
             @Override public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
@@ -50,7 +46,7 @@ public class LoginController {
 
         String isGood = validate(username, password);
 
-        if(isGood != null) {
+        if (isGood != null) {
             view.showError(isGood);
             return;
         }
@@ -58,17 +54,17 @@ public class LoginController {
         NhanVien nv = nvbus.Login(username, password);
 
         if (nv == null) {
-            // Sai tài khoản hoặc mật khẩu
             view.showError("Sai tài khoản hoặc mật khẩu!");
             view.clearPassword();
             view.focusPassword();
             return;
         }
-        // dn thanh cong
+
         view.showError("");
         view.dispose();
-        String maNV = nv.getManv();
-        SwingUtilities.invokeLater(() -> new MainFrame(maNV));
+
+        // ── THAY ĐỔI: truyền cả object NhanVien xuống MainFrame ──
+        SwingUtilities.invokeLater(() -> new MainFrame(nv));
     }
 
     private String validate(String username, String password) {
@@ -76,14 +72,6 @@ public class LoginController {
             return "Vui lòng nhập tên đăng nhập!";
         if (password == null || password.isEmpty())
             return "Vui lòng nhập mật khẩu!";
-        return null; // hợp lệ
+        return null;
     }
-
-    public String getInfoNV() {
-        String user = view.getUsername();
-        String pass = view.getPassword();
-        NhanVien nv = nvbus.Login(user, pass);
-        return nv.getManv();
-    }
-
 }

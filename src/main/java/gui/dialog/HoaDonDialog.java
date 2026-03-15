@@ -629,6 +629,7 @@ public class HoaDonDialog extends JDialog {
         spTable.getTableHeader().setBackground(CARD2);
         spTable.getTableHeader().setForeground(TEXT2);
         spTable.getTableHeader().setFont(new Font("Dialog", Font.BOLD, 11));
+
         int[] widths = {65, 160, 80, 90, 100, 65, 90};
         for (int i = 0; i < widths.length; i++)
             spTable.getColumnModel().getColumn(i).setPreferredWidth(widths[i]);
@@ -676,10 +677,11 @@ public class HoaDonDialog extends JDialog {
 
             // Nếu SP đã có trong bảng → tăng số lượng thay vì thêm dòng mới
             for (int i = 0; i < ctModel.getRowCount(); i++) {
-                if (ctModel.getValueAt(i, 0).toString().equals(sp.getMasp())) {
-                    int sl = Integer.parseInt(ctModel.getValueAt(i, 2).toString());
-                    ctModel.setValueAt(sl + 1, i, 2);
+                if (ctModel.getValueAt(i, 1).toString().equals(sp.getMasp())) { // cột 1 = MaSP
+                    int sl = Integer.parseInt(ctModel.getValueAt(i, 3).toString()); // cột 3 = SoLuong
+                    ctModel.setValueAt(sl + 1, i, 3);
                     tinhTong();
+
                     picker.dispose();
                     return;
                 }
@@ -857,7 +859,7 @@ public class HoaDonDialog extends JDialog {
                 double soLuong = Double.parseDouble(sl.toString());
                 double donGia  = Double.parseDouble(dg.toString());
                 double tt = soLuong * donGia;
-                ctModel.setValueAt(tt, i, 5);
+                ctModel.setValueAt(tt, i, 5); // col 5 = Thành tiền (col 4 = Đơn giá)
                 tong += tt;
             } catch (Exception ignored) {}
         }
@@ -926,7 +928,7 @@ public class HoaDonDialog extends JDialog {
     public double getTongTien() {
         double tong = 0;
         for (int i = 0; i < ctModel.getRowCount(); i++) {
-            try { tong += Double.parseDouble(ctModel.getValueAt(i, 4).toString()); }
+            try { tong += Double.parseDouble(ctModel.getValueAt(i, 5).toString()); } // cột 5 = ThanhTien
             catch (Exception ignored) {}
         }
         return tong;
@@ -972,7 +974,6 @@ public class HoaDonDialog extends JDialog {
                 ct.setDongia(Double.parseDouble(ctModel.getValueAt(i, 4).toString()));
                 ct.setThanhtien(Double.parseDouble(ctModel.getValueAt(i, 5).toString()));
             } catch (Exception ignored) {}
-            ct.setKhuyenmai(null);
             list.add(ct);
         }
         return list;

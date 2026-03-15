@@ -15,8 +15,29 @@ public class KhachHangController {
 
     private final KhachHangView view;
 
+    // ── THÊM MỚI: lưu chức vụ ──
+    private String chucvu;
+
+    public KhachHangController(KhachHangView view, String chucvu) {
+        this.view   = view;
+        this.chucvu = chucvu;
+    }
+
+    // Constructor cũ (tương thích)
     public KhachHangController(KhachHangView view) {
-        this.view = view;
+        this(view, "Quan ly");
+    }
+
+    // ── THÊM MỚI: kiểm tra quyền ──
+    // Chỉ Quản lý mới được thêm/sửa/xoá khách hàng
+    public boolean coQuyen() {
+        return "Quan ly".equals(chucvu);
+    }
+
+    private void showNoQuyen() {
+        JOptionPane.showMessageDialog(view,
+                "Bạn không có quyền thực hiện thao tác này!",
+                "Không có quyền", JOptionPane.WARNING_MESSAGE);
     }
 
     // ── Load & Filter ────────────────────────────────────
@@ -48,11 +69,13 @@ public class KhachHangController {
     // ── CRUD ─────────────────────────────────────────────
 
     public void moDialogThem() {
+        if (!coQuyen()) { showNoQuyen(); return; }
         KhachHangDialog dialog = new KhachHangDialog(view, null, this);
         dialog.setVisible(true);
     }
 
     public void moDialogSua(String maKH) {
+        if (!coQuyen()) { showNoQuyen(); return; }
         KhachHang kh = bus.findById(maKH);
         if (kh == null) return;
         KhachHangDialog dialog = new KhachHangDialog(view, kh, this);
@@ -60,18 +83,22 @@ public class KhachHangController {
     }
 
     public boolean themKhachHang(KhachHang kh) {
+        if (!coQuyen()) return false;
         boolean ok = bus.add(kh);
         if (ok) loadDanhSach();
         return ok;
     }
 
     public boolean suaKhachHang(KhachHang kh) {
+        if (!coQuyen()) return false;
         boolean ok = bus.update(kh);
         if (ok) loadDanhSach();
         return ok;
     }
 
     public void xoaKhachHang(String maKH, String ten) {
+        if (!coQuyen()) { showNoQuyen(); return; }
+
         int confirm = JOptionPane.showConfirmDialog(view,
                 "Bạn có chắc muốn xoá khách hàng:\n" + maKH + " - " + ten + "?",
                 "Xác nhận xoá", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);

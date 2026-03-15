@@ -30,16 +30,26 @@ public class HoaDonDAO {
     public boolean insert (HoaDon hd) {
         String sql = "INSERT INTO HoaDon VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-//        String maHD = generateHD();
-//        hd.setMaHD(maHD);
+        // Auto-generate maHD từ DB rồi set lại vào object
+        // → Controller đọc hd.getMaHD() sau khi gọi insert() sẽ lấy được mã đúng
+        String maHD = generateHD();
+        hd.setMaHD(maHD);
 
         try(Connection conn = DBConnection.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, hd.getMaHD());
-            pstmt.setString(2, hd.getMaKH());
+            // maKH null = khách vãng lai
+            if (hd.getMaKH() != null && !hd.getMaKH().isEmpty())
+                pstmt.setString(2, hd.getMaKH());
+            else
+                pstmt.setNull(2, java.sql.Types.VARCHAR);
             pstmt.setString(3, hd.getMaNV());
-            pstmt.setString(4, hd.getKhuyenmai());
+            // maKM null = không có khuyến mãi
+            if (hd.getKhuyenmai() != null && !hd.getKhuyenmai().isEmpty())
+                pstmt.setString(4, hd.getKhuyenmai());
+            else
+                pstmt.setNull(4, java.sql.Types.VARCHAR);
             pstmt.setTimestamp(5, Timestamp.valueOf(hd.getNgaytao()));
             pstmt.setDouble(6, hd.getTongtien());
             pstmt.setDouble(7, hd.getSotiengiam());
@@ -49,9 +59,8 @@ public class HoaDonDAO {
 
             return pstmt.executeUpdate() > 0;
         } catch(Exception e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException("Insert HoaDon lỗi: " + e.getMessage(), e);
         }
-        return false;
     }
 
     public boolean update(HoaDon hd) {

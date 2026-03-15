@@ -10,7 +10,7 @@ import entity.*;
 
 
 public class SanPhamDAO {
-    
+
     public List<SanPham> getALL() {
         List<SanPham> list = new ArrayList<>();
         String sql = "SELECT * FROM sanpham";
@@ -34,7 +34,7 @@ public class SanPhamDAO {
 
     public boolean insert(SanPham sp) {
         String sql = "INSERT INTO SanPham (maSP, tenSP, loaiSP, giaban, thuonghieu, kichco, mausac, trangthai, tonkho) " +
-                     "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         String maSP = generateSP();
         sp.setMasp(maSP);

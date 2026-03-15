@@ -46,11 +46,17 @@ public class KhachHangView extends JFrame {
 
     // ── Controller ───────────────────────────────────────
     private final KhachHangController controller;
+    private boolean chiXem = false; // phân quyền
 
     public KhachHangView() {
-        controller = new KhachHangController(this);
+        this("Nhan vien"); // mặc định
+    }
 
-        setTitle("Quản lý Khách hàng");
+    public KhachHangView(String chucvu) {
+        this.chiXem = !("Quan ly".equals(chucvu));
+        controller = new KhachHangController(this, chucvu);
+
+        setTitle("Quản lý Khách Hàng");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(900, 600);
         setLocationRelativeTo(null);
@@ -78,7 +84,7 @@ public class KhachHangView extends JFrame {
                 BorderFactory.createEmptyBorder(16, 22, 16, 22)
         ));
 
-        JLabel title = new JLabel("Quản lý Khách hàng");
+        JLabel title = new JLabel("Quản lý Khách Hàng");
         title.setFont(new Font("Dialog", Font.BOLD, 20));
         title.setForeground(TEXT1);
 
@@ -97,6 +103,7 @@ public class KhachHangView extends JFrame {
 
         JButton btnThem = makeButton("+ Thêm khách hàng", ACCENT, Color.WHITE);
         btnThem.addActionListener(e -> controller.moDialogThem());
+        if (chiXem) btnThem.setVisible(false);
 
         h.add(left,    BorderLayout.WEST);
         h.add(btnThem, BorderLayout.EAST);
@@ -183,13 +190,17 @@ public class KhachHangView extends JFrame {
                 }
         );
 
-        // Renderer cột Thao tác (col 5)
+        // Renderer cột Thao tác (col 5) — ẩn nút nếu chiXem=true
         table.getColumnModel().getColumn(5).setCellRenderer(
                 (t, val, sel, foc, row, col) -> {
                     JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 8));
                     p.setBackground(sel ? ROW_SEL : row % 2 == 0 ? SURFACE : ROW_ODD);
-                    p.add(makeTag("Sửa", CYAN));
-                    p.add(makeTag("Xoá", RED));
+                    if (!chiXem) {
+                        p.add(makeTag("Sửa", CYAN));
+                        p.add(makeTag("Xoá", RED));
+                    } else {
+                        p.add(makeTag("Chỉ xem", TEXT2));
+                    }
                     return p;
                 }
         );
@@ -205,11 +216,12 @@ public class KhachHangView extends JFrame {
                 int col = table.columnAtPoint(e.getPoint());
 
                 if (col == 5) {
+                    if (chiXem) return; // chặn thao tác
                     Rectangle rect = table.getCellRect(row, col, true);
                     int dx = e.getX() - rect.x;
                     if (dx < rect.width / 2) controller.moDialogSua(maKH);
                     else                     controller.xoaKhachHang(maKH, ten);
-                } else if (e.getClickCount() == 2) {
+                } else if (e.getClickCount() == 2 && !chiXem) {
                     controller.moDialogSua(maKH);
                 }
             }
@@ -303,6 +315,9 @@ public class KhachHangView extends JFrame {
                 BorderFactory.createEmptyBorder(6, 10, 6, 10)
         ));
     }
+
+    public void setChiXem(boolean chiXem) { this.chiXem = chiXem; table.repaint(); }
+    public boolean isChiXem() { return chiXem; }
 
     public static void main(String[] args) {
         try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); }

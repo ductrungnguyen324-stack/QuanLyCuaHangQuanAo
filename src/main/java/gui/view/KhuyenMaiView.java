@@ -36,6 +36,7 @@ public class KhuyenMaiView extends JFrame {
 
     // ── Controller ───────────────────────────────────────
     private KhuyenMaiController controller;
+    private boolean chiXem = false; // phân quyền
 
     private static final String[] COLUMNS = {
             "Mã KM",            // col 0
@@ -53,7 +54,12 @@ public class KhuyenMaiView extends JFrame {
     };
 
     public KhuyenMaiView() {
-        setTitle("Quản lý Khuyến mãi");
+        this("Nhan vien"); // mặc định
+    }
+
+    public KhuyenMaiView(String chucvu) {
+        this.chiXem = !("Quan ly".equals(chucvu));
+        setTitle("Quản lý Khuyến Mãi");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1280, 720);
         setLocationRelativeTo(null);
@@ -72,7 +78,7 @@ public class KhuyenMaiView extends JFrame {
         add(scrollPane, BorderLayout.CENTER);
 
         // Controller khởi tạo sau khi View đã có đủ component
-        controller = new KhuyenMaiController(this);
+        controller = new KhuyenMaiController(this, chucvu);
         controller.loadDanhSach();
 
         setVisible(true);
@@ -87,7 +93,7 @@ public class KhuyenMaiView extends JFrame {
                 BorderFactory.createEmptyBorder(16, 22, 16, 22)
         ));
 
-        JLabel title = new JLabel("Quản lý Khuyến mãi");
+        JLabel title = new JLabel("Quản lý Khuyến Mãi");
         title.setFont(new Font("Dialog", Font.BOLD, 20));
         title.setForeground(TEXT1);
 
@@ -108,6 +114,7 @@ public class KhuyenMaiView extends JFrame {
 
         JButton btnThem = makeButton("+ Thêm khuyến mãi", ACCENT, Color.WHITE);
         btnThem.addActionListener(e -> controller.moDialogThem());
+        if (chiXem) btnThem.setVisible(false);
 
         h.add(left,    BorderLayout.WEST);
         h.add(btnThem, BorderLayout.EAST);
@@ -234,13 +241,17 @@ public class KhuyenMaiView extends JFrame {
                 }
         );
 
-        // Renderer cột Thao tác (col 11) — chỉ Sửa và Xóa
+        // Renderer cột Thao tác (col 11) — ẩn nút nếu chiXem=true
         table.getColumnModel().getColumn(11).setCellRenderer(
                 (t, val, sel, foc, row, col) -> {
                     JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 8));
                     p.setBackground(sel ? ROW_SEL : row % 2 == 0 ? SURFACE : ROW_ODD);
-                    p.add(makeTag("Sửa", YELLOW));
-                    p.add(makeTag("Xóa", RED));
+                    if (!chiXem) {
+                        p.add(makeTag("Sửa", YELLOW));
+                        p.add(makeTag("Xóa", RED));
+                    } else {
+                        p.add(makeTag("Chỉ xem", TEXT2));
+                    }
                     return p;
                 }
         );
@@ -255,6 +266,7 @@ public class KhuyenMaiView extends JFrame {
                 int col = table.columnAtPoint(e.getPoint());
 
                 if (col == 11) {
+                    if (chiXem) return; // chặn thao tác
                     Rectangle rect = table.getCellRect(row, col, true);
                     int half = rect.width / 2;
                     int dx   = e.getX() - rect.x;
@@ -282,6 +294,9 @@ public class KhuyenMaiView extends JFrame {
         lblDangHoat.setText("Đang hoạt động: " + hoatDong);
         lblHetHan.setText("Hết hạn: " + hetHan);
     }
+
+    public void setChiXem(boolean chiXem) { this.chiXem = chiXem; table.repaint(); }
+    public boolean isChiXem() { return chiXem; }
 
     /** Controller cần truy cập tableModel để đổ dữ liệu. */
     public DefaultTableModel getTableModel() {
