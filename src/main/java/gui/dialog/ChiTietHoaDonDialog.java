@@ -113,7 +113,7 @@ public class ChiTietHoaDonDialog extends JDialog {
 
     // Bảng chi tiết sản phẩm — dữ liệu từ List<ChiTietHoaDon>
     private JScrollPane buildCTTable() {
-        String[] cols = {"Mã CTHD", "Mã SP", "Tên SP", "Số lượng", "Đơn giá", "KM", "Thành tiền"};
+        String[] cols = {"Mã CTHD", "Mã SP", "Tên SP", "Số lượng", "Đơn giá", "Thành tiền"};
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -128,7 +128,6 @@ public class ChiTietHoaDonDialog extends JDialog {
                             ? String.valueOf((int) ct.getSoluong())  // 2.0 → "2"
                             : String.valueOf(ct.getSoluong()),        // 1.5 → "1.5"
                     String.format("%,.0f đ", ct.getDongia()),
-                    ct.getKhuyenmai() != null ? ct.getKhuyenmai() : "-",
                     String.format("%,.0f đ", ct.getThanhtien())
             });
         }
@@ -140,8 +139,8 @@ public class ChiTietHoaDonDialog extends JDialog {
                         ? new Color(25, 35, 80)
                         : row % 2 == 0 ? CARD : new Color(11, 16, 30));
                 // Cột thành tiền nổi bật
-                c.setForeground(col == 6 ? CYAN : TEXT1);
-                if (col == 6) c.setFont(new Font("Dialog", Font.BOLD, 12));
+                c.setForeground(col == 5 ? CYAN : TEXT1);
+                if (col == 5) c.setFont(new Font("Dialog", Font.BOLD, 12));
                 return c;
             }
         };
@@ -158,7 +157,7 @@ public class ChiTietHoaDonDialog extends JDialog {
         th.setForeground(TEXT2);
         th.setFont(new Font("Dialog", Font.BOLD, 11));
 
-        int[] widths = {80, 70, 160, 70, 100, 70, 110};
+        int[] widths = {100, 90, 170, 80, 110, 120};
         for (int i = 0; i < widths.length; i++)
             table.getColumnModel().getColumn(i).setPreferredWidth(widths[i]);
 

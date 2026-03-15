@@ -208,11 +208,12 @@ public class HoaDonController {
         if (loi != null) { view.showError(loi); return; }
 
         try {
-            HoaDon hd              = dialog.buildHoaDon();
+            HoaDon hd = dialog.buildHoaDon();
             hoadonbus.add(hd);
+            // Sau khi add(), hd.getMaHD() đã được DAO generate → dùng mã này cho ChiTietHoaDon
             List<ChiTietHoaDon> cthd = dialog.buildChiTiet();
             for (ChiTietHoaDon ct : cthd) {
-                ct.setMaHD(hd.getMaHD());
+                ct.setMaHD(hd.getMaHD()); // ✅ đảm bảo maHD khớp với HoaDon vừa insert
                 cthdbus.add(ct);
             }
             loadDanhSach();

@@ -51,7 +51,7 @@ public class ChiTietHoaDonDAO {
     }
 
     public boolean insert(ChiTietHoaDon cthd) {
-        String sql = "INSERT INTO ChiTietHoaDon VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO ChiTietHoaDon VALUES (?, ?, ?, ?, ?, ?, ?)";
         String maCTHD = generate();
 
         cthd.setMaCTHD(maCTHD);
@@ -66,7 +66,6 @@ public class ChiTietHoaDonDAO {
             pstmt.setDouble(5, cthd.getSoluong());
             pstmt.setDouble(6, cthd.getDongia());
             pstmt.setDouble(7, cthd.getThanhtien());
-            pstmt.setObject(8, cthd.getKhuyenmai());
 
             return pstmt.executeUpdate() > 0;
         } catch(Exception e ) {
@@ -87,7 +86,6 @@ public class ChiTietHoaDonDAO {
                 + "soluong = ?, "
                 + "dongia = ?, "
                 + "thanhtien = ?, "
-                + "maKM = ? "
                 + "WHERE maCTHD = ?";
 
         try(Connection conn = DBConnection.getConnection();
@@ -99,7 +97,7 @@ public class ChiTietHoaDonDAO {
             pstmt.setDouble(4, cthd.getSoluong());
             pstmt.setDouble(5, cthd.getDongia());
             pstmt.setDouble(6, cthd.getThanhtien());
-            pstmt.setString(7, cthd.getKhuyenmai().getMaKM());
+            pstmt.setString(7, cthd.getMaCTHD());
 
             return pstmt.executeUpdate() > 0;
 
@@ -199,9 +197,6 @@ public class ChiTietHoaDonDAO {
         cthd.setTenSP(rs.getString("tenSP"));
         cthd.setSoluong(rs.getDouble("soluong"));
         cthd.setThanhtien(rs.getDouble("thanhtien"));
-        KhuyenMai km = new KhuyenMai();
-        km.setMaKM(rs.getString("maKM"));
-        cthd.setKhuyenmai(km);
 
         return cthd;
     }
