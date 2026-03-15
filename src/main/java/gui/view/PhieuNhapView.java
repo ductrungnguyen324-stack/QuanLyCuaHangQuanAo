@@ -1,6 +1,6 @@
 package gui.view;
 
-import gui.controller.PhieuNhapPanelController;
+import gui.controller.PhieuNhapController;
 import entity.PhieuNhapHangDTO;
 import gui.dialog.PhieuNhapChiTietDialog;
 import gui.dialog.PhieuNhapDialog;
@@ -19,7 +19,7 @@ import java.util.ArrayList;
 public class PhieuNhapView extends JPanel {
 
     // ── Controller ───────────────────────────────────────
-    private final PhieuNhapPanelController controller = new PhieuNhapPanelController();
+    private final PhieuNhapController controller = new PhieuNhapController();
 
     // ── Màu sắc ──────────────────────────────────────────
     private static final Color BG = new Color(7, 10, 20);
@@ -113,7 +113,6 @@ public class PhieuNhapView extends JPanel {
         searchField = new JTextField(20);
         styleTextField(searchField);
         searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            @Override
             public void insertUpdate(javax.swing.event.DocumentEvent e) {
                 locDuLieu();
             }
@@ -304,7 +303,7 @@ public class PhieuNhapView extends JPanel {
 
     // ── Sự kiện ──────────────────────────────────────────
     private void moDialogThem() {
-    PhieuNhapDialog dialog = new PhieuNhapDialog(
+        PhieuNhapDialog dialog = new PhieuNhapDialog(
             (Frame) SwingUtilities.getWindowAncestor(this), null);
     dialog.setVisible(true);
 
