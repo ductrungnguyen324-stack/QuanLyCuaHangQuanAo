@@ -129,7 +129,7 @@ public class PhieuNhapHangDAO {
     }
 
     public String getLastMaPhieuNhap() {
-        String sql = "SELECT maPN FROM phieunhap ORDER BY maPN DESC LIMIT 1";
+        String sql = "SELECT TOP 1 maPN FROM phieunhap ORDER BY maPN DESC";
         try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 return rs.getString("maPN");
