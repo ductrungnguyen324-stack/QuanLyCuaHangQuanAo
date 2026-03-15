@@ -59,7 +59,7 @@ public class KhuyenMaiView extends JFrame {
 
     public KhuyenMaiView(String chucvu) {
         this.chiXem = !("Quan ly".equals(chucvu));
-        setTitle("Quản lý Khuyến mãi");
+        setTitle("Quản lý Khuyến Mãi");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1280, 720);
         setLocationRelativeTo(null);

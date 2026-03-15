@@ -56,7 +56,7 @@ public class KhachHangView extends JFrame {
         this.chiXem = !("Quan ly".equals(chucvu));
         controller = new KhachHangController(this, chucvu);
 
-        setTitle("Quản lý Khách hàng");
+        setTitle("Quản lý Khách Hàng");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(900, 600);
         setLocationRelativeTo(null);
