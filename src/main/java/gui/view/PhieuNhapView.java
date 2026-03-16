@@ -16,7 +16,7 @@ import java.util.ArrayList;
  * PhieuNhapPanel — Chỉ chứa code giao diện. Mọi logic gọi qua
  * PhieuNhapPanelController.
  */
-public class PhieuNhapView extends JPanel {
+public class PhieuNhapView extends JFrame {
 
     // ── Controller ───────────────────────────────────────
     private final PhieuNhapController controller = new PhieuNhapController();
