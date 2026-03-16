@@ -217,7 +217,7 @@ public class MainFrame extends JFrame {
 //         (nếu có PhieuNhapView thì thêm tương tự — hiện để placeholder)
          PhieuNhapView phieuNhapView = new PhieuNhapView();
          new PhieuNhapController(chucvu);
-         contentPanel.add(wrapView(phieuNhapView), "PHIEUNHAP");
+        // contentPanel.add(wrapView(phieuNhapView), "PHIEUNHAP");
 
          BaoCaoView baocaoview = new BaoCaoView();
          contentPanel.add(wrapView(baocaoview), "BAOCAO");

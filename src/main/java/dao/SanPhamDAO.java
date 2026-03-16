@@ -10,7 +10,7 @@ import entity.*;
 
 
 public class SanPhamDAO {
-
+    
     public List<SanPham> getALL() {
         List<SanPham> list = new ArrayList<>();
         String sql = "SELECT * FROM sanpham";
@@ -34,7 +34,7 @@ public class SanPhamDAO {
 
     public boolean insert(SanPham sp) {
         String sql = "INSERT INTO SanPham (maSP, tenSP, loaiSP, giaban, thuonghieu, kichco, mausac, trangthai, tonkho) " +
-                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                     "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         String maSP = generateSP();
         sp.setMasp(maSP);
@@ -60,11 +60,10 @@ public class SanPhamDAO {
     }
 
     public boolean update(SanPham sp) {
-        SanPham check = new SanPham();
-        if(check == null) throw new RuntimeException("San Pham chua ton tai");
+        if(getById(sp.getMasp()) == null) throw new RuntimeException("Sản phẩm chưa tồn tại");
 
         String sql = "UPDATE sanpham SET tenSP=?, loaiSP=?, giaban=?, thuonghieu=?, kichco=?," +
-                "mausac=?, trangthai=?, tonkho=?" +
+                "mausac=?, trangthai=?, tonkho=? " +   // ← thêm dấu cách trước WHERE
                 "WHERE maSP = ?";
 
         try(Connection conn = DBConnection.getConnection();
@@ -115,7 +114,7 @@ public class SanPhamDAO {
         try (Connection con = DBConnection.getConnection();
              PreparedStatement pstmt = con.prepareStatement(sql))
         {
-            ResultSet rs = pstmt.executeQuery(sql);
+            ResultSet rs = pstmt.executeQuery();
             if (rs.next())
             {
                 return rs.getInt(1);
@@ -148,9 +147,9 @@ public class SanPhamDAO {
     }
 
     public String generateSP() {
-        String sql = "SELECT maSP FROM sanpham ORDER BY maSP DESC LIMIT 1";
+        String sql = "SELECT TOP 1 maSP FROM sanpham ORDER BY maSP DESC"; // SQL Server
 
-        try(Connection conn =DBConnection.getConnection();
+        try(Connection conn = DBConnection.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             ResultSet rs = pstmt.executeQuery();
 
@@ -165,6 +164,37 @@ public class SanPhamDAO {
             throw new RuntimeException("Lỗi generateSP SanPham: " + e.getMessage());
         }
         return "SP001";
+    }
+
+    /**
+     * Lấy thông tin sản phẩm để tự động điền vào form phiếu nhập.
+     * @return ArrayList gồm 2 phần tử: [0] tenSP, [1] giaban dạng String.
+     *         Trả về ["Không tìm thấy", "0"] nếu maSP không tồn tại.
+     */
+    public ArrayList<String> getThongTinSP(String maSP) {
+        ArrayList<String> result = new ArrayList<>();
+        String sql = "SELECT tenSP, giaban FROM sanpham WHERE maSP = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, maSP);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                result.add(rs.getString("tenSP"));
+                result.add(String.valueOf(rs.getDouble("giaban")));
+                return result;
+            }
+            rs.close();
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi getThongTinSP: " + e.getMessage());
+        }
+
+        result.add("Không tìm thấy");
+        result.add("0");
+        return result;
     }
 
     public SanPham mapResultSetToEntity(ResultSet rs) throws SQLException {

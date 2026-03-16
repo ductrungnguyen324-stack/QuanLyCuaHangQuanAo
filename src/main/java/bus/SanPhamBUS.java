@@ -2,6 +2,7 @@ package bus;
 
 import dao.*;
 import entity.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SanPhamBUS {
@@ -45,4 +46,8 @@ public class SanPhamBUS {
         sp.setTonkho(tonMoi);
         spDAO.update(sp);
     }
+     public ArrayList<String> getThongTinSP(String maSP) {
+        return spDAO.getThongTinSP(maSP);
+    }
+
 }

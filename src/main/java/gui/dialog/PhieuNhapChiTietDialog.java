@@ -87,7 +87,10 @@ public class PhieuNhapChiTietDialog extends JDialog {
         JPanel info = new JPanel(new GridLayout(1, 3, 12, 0));
         info.setBackground(BG);
         Color colorTT = controller.isDaDuyet(pn) ? GREEN : CYAN;
-        info.add(makeInfoCard("Nhà cung cấp", pn.getNhaCungCap(), TEXT1));
+        String hienThiNCC = (pn.getTenNCC() != null && !pn.getTenNCC().isEmpty())
+                ? pn.getTenNCC()   // tên NCC từ JOIN — ưu tiên hiển thị
+                : pn.getMaNCC();   // fallback: hiển thị mã NCC nếu không có tên
+        info.add(makeInfoCard("Nhà cung cấp", hienThiNCC, TEXT1));
         info.add(makeInfoCard("Trạng thái", pn.getTrangThai(), colorTT));
         info.add(makeInfoCard("Tổng thành tiền", df.format(pn.getTongTien()), CYAN));
         return info;

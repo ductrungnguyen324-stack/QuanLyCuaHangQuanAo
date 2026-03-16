@@ -2,7 +2,6 @@ package gui.controller;
 
 import bus.PhieuNhapHangBUS;
 import dao.ChiTietPhieuNhapDAO;
-import dao.DBConnection;
 import dao.PhieuNhapHangDAO;
 import dao.SanPhamDAO;
 import entity.ChiTietPhieuNhapDTO;
@@ -10,29 +9,28 @@ import entity.PhieuNhapHangDTO;
 
 import javax.swing.*;
 import java.awt.*;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 
 /**
- * PhieuNhapController — có phân quyền theo chức vụ.
- * Quản lý + Quản kho: toàn quyền thao tác phiếu nhập.
- * Thu ngân + Nhân viên: chỉ được xem.
+ * PhieuNhapController — controller duy nhất cho toàn bộ module phiếu nhập.
+ * Gộp từ PhieuNhapDialogController + PhieuNhapPanelController.
+ *
+ * Phân quyền:
+ *   Quan ly + Quan kho → toàn quyền thao tác.
+ *   Thu ngân + Nhân viên → chỉ được xem.
  */
 public class PhieuNhapController {
 
-    private final PhieuNhapHangBUS bus      = new PhieuNhapHangBUS();
-    private final PhieuNhapHangDAO dao      = new PhieuNhapHangDAO();
+    private final PhieuNhapHangBUS    bus     = new PhieuNhapHangBUS();
+    private final PhieuNhapHangDAO    dao     = PhieuNhapHangDAO.getInstance();
     private final ChiTietPhieuNhapDAO ctpnDAO = new ChiTietPhieuNhapDAO();
-    private final SanPhamDAO spDAO          = new SanPhamDAO();
+    private final SanPhamDAO          spDAO   = new SanPhamDAO();
 
-    // ── THÊM MỚI: lưu chức vụ ──
-    private String chucvu;
+    private final String chucvu;
 
-    // Constructor mặc định (không phân quyền — giữ tương thích cũ)
+    // Constructor mặc định — không phân quyền (tương thích cũ)
     public PhieuNhapController() {
-        this.chucvu = "Quan ly"; // mặc định full quyền
+        this.chucvu = "Quan ly";
     }
 
     // Constructor với phân quyền
@@ -40,7 +38,10 @@ public class PhieuNhapController {
         this.chucvu = chucvu;
     }
 
-    // ── THÊM MỚI: kiểm tra quyền ──
+    // ═══════════════════════════════════════════════════════
+    // PHÂN QUYỀN
+    // ═══════════════════════════════════════════════════════
+
     public boolean coQuyen() {
         return "Quan ly".equals(chucvu) || "Quan kho".equals(chucvu);
     }
@@ -60,6 +61,7 @@ public class PhieuNhapController {
         return bus.getAll();
     }
 
+    /** Lọc theo keyword (maPN, maNV, maNCC, tenNCC) và trạng thái. */
     public ArrayList<PhieuNhapHangDTO> locDuLieu(String keyword, String trangThai) {
         String kw = keyword.trim().toLowerCase();
         ArrayList<PhieuNhapHangDTO> ketQua = new ArrayList<>();
@@ -67,13 +69,20 @@ public class PhieuNhapController {
         for (PhieuNhapHangDTO pn : bus.getAll()) {
             boolean matchTT = trangThai.equals("Tất cả trạng thái")
                     || pn.getTrangThai().equalsIgnoreCase(trangThai);
+
             boolean matchKW = kw.isEmpty()
                     || pn.getMaPN().toLowerCase().contains(kw)
                     || pn.getMaNV().toLowerCase().contains(kw)
-                    || pn.getNhaCungCap().toLowerCase().contains(kw);
+                    || pn.getMaNCC().toLowerCase().contains(kw)
+                    || (pn.getTenNCC() != null && pn.getTenNCC().toLowerCase().contains(kw));
+
             if (matchTT && matchKW) ketQua.add(pn);
         }
         return ketQua;
+    }
+
+    public ArrayList<PhieuNhapHangDTO> getByMaNCC(String maNCC) {
+        return dao.getByMaNCC(maNCC);
     }
 
     public PhieuNhapHangDTO getById(String maPN) {
@@ -81,7 +90,7 @@ public class PhieuNhapController {
     }
 
     // ═══════════════════════════════════════════════════════
-    // THÊM / CẬP NHẬT / XOÁ / DUYỆT  (kiểm tra quyền trước khi gọi)
+    // THÊM / CẬP NHẬT / XOÁ / DUYỆT
     // ═══════════════════════════════════════════════════════
 
     public boolean themPhieuMoi(PhieuNhapHangDTO pn, ArrayList<ChiTietPhieuNhapDTO> dsCT) {
@@ -104,14 +113,18 @@ public class PhieuNhapController {
         return bus.xoaPhieuNhap(maPN);
     }
 
+    public ArrayList<ChiTietPhieuNhapDTO> getChiTietCu(String maPN) {
+        return bus.getChiTietByMaPN(maPN);
+    }
+
     // ═══════════════════════════════════════════════════════
     // VALIDATE
     // ═══════════════════════════════════════════════════════
 
-    public String validate(String maPN, String maNV, String ncc, int soSP) {
+    public String validate(String maPN, String maNV, String maNCC, int soSP) {
         if (maPN.isEmpty())  return "⚠ Mã phiếu không được để trống!";
         if (maNV.isEmpty())  return "⚠ Mã nhân viên không được để trống!";
-        if (ncc.isEmpty())   return "⚠ Nhà cung cấp không được để trống!";
+        if (maNCC.isEmpty()) return "⚠ Mã nhà cung cấp không được để trống!";
         if (soSP == 0)       return "⚠ Phải có ít nhất 1 sản phẩm!";
         return null;
     }
@@ -131,9 +144,9 @@ public class PhieuNhapController {
         stats[0] = list.size();
         for (PhieuNhapHangDTO pn : list) {
             String tt = pn.getTrangThai();
-            if ("Chờ xử lý".equals(tt))   stats[1]++;
-            if ("Đã nhập kho".equals(tt))  stats[2]++;
-            if ("Đã huỷ".equals(tt))       stats[3]++;
+            if ("Chờ xử lý".equals(tt))  stats[1]++;
+            if ("Đã nhập kho".equals(tt)) stats[2]++;
+            if ("Đã huỷ".equals(tt))      stats[3]++;
         }
         return stats;
     }
@@ -157,32 +170,12 @@ public class PhieuNhapController {
     }
 
     // ═══════════════════════════════════════════════════════
-    // CHI TIẾT & HỖ TRỢ
+    // HỖ TRỢ SP & MÃ
     // ═══════════════════════════════════════════════════════
 
-    public ArrayList<ChiTietPhieuNhapDTO> getChiTietCu(String maPN) {
-        return bus.getChiTietByMaPN(maPN);
-    }
-
+    /** Tự động điền Tên SP + Giá khi nhập Mã SP — dùng SanPhamDAO, không raw SQL. */
     public ArrayList<String> tuDongDienThongTin(String maSP) {
-        ArrayList<String> result = new ArrayList<>();
-        String sql = "SELECT tenSP, giaban FROM sanpham WHERE maSP = ?";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, maSP);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    result.add(rs.getString("tenSP"));
-                    result.add(String.valueOf(rs.getDouble("giaban")));
-                    return result;
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("[PhieuNhapController] tuDongDienThongTin lỗi: " + e.getMessage());
-        }
-        result.add("Không tìm thấy");
-        result.add("0");
-        return result;
+        return spDAO.getThongTinSP(maSP);
     }
 
     public String generateMaSP() {
@@ -190,13 +183,22 @@ public class PhieuNhapController {
     }
 
     public String taoMaCTPN() {
+        return String.format("CTPN%03d", getNextMaCTPNNumber());
+    }
+
+    /**
+     * Trả về số thứ tự tiếp theo để sinh maCTPN.
+     * Gọi 1 lần DUY NHẤT trước vòng lặp insert để tránh duplicate key:
+     *   int next = controller.getNextMaCTPNNumber();
+     *   for (...) { maCTPN = String.format("CTPN%03d", next++); }
+     */
+    public int getNextMaCTPNNumber() {
         String last = ctpnDAO.getLastMaCTPN();
-        if (last == null || last.isEmpty()) return "CTPN001";
+        if (last == null || last.isEmpty()) return 1;
         try {
-            int next = Integer.parseInt(last.replaceAll("[^0-9]", "")) + 1;
-            return String.format("CTPN%03d", next);
+            return Integer.parseInt(last.replaceAll("[^0-9]", "")) + 1;
         } catch (NumberFormatException e) {
-            return "CTPN001";
+            return 1;
         }
     }
 

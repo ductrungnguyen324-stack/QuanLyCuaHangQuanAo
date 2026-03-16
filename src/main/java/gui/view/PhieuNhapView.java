@@ -279,8 +279,11 @@ public class PhieuNhapView extends JPanel {
             if (pn.getNgayTao() != null) {
                 ngay = sdf.format(pn.getNgayTao());
             }
+            String hienThiNCC = (pn.getTenNCC() != null && !pn.getTenNCC().isEmpty())
+                    ? pn.getTenNCC()  // tên NCC từ JOIN
+                    : pn.getMaNCC();  // fallback mã NCC
             tableModel.addRow(new Object[]{
-                pn.getMaPN(), pn.getMaPN(), pn.getMaNV(), pn.getNhaCungCap(),
+                pn.getMaPN(), pn.getMaPN(), pn.getMaNV(), hienThiNCC,
                 ngay,
                 String.format("%,.0f đ", pn.getTongTien()),
                 pn.getTrangThai(), ""
@@ -423,6 +426,7 @@ public class PhieuNhapView extends JPanel {
         cb.setFont(new Font("Dialog", Font.BOLD, 12));
     }
 
+    //
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());

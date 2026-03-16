@@ -1,10 +1,9 @@
 package gui.dialog;
 
-import dao.SanPhamDAO;
-import gui.controller.PhieuNhapController;
-import gui.controller.PhieuNhapController;
+
 import entity.ChiTietPhieuNhapDTO;
 import entity.PhieuNhapHangDTO;
+import gui.controller.PhieuNhapController;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.table.*;
@@ -35,12 +34,10 @@ public class PhieuNhapDialog extends JDialog {
 
     // ── Widgets ──────────────────────────────────────────
     private String ketQua = null;
-    private JTextField fMaPN, fMaNV, fNhaCungCap;
+    private JTextField fMaPN, fMaNV, fMaNCC;   // fMaNCC = mã nhà cung cấp (FK)
     private JLabel lblTongTien, lblStatus;
     private DefaultTableModel ctModel;
     private JTable ctTable;
-
-    SanPhamDAO spdao = new SanPhamDAO();
 
     // ── Constructor ──────────────────────────────────────
     public PhieuNhapDialog(Frame parent, PhieuNhapHangDTO pn) {
@@ -67,7 +64,7 @@ public class PhieuNhapDialog extends JDialog {
         body.setBackground(BG);
         body.setBorder(BorderFactory.createEmptyBorder(16, 20, 0, 20));
         body.add(buildInfoForm(pn), BorderLayout.NORTH);
-        body.add(buildCTTable(), BorderLayout.CENTER);
+        body.add(buildCTTable(pn), BorderLayout.CENTER);
 
         main.add(body, BorderLayout.CENTER);
         main.add(buildFooter(pn), BorderLayout.SOUTH);
@@ -85,7 +82,9 @@ public class PhieuNhapDialog extends JDialog {
         JLabel t = new JLabel(pn != null ? "Sửa phiếu nhập: " + pn.getMaPN() : "Tạo phiếu nhập mới");
         t.setFont(new Font("Dialog", Font.BOLD, 16));
         t.setForeground(TEXT1);
-        JLabel s = new JLabel(pn != null ? "Chỉnh sửa thông tin phiếu " + pn.getMaPN() : "Chọn sản phẩm và điền số lượng, giá nhập");
+        JLabel s = new JLabel(pn != null
+                ? "Chỉnh sửa thông tin phiếu " + pn.getMaPN()
+                : "Chọn sản phẩm và điền số lượng, giá nhập");
         s.setFont(new Font("Dialog", Font.PLAIN, 12));
         s.setForeground(TEXT2);
         h.add(t, BorderLayout.NORTH);
@@ -98,9 +97,9 @@ public class PhieuNhapDialog extends JDialog {
         JPanel p = new JPanel(new GridLayout(2, 4, 12, 10));
         p.setBackground(BG);
 
-        fMaPN = addField(p, "Mã phiếu *", pn != null ? pn.getMaPN() : "");
-        fMaNV = addField(p, "Mã nhân viên *", pn != null ? pn.getMaNV() : "");
-        fNhaCungCap = addField(p, "Nhà cung cấp *", pn != null ? pn.getNhaCungCap() : "");
+        fMaPN  = addField(p, "Mã phiếu *",    pn != null ? pn.getMaPN()  : "");
+        fMaNV  = addField(p, "Mã nhân viên *", pn != null ? pn.getMaNV()  : "");
+        fMaNCC = addField(p, "Mã NCC *",       pn != null ? pn.getMaNCC() : ""); // cột nhacungcap
 
         JLabel lblNgay = new JLabel("Ngày tạo");
         lblNgay.setFont(new Font("Dialog", Font.BOLD, 11));
@@ -123,7 +122,7 @@ public class PhieuNhapDialog extends JDialog {
     }
 
     // ── Bảng chi tiết ────────────────────────────────────
-    private JPanel buildCTTable() {
+    private JPanel buildCTTable(PhieuNhapHangDTO pn) {
         JPanel wrap = new JPanel(new BorderLayout(0, 8));
         wrap.setBackground(BG);
 
@@ -137,13 +136,8 @@ public class PhieuNhapDialog extends JDialog {
         JButton btnXoa  = makeButton("Xoá dòng",  RED,    Color.WHITE);
 
         btnThem.addActionListener(e -> {
-            // Dừng edit hiện tại nếu có
-            if (ctTable.isEditing()) {
-                ctTable.getCellEditor().stopCellEditing();
-            }
-            // ── FIX 1: generate mã SP từ DB với sort số thực sự ──
-            String maSPMoi = "SP" + String.format("%03d",Integer.parseInt(spdao.generateSP().substring(2)) + ctModel.getRowCount());
-            ctModel.addRow(new Object[]{maSPMoi, "", 1, 0.0, 0.0});
+            if (ctTable.isEditing()) ctTable.getCellEditor().stopCellEditing();
+            ctModel.addRow(new Object[]{"", "", 1, 0.0, 0.0});
             int newRow = ctModel.getRowCount() - 1;
             ctTable.changeSelection(newRow, 0, false, false);
             ctTable.editCellAt(newRow, 0);
@@ -153,10 +147,7 @@ public class PhieuNhapDialog extends JDialog {
         });
 
         btnXoa.addActionListener(e -> {
-            // ── FIX 2: dừng edit trước khi xoá để không mất selection ──
-            if (ctTable.isEditing()) {
-                ctTable.getCellEditor().cancelCellEditing();
-            }
+            if (ctTable.isEditing()) ctTable.getCellEditor().cancelCellEditing();
             int row = ctTable.getSelectedRow();
             if (row >= 0) {
                 ctModel.removeRow(row);
@@ -173,15 +164,8 @@ public class PhieuNhapDialog extends JDialog {
 
         String[] cols = {"Mã SP", "Tên SP", "Số lượng", "Giá nhập", "Thành tiền"};
         ctModel = new DefaultTableModel(cols, 0) {
-            @Override
-            public boolean isCellEditable(int r, int c) {
-                return c == 0 || c == 2 || c == 3;
-            }
-
-            @Override
-            public Class<?> getColumnClass(int c) {
-                return (c == 2 || c == 3 || c == 4) ? Double.class : String.class;
-            }
+            @Override public boolean isCellEditable(int r, int c) { return c == 0 || c == 2 || c == 3; }
+            @Override public Class<?> getColumnClass(int c) { return (c == 2 || c == 3 || c == 4) ? Double.class : String.class; }
         };
 
         ctTable = new JTable(ctModel) {
@@ -194,12 +178,7 @@ public class PhieuNhapDialog extends JDialog {
                 return c;
             }
         };
-
-        // ── FIX 2: phải double-click mới vào edit, single-click chỉ chọn dòng ──
-        ctTable.putClientProperty("JTable.autoStartsEdit", Boolean.FALSE);
-        ctTable.setSurrendersFocusOnKeystroke(true);
         ctTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
         ctTable.setBackground(CARD);
         ctTable.setForeground(TEXT1);
         ctTable.setGridColor(BORDER);
@@ -212,7 +191,7 @@ public class PhieuNhapDialog extends JDialog {
         th.setForeground(TEXT2);
         th.setFont(new Font("Dialog", Font.BOLD, 11));
 
-        // Tự động tính thành tiền khi sửa
+        // Tự động tính thành tiền khi sửa số lượng hoặc giá
         ctModel.addTableModelListener(e -> {
             if (e.getColumn() == 2 || e.getColumn() == 3) {
                 int row = e.getFirstRow();
@@ -239,7 +218,18 @@ public class PhieuNhapDialog extends JDialog {
         });
         ctTable.getColumnModel().getColumn(0).setCellEditor(new DefaultCellEditor(tfMaSP));
 
-        JLabel hint = new JLabel("  * Double-click ô Mã SP để sửa | Single-click dòng để chọn → Xoá dòng");
+        // Nếu đang sửa phiếu → nạp chi tiết cũ vào bảng
+        if (pn != null) {
+            ArrayList<ChiTietPhieuNhapDTO> dsCu = controller.getChiTietCu(pn.getMaPN());
+            for (ChiTietPhieuNhapDTO ct : dsCu) {
+                ctModel.addRow(new Object[]{
+                    ct.getMaSP(), "", ct.getSoLuong(), ct.getDonGia(), ct.getThanhTien()
+                });
+            }
+            tinhTong();
+        }
+
+        JLabel hint = new JLabel("  * Nhập Mã SP rồi nhấn Enter để tự điền tên & giá | Cột xanh có thể sửa trực tiếp");
         hint.setFont(new Font("Dialog", Font.ITALIC, 10));
         hint.setForeground(new Color(60, 80, 120));
 
@@ -250,7 +240,7 @@ public class PhieuNhapDialog extends JDialog {
         JPanel tableWrap = new JPanel(new BorderLayout(0, 4));
         tableWrap.setBackground(BG);
         tableWrap.add(scroll, BorderLayout.CENTER);
-        tableWrap.add(hint, BorderLayout.SOUTH);
+        tableWrap.add(hint,   BorderLayout.SOUTH);
 
         wrap.add(tableWrap, BorderLayout.CENTER);
         return wrap;
@@ -301,16 +291,13 @@ public class PhieuNhapDialog extends JDialog {
 
     // ── Sự kiện Lưu ──────────────────────────────────────
     private void onSave(PhieuNhapHangDTO pn) {
-        // Dừng edit đang diễn ra trước khi đọc dữ liệu
-        if (ctTable.isEditing()) {
-            ctTable.getCellEditor().stopCellEditing();
-        }
+        if (ctTable.isEditing()) ctTable.getCellEditor().stopCellEditing();
 
-        String maPN = fMaPN.getText().trim();
-        String maNV = fMaNV.getText().trim();
-        String ncc  = fNhaCungCap.getText().trim();
+        String maPN  = fMaPN.getText().trim();
+        String maNV  = fMaNV.getText().trim();
+        String maNCC = fMaNCC.getText().trim();  // lưu vào cột nhacungcap
 
-        String errForm = controller.validate(maPN, maNV, ncc, ctModel.getRowCount());
+        String errForm = controller.validate(maPN, maNV, maNCC, ctModel.getRowCount());
         if (errForm != null) {
             lblStatus.setText(errForm);
             return;
@@ -322,8 +309,12 @@ public class PhieuNhapDialog extends JDialog {
                     ? controller.getChiTietCu(pn.getMaPN()) : new ArrayList<>();
             double tongTien = 0;
 
+            // FIX duplicate key: lấy số thứ tự CTPN 1 lần trước vòng lặp,
+            // sau đó tự tăng (nextCTPN++) — không query DB nhiều lần trong cùng transaction
+            int nextCTPN = controller.getNextMaCTPNNumber();
+
             for (int i = 0; i < ctModel.getRowCount(); i++) {
-                String maSP      = ctModel.getValueAt(i, 0).toString();
+                String maSP      = ctModel.getValueAt(i, 0).toString().trim();
                 int    sl        = (int) controller.parseDouble(ctModel.getValueAt(i, 2));
                 double gia       = controller.parseDouble(ctModel.getValueAt(i, 3));
                 double thanhTien = sl * gia;
@@ -334,6 +325,7 @@ public class PhieuNhapDialog extends JDialog {
                     return;
                 }
 
+                // Giữ mã cũ nếu sản phẩm đã có trong phiếu (edit mode)
                 String maCTPN = null;
                 for (ChiTietPhieuNhapDTO old : dsCTCu) {
                     if (old.getMaSP().equals(maSP)) {
@@ -341,7 +333,10 @@ public class PhieuNhapDialog extends JDialog {
                         break;
                     }
                 }
-                if (maCTPN == null) maCTPN = controller.taoMaCTPN();
+                // Dòng mới → sinh mã mới, tăng counter lên 1
+                if (maCTPN == null) {
+                    maCTPN = String.format("CTPN%03d", nextCTPN++);
+                }
 
                 dsCT.add(new ChiTietPhieuNhapDTO(maCTPN, maPN, maSP, sl, gia, thanhTien));
                 tongTien += thanhTien;
@@ -349,12 +344,14 @@ public class PhieuNhapDialog extends JDialog {
 
             boolean success;
             if (pn == null) {
+                // Tạo mới: maNCC → lưu vào cột nhacungcap trong DB
                 PhieuNhapHangDTO newPn = new PhieuNhapHangDTO(
-                        maPN, maNV, ncc, new java.util.Date(), tongTien, "Chờ xử lý");
+                        maPN, maNV, maNCC, new java.util.Date(), tongTien, "Chờ xử lý");
                 success = controller.themPhieuMoi(newPn, dsCT);
             } else {
+                // Cập nhật
                 pn.setMaNV(maNV);
-                pn.setNhaCungCap(ncc);
+                pn.setMaNCC(maNCC);      // setMaNCC — không dùng setNhaCungCap nữa
                 pn.setTongTien(tongTien);
                 success = controller.capNhatPhieu(pn, dsCT);
             }
@@ -412,7 +409,5 @@ public class PhieuNhapDialog extends JDialog {
         return b;
     }
 
-    public String getKetQua() {
-        return ketQua;
-    }
+    public String getKetQua() { return ketQua; }
 }
