@@ -12,25 +12,16 @@ public class SanPhamBUS {
     }
 
     public boolean add(SanPham sp) {
-        // Không check maSP vì DAO tự generate qua generateSP()
-        if (sp.getTensp() == null || sp.getTensp().trim().isEmpty()) {
-            System.out.println("Tên sản phẩm không được rỗng");
+        if(sp.getMasp() == null || sp.getMasp().isEmpty()) {
+            System.out.println("Ma san pham khong duoc rong");
             return false;
         }
-        if (sp.getGiaban() <= 0) {
-            System.out.println("Giá bán phải lớn hơn 0");
+        if(sp.getTensp() == null || sp.getTensp().isEmpty()) {
+            System.out.println("Ten san pham khong duoc rong");
             return false;
         }
+
         return spDAO.insert(sp);
-    }
-
-    public boolean update(SanPham sp) {
-        if (sp.getMasp() == null || sp.getMasp().trim().isEmpty()) return false;
-        return spDAO.update(sp);
-    }
-
-    public SanPham getById(String maSP) {
-        return spDAO.getById(maSP);
     }
 
     public Object[] getTonKhoTheoLoai() {
@@ -44,5 +35,17 @@ public class SanPhamBUS {
         if (tonMoi < 0) throw new RuntimeException("Sản phẩm " + maSP + " không đủ tồn kho!");
         sp.setTonkho(tonMoi);
         spDAO.update(sp);
+    }
+    
+    public String[] getThongTinSP(String maSP) {
+        return spDAO.getThongTinSP(maSP);
+    }
+
+    public boolean update(SanPham sp) {
+        return spDAO.update(sp);
+    }
+
+    public SanPham getById(String maSP) {
+        return spDAO.getById(maSP);
     }
 }

@@ -185,8 +185,9 @@ public class PhieuNhapHangBUS {
         for (PhieuNhapHangDTO pn : all) {
             boolean matchKey = keyLower.isEmpty()
                     || pn.getMaPN().toLowerCase().contains(keyLower)
-                    || pn.getNhaCungCap().toLowerCase().contains(keyLower)
-                    || pn.getMaNV().toLowerCase().contains(keyLower);
+                    || pn.getMaNV().toLowerCase().contains(keyLower)
+                    || pn.getMaNCC().toLowerCase().contains(keyLower)
+                    || (pn.getTenNCC() != null && pn.getTenNCC().toLowerCase().contains(keyLower));
             boolean matchStatus = trangThaiLoc == null
                     || trangThaiLoc.isEmpty()
                     || trangThaiLoc.equals("Tất cả trạng thái")

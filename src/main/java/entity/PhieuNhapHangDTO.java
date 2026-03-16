@@ -6,7 +6,8 @@ public class PhieuNhapHangDTO {
 
     private String maPN;
     private String maNV;
-    private String nhaCungCap;
+    private String maNCC;      // maps to DB column: nhacungcap (FK)
+    private String tenNCC;     // từ JOIN nhacungcap — chỉ hiển thị, không lưu DB
     private Date ngayTao;
     private double tongTien;
     private String trangThai;
@@ -14,10 +15,10 @@ public class PhieuNhapHangDTO {
     public PhieuNhapHangDTO() {
     }
 
-    public PhieuNhapHangDTO(String maPN, String maNV, String nhaCungCap, Date ngayTao, double tongTien, String trangThai) {
+    public PhieuNhapHangDTO(String maPN, String maNV, String maNCC, Date ngayTao, double tongTien, String trangThai) {
         this.maPN = maPN;
         this.maNV = maNV;
-        this.nhaCungCap = nhaCungCap;
+        this.maNCC = maNCC;
         this.ngayTao = ngayTao;
         this.tongTien = tongTien;
         this.trangThai = trangThai;
@@ -39,12 +40,26 @@ public class PhieuNhapHangDTO {
         this.maNV = maNV;
     }
 
-    public String getNhaCungCap() {
-        return nhaCungCap;
+    /**
+     * Mã NCC — lưu xuống DB cột nhacungcap.
+     */
+    public String getMaNCC() {
+        return maNCC;
     }
 
-    public void setNhaCungCap(String nhaCungCap) {
-        this.nhaCungCap = nhaCungCap;
+    public void setMaNCC(String maNCC) {
+        this.maNCC = maNCC;
+    }
+
+    /**
+     * Tên NCC — lấy từ JOIN, chỉ dùng để hiển thị, không lưu DB.
+     */
+    public String getTenNCC() {
+        return tenNCC;
+    }
+
+    public void setTenNCC(String tenNCC) {
+        this.tenNCC = tenNCC;
     }
 
     public Date getNgayTao() {
@@ -73,6 +88,6 @@ public class PhieuNhapHangDTO {
 
     @Override
     public String toString() {
-        return "PhieuNhap{" + "maPN='" + maPN + '\'' + ", tongTien=" + tongTien + '}';
+        return "PhieuNhap{maPN='" + maPN + "', maNCC='" + maNCC + "', tongTien=" + tongTien + '}';
     }
 }

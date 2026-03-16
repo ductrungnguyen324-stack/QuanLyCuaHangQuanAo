@@ -10,7 +10,7 @@ import entity.*;
 
 
 public class SanPhamDAO {
-
+    
     public List<SanPham> getALL() {
         List<SanPham> list = new ArrayList<>();
         String sql = "SELECT * FROM sanpham";
@@ -34,7 +34,7 @@ public class SanPhamDAO {
 
     public boolean insert(SanPham sp) {
         String sql = "INSERT INTO SanPham (maSP, tenSP, loaiSP, giaban, thuonghieu, kichco, mausac, trangthai, tonkho) " +
-                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                     "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         String maSP = generateSP();
         sp.setMasp(maSP);
@@ -187,6 +187,9 @@ public class SanPhamDAO {
                 soList.stream().mapToInt(i -> i).toArray()
         };
     }
+    
+    
+    
 
     public SanPham mapResultSetToEntity(ResultSet rs) throws SQLException {
         SanPham sp = new SanPham();
@@ -203,7 +206,30 @@ public class SanPhamDAO {
 
         return sp;
     }
+    public String[] getThongTinSP(String maSP) {
+    String sql = "SELECT tenSP, giaban FROM sanpham WHERE maSP = ?";
 
+    try (Connection conn = DBConnection.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+        pstmt.setString(1, maSP);
+        ResultSet rs = pstmt.executeQuery();
+
+        if (rs.next()) {
+            return new String[]{
+                rs.getString("tenSP"),
+                String.valueOf(rs.getDouble("giaban"))
+            };
+        }
+        rs.close();
+
+    } catch (SQLException e) {
+        throw new RuntimeException("Lỗi getThongTinSP: " + e.getMessage());
+    }
+
+    return new String[]{ "Không tìm thấy", "0" };
+}
+    
     public static void main(String[] args) {
         SanPhamDAO sp = new SanPhamDAO();
         List<SanPham> list = sp.getALL();

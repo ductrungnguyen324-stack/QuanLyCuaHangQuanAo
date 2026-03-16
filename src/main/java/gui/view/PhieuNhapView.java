@@ -1,10 +1,9 @@
 package gui.view;
 
-import entity.PhieuNhapHangDTO;
 import gui.controller.PhieuNhapController;
+import entity.PhieuNhapHangDTO;
 import gui.dialog.PhieuNhapChiTietDialog;
 import gui.dialog.PhieuNhapDialog;
-
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.table.*;
@@ -17,7 +16,7 @@ import java.util.ArrayList;
  * PhieuNhapPanel — Chỉ chứa code giao diện. Mọi logic gọi qua
  * PhieuNhapPanelController.
  */
-public class PhieuNhapView extends JFrame {
+public class PhieuNhapView extends JPanel {
 
     // ── Controller ───────────────────────────────────────
     private final PhieuNhapController controller = new PhieuNhapController();
@@ -266,13 +265,15 @@ public class PhieuNhapView extends JFrame {
     }
 
     private void locDuLieu() {
-        if (tableModel == null || searchField == null || cbTrangThai == null) return;
-        String keyword   = searchField.getText();
+        if (tableModel == null || searchField == null || cbTrangThai == null) {
+            return;
+        }
+        String keyword = searchField.getText();
         String trangThai = cbTrangThai.getSelectedItem().toString();
         renderTable(controller.locDuLieu(keyword, trangThai));
     }
 
-      private void renderTable(ArrayList<PhieuNhapHangDTO> list) {
+    private void renderTable(ArrayList<PhieuNhapHangDTO> list) {
         tableModel.setRowCount(0);
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
         for (PhieuNhapHangDTO pn : list) {
@@ -280,8 +281,11 @@ public class PhieuNhapView extends JFrame {
             if (pn.getNgayTao() != null) {
                 ngay = sdf.format(pn.getNgayTao());
             }
+            String hienThiNCC = (pn.getTenNCC() != null && !pn.getTenNCC().isEmpty())
+                    ? pn.getTenNCC() // tên NCC từ JOIN
+                    : pn.getMaNCC();  // fallback mã NCC
             tableModel.addRow(new Object[]{
-                pn.getMaPN(), pn.getMaPN(), pn.getMaNV(), pn.getNhaCungCap(),
+                pn.getMaPN(), pn.getMaPN(), pn.getMaNV(), hienThiNCC,
                 ngay,
                 String.format("%,.0f đ", pn.getTongTien()),
                 pn.getTrangThai(), ""
@@ -290,35 +294,37 @@ public class PhieuNhapView extends JFrame {
         updateStats();
     }
 
-     private void updateStats() {
-        if (lblTongPN == null) return; // tránh crash khi chưa khởi tạo
-        int[]  stats   = controller.tinhThongKeAll();
+    private void updateStats() {
+        if (lblTongPN == null) {
+            return; // tránh crash khi chưa khởi tạo
+        }
+        int[] stats = controller.tinhThongKeAll();
         double tongChi = controller.tinhTongChiAll();
-        lblTongPN.setText("Phiếu: "          + stats[0]);
+        lblTongPN.setText("Phiếu: " + stats[0]);
         lblTongTien.setText(String.format("Tổng chi: %,.0f đ", tongChi));
-        lblChoXuLy.setText("Chờ xử lý: "     + stats[1]);
+        lblChoXuLy.setText("Chờ xử lý: " + stats[1]);
         lblDaNhapKho.setText("Đã nhập kho: " + stats[2]);
-        lblDaHuy.setText("Đã huỷ: "          + stats[3]);
+        lblDaHuy.setText("Đã huỷ: " + stats[3]);
 
     }
 
     // ── Sự kiện ──────────────────────────────────────────
     private void moDialogThem() {
-    PhieuNhapDialog dialog = new PhieuNhapDialog(
-            (Frame) SwingUtilities.getWindowAncestor(this), null);
-    dialog.setVisible(true);
+        PhieuNhapDialog dialog = new PhieuNhapDialog(
+                (Frame) SwingUtilities.getWindowAncestor(this), null);
+        dialog.setVisible(true);
 
-    // ✅ Sau khi dialog đóng mới xử lý kết quả
-    if (dialog.getKetQua() != null) {
-        loadDanhSach();
-        JOptionPane.showMessageDialog(
-            SwingUtilities.getWindowAncestor(this), // ← parent đúng là frame chính
-            "Tạo phiếu " + dialog.getKetQua() + " thành công!",
-            "Thành công",
-            JOptionPane.INFORMATION_MESSAGE
-        );
+        // ✅ Sau khi dialog đóng mới xử lý kết quả
+        if (dialog.getKetQua() != null) {
+            loadDanhSach();
+            JOptionPane.showMessageDialog(
+                    SwingUtilities.getWindowAncestor(this), // ← parent đúng là frame chính
+                    "Tạo phiếu " + dialog.getKetQua() + " thành công!",
+                    "Thành công",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+        }
     }
-}
 
     private void xemChiTiet(String maPN) {
         PhieuNhapHangDTO pn = controller.getById(maPN);
