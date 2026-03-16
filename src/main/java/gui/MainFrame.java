@@ -190,7 +190,7 @@ public class MainFrame extends JFrame {
 
         // ── Hoá đơn ──
         HoaDonView hoaDonView = new HoaDonView();
-        new HoaDonController(hoaDonView, maNV, chucvu); // ← truyền chucvu
+        new HoaDonController(hoaDonView, chucvu); // ← truyền chucvu
         contentPanel.add(wrapView(hoaDonView), "HOADON");
 
         // ── Khuyến mãi ──
