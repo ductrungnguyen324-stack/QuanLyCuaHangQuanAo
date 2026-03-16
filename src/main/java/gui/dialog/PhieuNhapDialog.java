@@ -175,7 +175,7 @@ public class PhieuNhapDialog extends JDialog {
         ctModel = new DefaultTableModel(cols, 0) {
             @Override
             public boolean isCellEditable(int r, int c) {
-                return c == 0 || c == 2 || c == 3;
+                return c == 0 || c==1 || c == 2 || c == 3 || c==4;
             }
 
             @Override

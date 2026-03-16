@@ -53,7 +53,7 @@ public class KhachHangView extends JFrame {
     }
 
     public KhachHangView(String chucvu) {
-        this.chiXem = !("Quan ly".equals(chucvu));
+        this.chiXem = !("Quan ly".equals(chucvu) || "Thu ngan".equals(chucvu));
         controller = new KhachHangController(this, chucvu);
 
         setTitle("Quản lý Khách Hàng");

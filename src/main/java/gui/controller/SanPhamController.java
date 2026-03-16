@@ -45,14 +45,14 @@ public class SanPhamController {
     // ── THÊM MỚI: áp dụng quyền ──
     private void applyQuyen() {
         // Chỉ Quản lý mới được thêm/sửa/xoá sản phẩm
-        boolean coQuyen = "Quan ly".equals(chucvu);
+        boolean coQuyen = "Quan ly".equals(chucvu) || "Thu ngan".equals(chucvu);
         view.getBtnThem().setVisible(coQuyen);
         view.getBtnThem().setEnabled(coQuyen);
         view.setChiXem(!coQuyen);
     }
 
     private boolean coQuyen() {
-        return "Quan ly".equals(chucvu);
+        return "Quan ly".equals(chucvu) || "Thu ngan".equals(chucvu);
     }
 
     private void showNoQuyen() {

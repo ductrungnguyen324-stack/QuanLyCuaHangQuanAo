@@ -31,7 +31,7 @@ public class KhachHangController {
     // ── THÊM MỚI: kiểm tra quyền ──
     // Chỉ Quản lý mới được thêm/sửa/xoá khách hàng
     public boolean coQuyen() {
-        return "Quan ly".equals(chucvu);
+        return "Quan ly".equals(chucvu) || "Thu ngan".equals(chucvu);
     }
 
     private void showNoQuyen() {
