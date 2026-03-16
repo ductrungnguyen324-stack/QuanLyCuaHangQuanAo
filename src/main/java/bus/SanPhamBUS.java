@@ -36,6 +36,10 @@ public class SanPhamBUS {
         sp.setTonkho(tonMoi);
         spDAO.update(sp);
     }
+    
+    public String[] getThongTinSP(String maSP) {
+        return spDAO.getThongTinSP(maSP);
+    }
 
     public boolean update(SanPham sp) {
         return spDAO.update(sp);

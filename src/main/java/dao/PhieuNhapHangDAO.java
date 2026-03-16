@@ -47,10 +47,10 @@ public class PhieuNhapHangDAO {
     public ArrayList<PhieuNhapHangDTO> getByMaNCC(String maNCC) {
         ArrayList<PhieuNhapHangDTO> list = new ArrayList<>();
         String sql = "SELECT pn.*, ncc.tenNCC "
-        + "FROM phieunhap pn "
-        + "LEFT JOIN nhacungcap ncc ON pn.nhacungcap = ncc.maNCC "
-        + "WHERE pn.nhacungcap = ? "
-        + "ORDER BY pn.ngaytao DESC";
+                + "FROM phieunhap pn "
+                + "LEFT JOIN nhacungcap ncc ON pn.nhacungcap = ncc.maNCC "
+                + "WHERE pn.nhacungcap = ? "
+                + "ORDER BY pn.ngaytao DESC";
 
         try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, maNCC);
@@ -131,9 +131,9 @@ public class PhieuNhapHangDAO {
     // ── Lấy phiếu nhập theo mã, JOIN để có tên NCC ──────────────────────────
     public PhieuNhapHangDTO getPhieuNhapById(String maPN) {
         String sql = "SELECT pn.*, ncc.tenNCC "
-        + "FROM phieunhap pn "
-        + "LEFT JOIN nhacungcap ncc ON pn.nhacungcap = ncc.maNCC "
-        + "WHERE pn.maPN = ?";
+                + "FROM phieunhap pn "
+                + "LEFT JOIN nhacungcap ncc ON pn.nhacungcap = ncc.maNCC "
+                + "WHERE pn.maPN = ?";
         try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, maPN);
             try (ResultSet rs = ps.executeQuery()) {
@@ -141,7 +141,7 @@ public class PhieuNhapHangDAO {
                     PhieuNhapHangDTO pn = new PhieuNhapHangDTO(
                             rs.getString("maPN"),
                             rs.getString("maNV"),
-                            rs.getString("nhacungcap"),   // tên cột trong DB là nhacungcap
+                            rs.getString("nhacungcap"), // tên cột trong DB là nhacungcap
                             rs.getTimestamp("ngaytao"),
                             rs.getDouble("thanhtien"),
                             rs.getString("trangthai")
@@ -174,9 +174,9 @@ public class PhieuNhapHangDAO {
     // ── Lấy mã phiếu nhập lớn nhất để sinh mã mới ───────────────────────────
     public String getLastMaPhieuNhap() {
         // SQL Server
-        String sql = "SELECT TOP 1 maPN FROM phieunhap ORDER BY maPN DESC";
+        //String sql = "SELECT TOP 1 maPN FROM phieunhap ORDER BY maPN DESC";
 
-        //  String sql = "SELECT maPN FROM phieunhap ORDER BY maPN DESC LIMIT 1";
+        String sql = "SELECT maPN FROM phieunhap ORDER BY maPN DESC LIMIT 1";
         try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 return rs.getString("maPN");

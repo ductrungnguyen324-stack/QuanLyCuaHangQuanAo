@@ -1,6 +1,5 @@
 package gui.dialog;
 
-
 import entity.ChiTietPhieuNhapDTO;
 import entity.PhieuNhapHangDTO;
 import gui.controller.PhieuNhapController;
@@ -21,15 +20,15 @@ public class PhieuNhapDialog extends JDialog {
     private final PhieuNhapController controller = new PhieuNhapController();
 
     // ── Màu sắc ──────────────────────────────────────────
-    private static final Color BG     = new Color(10, 14, 30);
-    private static final Color CARD   = new Color(14, 20, 40);
-    private static final Color CARD2  = new Color(18, 26, 52);
+    private static final Color BG = new Color(10, 14, 30);
+    private static final Color CARD = new Color(14, 20, 40);
+    private static final Color CARD2 = new Color(18, 26, 52);
     private static final Color BORDER = new Color(30, 42, 72);
     private static final Color ACCENT = new Color(99, 102, 241);
-    private static final Color RED    = new Color(239, 68, 68);
-    private static final Color CYAN   = new Color(6, 182, 212);
-    private static final Color TEXT1  = new Color(226, 232, 240);
-    private static final Color TEXT2  = new Color(100, 116, 139);
+    private static final Color RED = new Color(239, 68, 68);
+    private static final Color CYAN = new Color(6, 182, 212);
+    private static final Color TEXT1 = new Color(226, 232, 240);
+    private static final Color TEXT2 = new Color(100, 116, 139);
     private static final Color DANGER = new Color(239, 68, 68);
 
     // ── Widgets ──────────────────────────────────────────
@@ -97,9 +96,9 @@ public class PhieuNhapDialog extends JDialog {
         JPanel p = new JPanel(new GridLayout(2, 4, 12, 10));
         p.setBackground(BG);
 
-        fMaPN  = addField(p, "Mã phiếu *",    pn != null ? pn.getMaPN()  : "");
-        fMaNV  = addField(p, "Mã nhân viên *", pn != null ? pn.getMaNV()  : "");
-        fMaNCC = addField(p, "Mã NCC *",       pn != null ? pn.getMaNCC() : ""); // cột nhacungcap
+        fMaPN = addField(p, "Mã phiếu *", pn != null ? pn.getMaPN() : "");
+        fMaNV = addField(p, "Mã nhân viên *", pn != null ? pn.getMaNV() : "");
+        fMaNCC = addField(p, "Mã NCC *", pn != null ? pn.getMaNCC() : ""); // cột nhacungcap
 
         JLabel lblNgay = new JLabel("Ngày tạo");
         lblNgay.setFont(new Font("Dialog", Font.BOLD, 11));
@@ -133,21 +132,27 @@ public class PhieuNhapDialog extends JDialog {
         lbl.setForeground(TEXT1);
 
         JButton btnThem = makeButton("+ Thêm SP", ACCENT, Color.WHITE);
-        JButton btnXoa  = makeButton("Xoá dòng",  RED,    Color.WHITE);
+        JButton btnXoa = makeButton("Xoá dòng", RED, Color.WHITE);
 
         btnThem.addActionListener(e -> {
-            if (ctTable.isEditing()) ctTable.getCellEditor().stopCellEditing();
+            if (ctTable.isEditing()) {
+                ctTable.getCellEditor().stopCellEditing();
+            }
             ctModel.addRow(new Object[]{"", "", 1, 0.0, 0.0});
             int newRow = ctModel.getRowCount() - 1;
             ctTable.changeSelection(newRow, 0, false, false);
             ctTable.editCellAt(newRow, 0);
             Component editor = ctTable.getEditorComponent();
-            if (editor != null) editor.requestFocusInWindow();
+            if (editor != null) {
+                editor.requestFocusInWindow();
+            }
             tinhTong();
         });
 
         btnXoa.addActionListener(e -> {
-            if (ctTable.isEditing()) ctTable.getCellEditor().cancelCellEditing();
+            if (ctTable.isEditing()) {
+                ctTable.getCellEditor().cancelCellEditing();
+            }
             int row = ctTable.getSelectedRow();
             if (row >= 0) {
                 ctModel.removeRow(row);
@@ -164,8 +169,15 @@ public class PhieuNhapDialog extends JDialog {
 
         String[] cols = {"Mã SP", "Tên SP", "Số lượng", "Giá nhập", "Thành tiền"};
         ctModel = new DefaultTableModel(cols, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return c == 0 || c == 2 || c == 3; }
-            @Override public Class<?> getColumnClass(int c) { return (c == 2 || c == 3 || c == 4) ? Double.class : String.class; }
+            @Override
+            public boolean isCellEditable(int r, int c) {
+                return c == 0 || c == 2 || c == 3;
+            }
+
+            @Override
+            public Class<?> getColumnClass(int c) {
+                return (c == 2 || c == 3 || c == 4) ? Double.class : String.class;
+            }
         };
 
         ctTable = new JTable(ctModel) {
@@ -196,10 +208,11 @@ public class PhieuNhapDialog extends JDialog {
             if (e.getColumn() == 2 || e.getColumn() == 3) {
                 int row = e.getFirstRow();
                 try {
-                    int    sl = (int) controller.parseDouble(ctModel.getValueAt(row, 2));
+                    int sl = (int) controller.parseDouble(ctModel.getValueAt(row, 2));
                     double gn = controller.parseDouble(ctModel.getValueAt(row, 3));
                     ctModel.setValueAt(sl * gn, row, 4);
-                } catch (Exception ignored) {}
+                } catch (Exception ignored) {
+                }
                 tinhTong();
             }
         });
@@ -209,15 +222,14 @@ public class PhieuNhapDialog extends JDialog {
         tfMaSP.addActionListener(e -> {
             int row = ctTable.getSelectedRow();
             if (row != -1) {
-                ArrayList<String> info = controller.tuDongDienThongTin(tfMaSP.getText().trim());
+                String[] info = controller.tuDongDienThongTin(tfMaSP.getText().trim());
                 ctModel.setValueAt(tfMaSP.getText().trim(), row, 0);
-                ctModel.setValueAt(info.get(0), row, 1);
-                ctModel.setValueAt(Double.parseDouble(info.get(1)), row, 3);
+                ctModel.setValueAt(info[0], row, 1);
+                ctModel.setValueAt(Double.parseDouble(info[1]), row, 3);
                 ctTable.changeSelection(row, 2, false, false);
             }
         });
         ctTable.getColumnModel().getColumn(0).setCellEditor(new DefaultCellEditor(tfMaSP));
-
         // Nếu đang sửa phiếu → nạp chi tiết cũ vào bảng
         if (pn != null) {
             ArrayList<ChiTietPhieuNhapDTO> dsCu = controller.getChiTietCu(pn.getMaPN());
@@ -240,7 +252,7 @@ public class PhieuNhapDialog extends JDialog {
         JPanel tableWrap = new JPanel(new BorderLayout(0, 4));
         tableWrap.setBackground(BG);
         tableWrap.add(scroll, BorderLayout.CENTER);
-        tableWrap.add(hint,   BorderLayout.SOUTH);
+        tableWrap.add(hint, BorderLayout.SOUTH);
 
         wrap.add(tableWrap, BorderLayout.CENTER);
         return wrap;
@@ -284,17 +296,19 @@ public class PhieuNhapDialog extends JDialog {
         btns.add(btnHuy);
         btns.add(btnLuu);
 
-        footer.add(top,  BorderLayout.NORTH);
+        footer.add(top, BorderLayout.NORTH);
         footer.add(btns, BorderLayout.SOUTH);
         return footer;
     }
 
     // ── Sự kiện Lưu ──────────────────────────────────────
     private void onSave(PhieuNhapHangDTO pn) {
-        if (ctTable.isEditing()) ctTable.getCellEditor().stopCellEditing();
+        if (ctTable.isEditing()) {
+            ctTable.getCellEditor().stopCellEditing();
+        }
 
-        String maPN  = fMaPN.getText().trim();
-        String maNV  = fMaNV.getText().trim();
+        String maPN = fMaPN.getText().trim();
+        String maNV = fMaNV.getText().trim();
         String maNCC = fMaNCC.getText().trim();  // lưu vào cột nhacungcap
 
         String errForm = controller.validate(maPN, maNV, maNCC, ctModel.getRowCount());
@@ -304,7 +318,7 @@ public class PhieuNhapDialog extends JDialog {
         }
 
         try {
-            ArrayList<ChiTietPhieuNhapDTO> dsCT   = new ArrayList<>();
+            ArrayList<ChiTietPhieuNhapDTO> dsCT = new ArrayList<>();
             ArrayList<ChiTietPhieuNhapDTO> dsCTCu = (pn != null)
                     ? controller.getChiTietCu(pn.getMaPN()) : new ArrayList<>();
             double tongTien = 0;
@@ -314,9 +328,9 @@ public class PhieuNhapDialog extends JDialog {
             int nextCTPN = controller.getNextMaCTPNNumber();
 
             for (int i = 0; i < ctModel.getRowCount(); i++) {
-                String maSP      = ctModel.getValueAt(i, 0).toString().trim();
-                int    sl        = (int) controller.parseDouble(ctModel.getValueAt(i, 2));
-                double gia       = controller.parseDouble(ctModel.getValueAt(i, 3));
+                String maSP = ctModel.getValueAt(i, 0).toString().trim();
+                int sl = (int) controller.parseDouble(ctModel.getValueAt(i, 2));
+                double gia = controller.parseDouble(ctModel.getValueAt(i, 3));
                 double thanhTien = sl * gia;
 
                 String errDong = controller.validateDong(i + 1, sl, gia);
@@ -409,5 +423,7 @@ public class PhieuNhapDialog extends JDialog {
         return b;
     }
 
-    public String getKetQua() { return ketQua; }
+    public String getKetQua() {
+        return ketQua;
+    }
 }

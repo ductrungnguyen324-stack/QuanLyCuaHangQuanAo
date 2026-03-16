@@ -42,6 +42,12 @@ public class PhieuNhapChiTietDialog extends JDialog {
 
     // ── Build UI ─────────────────────────────────────────
     private void buildUI(PhieuNhapHangDTO pn) {
+        // Reload từ DB để lấy trạng thái mới nhất, tránh dùng object cache cũ
+        PhieuNhapHangDTO pnMoi = controller.getPhieuNhapById(pn.getMaPN());
+        if (pnMoi != null) {
+            pn = pnMoi;
+        }
+
         // Lấy dữ liệu qua Controller
         ArrayList<ChiTietPhieuNhapDTO> listCT = controller.getChiTiet(pn.getMaPN());
 
@@ -88,7 +94,7 @@ public class PhieuNhapChiTietDialog extends JDialog {
         info.setBackground(BG);
         Color colorTT = controller.isDaDuyet(pn) ? GREEN : CYAN;
         String hienThiNCC = (pn.getTenNCC() != null && !pn.getTenNCC().isEmpty())
-                ? pn.getTenNCC()   // tên NCC từ JOIN — ưu tiên hiển thị
+                ? pn.getTenNCC() // tên NCC từ JOIN — ưu tiên hiển thị
                 : pn.getMaNCC();   // fallback: hiển thị mã NCC nếu không có tên
         info.add(makeInfoCard("Nhà cung cấp", hienThiNCC, TEXT1));
         info.add(makeInfoCard("Trạng thái", pn.getTrangThai(), colorTT));
@@ -135,31 +141,75 @@ public class PhieuNhapChiTietDialog extends JDialog {
 
     // ── Footer ───────────────────────────────────────────
     private JPanel buildFooter(PhieuNhapHangDTO pn) {
-        JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 12));
+        JPanel footer = new JPanel(new BorderLayout(10, 0));
         footer.setBackground(BG);
+        footer.setBorder(BorderFactory.createEmptyBorder(10, 16, 12, 16));
+
+        // Label cảnh báo trạng thái — hiện khi đã duyệt
+        JLabel lblCanhBao = new JLabel(
+                controller.isDaDuyet(pn) ? "⚠ Phiếu này đã được duyệt, không thể duyệt lại!" : " ");
+        lblCanhBao.setFont(new Font("Dialog", Font.BOLD, 11));
+        lblCanhBao.setForeground(new Color(245, 158, 11)); // màu vàng cảnh báo
+
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        btnPanel.setOpaque(false);
 
         JButton btnDuyet = makeButton("✓ Duyệt nhập kho", GREEN, Color.WHITE);
         JButton btnDong = makeButton("Đóng", CARD, TEXT2);
 
+        // Disable ngay nếu đã duyệt — dựa trên trạng thái reload từ DB
         btnDuyet.setEnabled(!controller.isDaDuyet(pn));
-        btnDuyet.addActionListener(e -> onDuyetClick(pn));
+        if (controller.isDaDuyet(pn)) {
+            btnDuyet.setBackground(new Color(30, 42, 72)); // xám — không thể nhấn
+            btnDuyet.setForeground(TEXT2);
+            btnDuyet.setToolTipText("Phiếu này đã được duyệt");
+        }
+
+        btnDuyet.addActionListener(e -> onDuyetClick(pn, btnDuyet, lblCanhBao));
         btnDong.addActionListener(e -> dispose());
 
-        footer.add(btnDuyet);
-        footer.add(btnDong);
+        btnPanel.add(btnDuyet);
+        btnPanel.add(btnDong);
+
+        footer.add(lblCanhBao, BorderLayout.WEST);
+        footer.add(btnPanel, BorderLayout.EAST);
         return footer;
     }
 
     // ── Sự kiện Duyệt ────────────────────────────────────
-    private void onDuyetClick(PhieuNhapHangDTO pn) {
+    private void onDuyetClick(PhieuNhapHangDTO pn, JButton btnDuyet, JLabel lblCanhBao) {
+        // Double-check trạng thái trực tiếp từ DB trước khi duyệt
+        PhieuNhapHangDTO check = controller.getPhieuNhapById(pn.getMaPN());
+        if (check != null && controller.isDaDuyet(check)) {
+            lblCanhBao.setText("⚠ Phiếu này đã được duyệt, không thể duyệt lại!");
+            btnDuyet.setEnabled(false);
+            btnDuyet.setBackground(new Color(30, 42, 72));
+            btnDuyet.setForeground(TEXT2);
+            JOptionPane.showMessageDialog(this,
+                    "Phiếu " + pn.getMaPN() + " đã được duyệt rồi!",
+                    "Thông báo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         int ok = JOptionPane.showConfirmDialog(this,
-                "Duyệt phiếu " + pn.getMaPN() + "?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+                "Xác nhận duyệt phiếu " + pn.getMaPN() + "?\n"
+                + "Thao tác này sẽ cập nhật tồn kho và không thể hoàn tác.",
+                "Xác nhận duyệt", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
         if (ok == JOptionPane.YES_OPTION) {
             if (controller.duyetPhieu(pn.getMaPN())) {
-                JOptionPane.showMessageDialog(this, "Duyệt thành công!");
+                // Cập nhật state object + disable button ngay lập tức
+                pn.setTrangThai("Đã nhập kho");
+                btnDuyet.setEnabled(false);
+                btnDuyet.setBackground(new Color(30, 42, 72));
+                btnDuyet.setForeground(TEXT2);
+                lblCanhBao.setText("⚠ Phiếu này đã được duyệt, không thể duyệt lại!");
+                JOptionPane.showMessageDialog(this, "✓ Duyệt thành công!", "Thành công",
+                        JOptionPane.INFORMATION_MESSAGE);
                 dispose();
             } else {
-                JOptionPane.showMessageDialog(this, "Duyệt thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Duyệt thất bại!", "Lỗi",
+                        JOptionPane.ERROR_MESSAGE);
             }
         }
     }

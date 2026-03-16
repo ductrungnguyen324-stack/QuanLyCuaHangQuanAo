@@ -17,6 +17,14 @@ public class PhieuNhapChiTietController {
         return list;
     }
 
+    /**
+     * Reload phiếu từ DB — dùng để kiểm tra trạng thái mới nhất trước khi
+     * duyệt.
+     */
+    public PhieuNhapHangDTO getPhieuNhapById(String maPN) {
+        return pnBUS.getPhieuNhapById(maPN);
+    }
+
     public boolean duyetPhieu(String maPN) {
         return pnBUS.duyetPhieu(maPN);
     }
