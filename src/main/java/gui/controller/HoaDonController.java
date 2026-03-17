@@ -133,7 +133,7 @@ public class HoaDonController {
 
             // Nếu người dùng bấm "Duyệt thanh toán" bên trong dialog
             if (dialog.isDuyet()) {
-                hd.setTrangthai("DATHANHTOAN");
+                hd.setTrangthai("Đã thanh toán");
                 hoadonbus.update(hd);
                 // giam so luong sp khi da thanh toan
                 List<ChiTietHoaDon> ctList = cthdbus.getAllByMaHD(maHD);

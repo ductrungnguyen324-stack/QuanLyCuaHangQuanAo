@@ -38,19 +38,19 @@ public class NhanVienController {
 
     // Constructor cũ (tương thích)
     public NhanVienController(IView view) {
-        this(view, "Quan ly");
+        this(view, "Quản lý");
     }
 
     public NhanVienController(IView view, NhanVienBUS bus) {
         this.view   = view;
         this.bus    = bus;
-        this.chucvu = "Quan ly";
+        this.chucvu = "Quản lý";
     }
 
     // ── THÊM MỚI: kiểm tra quyền ──
     // Chỉ Quản lý mới được thêm/sửa/xoá nhân viên
     private boolean coQuyen() {
-        return "Quan ly".equals(chucvu);
+        return "Quản lý".equals(chucvu);
     }
 
     private void showNoQuyen() {

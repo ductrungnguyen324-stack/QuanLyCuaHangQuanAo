@@ -1,10 +1,10 @@
 package dao;
+
 import java.sql.Connection;
 import java.util.List;
 import java.util.ArrayList;
-import  java.sql.*;
+import java.sql.*;
 import entity.*;
-
 
 public class ChiTietHoaDonDAO {
 
@@ -12,39 +12,37 @@ public class ChiTietHoaDonDAO {
         List<ChiTietHoaDon> list = new ArrayList<>();
         String sql = "SELECT * from ChiTietHoaDon ORDER BY maCTHD DESC";
 
-        try(Connection conn = DBConnection.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            ResultSet rs = pstmt.executeQuery()) {
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
 
-            while(rs.next()) {
+            while (rs.next()) {
                 ChiTietHoaDon cthd = mapResultSetToEntity(rs);
                 list.add(cthd);
             }
             rs.close();
 
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return list;
     }
+
     public List<ChiTietHoaDon> getAllByMaHD(String maHD) {
         List<ChiTietHoaDon> list = new ArrayList<>();
 
         String sql = "SELECT * from ChiTietHoaDon where maHD = ?";
 
-        try(Connection conn = DBConnection.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, maHD);
 
-            try(ResultSet rs = pstmt.executeQuery()) {
-                while(rs.next()) {
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
                     ChiTietHoaDon cthd = mapResultSetToEntity(rs);
                     list.add(cthd);
                 }
                 rs.close();
             }
-        }catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return list;
@@ -56,8 +54,7 @@ public class ChiTietHoaDonDAO {
 
         cthd.setMaCTHD(maCTHD);
 
-        try(Connection conn = DBConnection.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, cthd.getMaCTHD());
             pstmt.setString(2, cthd.getMaHD());
@@ -68,7 +65,7 @@ public class ChiTietHoaDonDAO {
             pstmt.setDouble(7, cthd.getThanhtien());
 
             return pstmt.executeUpdate() > 0;
-        } catch(Exception e ) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
@@ -77,19 +74,20 @@ public class ChiTietHoaDonDAO {
     public boolean update(ChiTietHoaDon cthd) {
         ChiTietHoaDon check = getById(cthd.getMaCTHD());
 
-        if(check == null) throw new RuntimeException("Chi tiet hoa don chua ton tai !");
+        if (check == null) {
+            throw new RuntimeException("Chi tiet hoa don chua ton tai !");
+        }
 
-        String sql =  "UPDATE ChiTietHoaDon SET "
+        String sql = "UPDATE ChiTietHoaDon SET "
                 + "maHD = ?, "
                 + "maSP = ?, "
                 + "tenSP = ?, "
                 + "soluong = ?, "
                 + "dongia = ?, "
-                + "thanhtien = ?, "
+                + "thanhtien = ? "
                 + "WHERE maCTHD = ?";
 
-        try(Connection conn = DBConnection.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, cthd.getMaHD());
             pstmt.setString(2, cthd.getMaSP());
@@ -101,7 +99,7 @@ public class ChiTietHoaDonDAO {
 
             return pstmt.executeUpdate() > 0;
 
-        }catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
@@ -110,14 +108,13 @@ public class ChiTietHoaDonDAO {
     public boolean delete(String maHD) {
         String sql = "DELETE FROM ChiTietHoaDon WHERE maHD = ?";
 
-        try(Connection conn = DBConnection.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, maHD);
 
             return pstmt.executeUpdate() > 0;
 
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
@@ -126,18 +123,17 @@ public class ChiTietHoaDonDAO {
     public ChiTietHoaDon getById(String maCTHD) {
         String sql = "SELECT * from ChiTietHoaDon where maCTHD = ?";
 
-        try(Connection conn = DBConnection.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, maCTHD);
 
-            try(ResultSet rs = pstmt.executeQuery()) {
-                if(rs.next()) {
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
                     return mapResultSetToEntity(rs);
                 }
                 rs.close();
             }
-        }catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -145,19 +141,17 @@ public class ChiTietHoaDonDAO {
 
     public String generate() {
         String sql = "SELECT maCTHD from ChiTietHoaDon ORDER BY maCTHD DESC LIMIT 1";
+        //String sql = "SELECT TOP 1 maCTHD FROM ChiTietHoaDon ORDER BY maCTHD DESC";
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
 
-        try(Connection conn = DBConnection.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            ResultSet rs = pstmt.executeQuery()) {
-
-            if(rs.next()) {
+            if (rs.next()) {
                 String maHD = rs.getString("maCTHD");
                 int number = Integer.parseInt(maHD.substring(4));
                 return String.format("CTHD%03d", number + 1);
             }
             rs.close();
 
-        } catch(Exception e) {
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
         return "CTHD001";
@@ -167,10 +161,14 @@ public class ChiTietHoaDonDAO {
         String sql = "SELECT tenSP, SUM(soluong) AS tong " +
                 "FROM chitiethoadon GROUP BY maSP, tenSP " +
                 "ORDER BY tong DESC LIMIT ?";
+       // String sql = "SELECT tenSP, SUM(soluong) AS tong "
+        //        + "FROM ChiTietHoaDon "
+        //        + "GROUP BY maSP, tenSP "
+        //        + "ORDER BY tong DESC "
+          //      + "OFFSET 0 ROWS FETCH NEXT ? ROWS ONLY";
         List<String> tenList = new ArrayList<>();
-        List<Integer> slList  = new ArrayList<>();
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        List<Integer> slList = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, limit);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
@@ -182,8 +180,8 @@ public class ChiTietHoaDonDAO {
             e.printStackTrace();
         }
         return new Object[]{
-                tenList.toArray(new String[0]),
-                slList.stream().mapToInt(i -> i).toArray()
+            tenList.toArray(new String[0]),
+            slList.stream().mapToInt(i -> i).toArray()
         };
     }
 

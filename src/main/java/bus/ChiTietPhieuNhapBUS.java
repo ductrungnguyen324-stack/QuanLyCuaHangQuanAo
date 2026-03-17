@@ -20,7 +20,7 @@ public class ChiTietPhieuNhapBUS {
     }
 
     public boolean insert(ChiTietPhieuNhapDTO ct, Connection conn) {
-        String sql = "INSERT INTO chitietphieunhap (maCTPN, maPN, maSP, soluong, dongia, thanhtien) "
+        String sql = "INSERT INTO chitietphieunhap (maCTPN, maPN, maSP, soluong, gianhap, thanhtien) "
                 + "VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, ct.getMaCTPN());

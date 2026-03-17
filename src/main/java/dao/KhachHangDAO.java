@@ -1,4 +1,5 @@
 package dao;
+
 import entity.KhachHang;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,9 +12,8 @@ public class KhachHangDAO {
     // INSERT
     public boolean insert(KhachHang kh) {
         int result = 0;
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(
-                     "INSERT INTO KhachHang(maKH, hoten, sdt, ngaythamgia) VALUES(?,?,?,?)")) {
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(
+                "INSERT INTO KhachHang(maKH, hoten, sdt, ngaythamgia) VALUES(?,?,?,?)")) {
 
             ps.setString(1, kh.getMaKH());
             ps.setString(2, kh.getHoten());
@@ -30,9 +30,8 @@ public class KhachHangDAO {
 
     // UPDATE
     public boolean update(KhachHang kh) {
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(
-                     "UPDATE KhachHang SET hoten=?, sdt=?, ngaythamgia=? WHERE maKH=?")) {
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(
+                "UPDATE KhachHang SET hoten=?, sdt=?, ngaythamgia=? WHERE maKH=?")) {
 
             ps.setString(1, kh.getHoten());
             ps.setString(2, kh.getSdt());
@@ -49,9 +48,8 @@ public class KhachHangDAO {
 
     // DELETE
     public boolean delete(String maKH) {
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(
-                     "DELETE FROM KhachHang WHERE maKH=?")) {
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(
+                "DELETE FROM KhachHang WHERE maKH=?")) {
 
             ps.setString(1, maKH);
 
@@ -66,9 +64,8 @@ public class KhachHangDAO {
     // GENERATE MA KH
     public String generateKH() {
         String sql = "SELECT maKH FROM KhachHang ORDER BY maKH DESC LIMIT 1";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+      //  String sql = " SELECT TOP 1 maKH FROM KhachHang ORDER BY maKH DESC";
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 String last = rs.getString("maKH"); // VD: KH005
                 int num = Integer.parseInt(last.replaceAll("[^0-9]", "")) + 1;
@@ -79,13 +76,12 @@ public class KhachHangDAO {
         }
         return "KH001"; // mặc định nếu bảng trống
     }
+
     public ArrayList<KhachHang> getAll() {
         ArrayList<KhachHang> list = new ArrayList<>();
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(
-                     "SELECT * FROM KhachHang");
-             ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(
+                "SELECT * FROM KhachHang"); ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 KhachHang kh = new KhachHang(
@@ -107,9 +103,8 @@ public class KhachHangDAO {
     public KhachHang findById(String maKH) {
         KhachHang kh = null;
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(
-                     "SELECT * FROM KhachHang WHERE maKH=?")) {
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(
+                "SELECT * FROM KhachHang WHERE maKH=?")) {
 
             ps.setString(1, maKH);
             ResultSet rs = ps.executeQuery();
@@ -128,13 +123,13 @@ public class KhachHangDAO {
         }
         return kh;
     }
+
     // FIND BY PHONE
     public KhachHang findByPhone(String sdt) {
         KhachHang kh = null;
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(
-                     "SELECT * FROM KhachHang WHERE sdt=?")) {
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(
+                "SELECT * FROM KhachHang WHERE sdt=?")) {
 
             ps.setString(1, sdt);
 

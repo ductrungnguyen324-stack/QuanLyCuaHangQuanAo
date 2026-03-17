@@ -131,7 +131,7 @@ public class HoaDonDialog extends JDialog {
 
         JLabel lblPT = makeLabel("Phương thức TT");
         fPhuongThuc = new JComboBox<>(new String[]{
-                "TIENMAT","CHUYENKHOAN","MOMO","VNPAY","ZaloPay"
+                "Tiền mặt","Chuyển khoản","MOMO","VNPAY","ZaloPay"
         });
         fPhuongThuc.setBackground(CARD2);
         fPhuongThuc.setForeground(new Color(0,0,0));
@@ -943,7 +943,7 @@ public class HoaDonDialog extends JDialog {
         hd.setKhuyenmai(selectedKM != null ? selectedKM.getMaKM() : null);
         hd.setNgaytao(LocalDateTime.now());
         hd.setPhuongthucTT((String) fPhuongThuc.getSelectedItem());
-        hd.setTrangthai("CHUATHANHTOAN");
+        hd.setTrangthai("Chưa thanh toán");
 
         // Tính tiền từ bảng chi tiết
         double tongTien = getTongTien();

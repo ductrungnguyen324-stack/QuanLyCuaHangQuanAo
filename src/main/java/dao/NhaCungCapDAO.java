@@ -10,12 +10,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NhaCungCapDAO {
+
     public List<NhaCungCap> getAll() {
         List<NhaCungCap> list = new ArrayList<>();
         String sql = "SELECT * FROM NhaCungCap ORDER BY maNCC DESC";
 
-        try (Connection connect = DBConnection.getConnection();
-             PreparedStatement pstmt = connect.prepareStatement(sql)) {
+        try (Connection connect = DBConnection.getConnection(); PreparedStatement pstmt = connect.prepareStatement(sql)) {
 
             ResultSet rs = pstmt.executeQuery();
 
@@ -37,8 +37,7 @@ public class NhaCungCapDAO {
         String maNCC = generateNCC();
         ncc.setMaNCC(maNCC);
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, ncc.getMaNCC());
             pstmt.setString(2, ncc.getTenNCC());
@@ -58,17 +57,18 @@ public class NhaCungCapDAO {
 
         NhaCungCap check = getById(ncc.getMaNCC());
 
-        if (check == null) throw new RuntimeException("Nha cung cap chua ton tai!");
+        if (check == null) {
+            throw new RuntimeException("Nha cung cap chua ton tai!");
+        }
 
         String sql = "UPDATE NhaCungCap SET tenNCC=?, diachi=?, sodienthoai=? WHERE maNCC=?";
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, ncc.getTenNCC());
             pstmt.setString(2, ncc.getDiachi());
             pstmt.setString(3, ncc.getSodienthoai());
-            pstmt.setString(6, ncc.getMaNCC());
+            pstmt.setString(4, ncc.getMaNCC());
 
             return pstmt.executeUpdate() > 0;
 
@@ -82,10 +82,9 @@ public class NhaCungCapDAO {
     public String generateNCC() {
 
         String sql = "SELECT maNCC FROM NhaCungCap ORDER BY maNCC DESC LIMIT 1";
+      //  String sql = "SELECT TOP 1 maNCC FROM NhaCungCap ORDER BY maNCC DESC";
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
 
             if (rs.next()) {
 
@@ -106,8 +105,7 @@ public class NhaCungCapDAO {
 
         String sql = "SELECT * FROM NhaCungCap WHERE maNCC = ?";
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, maNCC);
 

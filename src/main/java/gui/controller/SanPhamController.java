@@ -39,20 +39,20 @@ public class SanPhamController {
 
     // Constructor cũ (tương thích nếu có chỗ nào chưa truyền chucvu)
     public SanPhamController(SanPhamView view) {
-        this(view, "Quan ly");
+        this(view, "Quản lý");
     }
 
     // ── THÊM MỚI: áp dụng quyền ──
     private void applyQuyen() {
         // Chỉ Quản lý mới được thêm/sửa/xoá sản phẩm
-        boolean coQuyen = "Quan ly".equals(chucvu) || "Thu ngan".equals(chucvu);
+        boolean coQuyen = "Quản lý".equals(chucvu) || "Thu ngân".equals(chucvu);
         view.getBtnThem().setVisible(coQuyen);
         view.getBtnThem().setEnabled(coQuyen);
         view.setChiXem(!coQuyen);
     }
 
     private boolean coQuyen() {
-        return "Quan ly".equals(chucvu) || "Thu ngan".equals(chucvu);
+        return "Quản lý".equals(chucvu) || "Thu ngân".equals(chucvu);
     }
 
     private void showNoQuyen() {
@@ -163,14 +163,14 @@ public class SanPhamController {
 
         int confirm = JOptionPane.showConfirmDialog(
                 view,
-                "Ngừng bán sản phẩm: " + maSP + " - " + sp.getTensp() + "?\n(Trạng thái sẽ đổi thành HETHANG)",
+                "Ngừng bán sản phẩm: " + maSP + " - " + sp.getTensp() + "?\n(Trạng thái sẽ đổi thành HẾT HÀNG)",
                 "Xác nhận ngừng bán",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.WARNING_MESSAGE);
         if (confirm != JOptionPane.YES_OPTION) return;
 
         try {
-            sp.setTrangthai("HETHANG");
+            sp.setTrangthai("HẾT HÀNG");
             if (bus.update(sp)) {
                 loadDanhSach();
                 view.showSuccess("Đã ngừng bán sản phẩm " + maSP + "!");

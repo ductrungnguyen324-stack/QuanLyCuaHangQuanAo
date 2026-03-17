@@ -30,13 +30,13 @@ public class KhuyenMaiController {
 
     // Constructor cũ (tương thích)
     public KhuyenMaiController(KhuyenMaiView view) {
-        this(view, "Quan ly");
+        this(view, "Quản lý");
     }
 
     // ── THÊM MỚI: kiểm tra quyền ──
     // Chỉ Quản lý mới được thêm/sửa/xoá khuyến mãi
     private boolean coQuyen() {
-        return "Quan ly".equals(chucvu);
+        return "Quản lý".equals(chucvu);
     }
 
     private void showNoQuyen() {
@@ -130,8 +130,8 @@ public class KhuyenMaiController {
         KhuyenMai km = bus.getByID(maKM);
         if (km == null) { showError("Không tìm thấy khuyến mãi: " + maKM); return; }
 
-        String loaiHienThi = km.getLoaiKM().equals("PHANTRAM") ? "Phần trăm (%)" : "Tiền cố định (đ)";
-        String giaTriHienThi = km.getLoaiKM().equals("PHANTRAM")
+        String loaiHienThi = km.getLoaiKM().equals("Phần trăm") ? "Phần trăm (%)" : "Tiền cố định (đ)";
+        String giaTriHienThi = km.getLoaiKM().equals("Phần trăm")
                 ? String.format("%.0f%%", km.getGiatrigiam())
                 : String.format("%,.0f đ", km.getGiatrigiam());
 
@@ -189,7 +189,7 @@ public class KhuyenMaiController {
 
         for (KhuyenMai km : list) {
             String loai = km.getLoaiKM();
-            String giaTriHienThi = loai.equals("PHANTRAM")
+            String giaTriHienThi = loai.equals("Phần trăm")
                     ? String.format("%.0f%%", km.getGiatrigiam())
                     : String.format("%,.0f đ", km.getGiatrigiam());
 

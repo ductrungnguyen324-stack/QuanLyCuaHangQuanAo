@@ -85,7 +85,7 @@ public class ThemKhuyenMaiView extends JPanel {
         UIManager.put("ComboBox.selectionBackground", ACCENT);
         UIManager.put("ComboBox.selectionForeground", Color.WHITE);
 
-        cbLoaiKM = new JComboBox<>(new String[]{"PHANTRAM", "TIENCODINH"});
+        cbLoaiKM = new JComboBox<>(new String[]{"Phần trăm", "Tiền cố định"});
         cbLoaiKM.setFont(new Font("Dialog", Font.PLAIN, 13));
         cbLoaiKM.setBackground(CARD2);
         cbLoaiKM.setForeground(TEXT1);
@@ -168,7 +168,7 @@ public class ThemKhuyenMaiView extends JPanel {
 
     // ── Khi đổi loại ─────────────────────────────────────
     private void onLoaiChanged() {
-        boolean isPhanTram = !"TIENCODINH".equals(cbLoaiKM.getSelectedItem());
+        boolean isPhanTram = !"Tiền cố định".equals(cbLoaiKM.getSelectedItem());
         lblGiaTri.setText(isPhanTram ? "Giá trị giảm (%) *" : "Giá trị giảm (đ) *");
         lblGiaTri.setForeground(isPhanTram ? GREEN : YELLOW);
         txtGiaTri.setToolTipText(isPhanTram ? "Nhập % từ 1–100" : "Nhập số tiền VNĐ");
@@ -185,7 +185,7 @@ public class ThemKhuyenMaiView extends JPanel {
 
         String loai   = (String) cbLoaiKM.getSelectedItem();
         double giaTri = parseDouble(txtGiaTri.getText(), "Giá trị giảm");
-        if ("TIENCODINH".equals(loai)) {
+        if ("Tiền cố định".equals(loai)) {
             if (giaTri <= 0) throw new Exception("Giá trị giảm tiền cố định phải > 0đ!");
         } else {
             if (giaTri <= 0 || giaTri > 100) throw new Exception("Giá trị % phải từ 1–100!");

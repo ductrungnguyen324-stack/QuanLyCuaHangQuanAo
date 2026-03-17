@@ -52,7 +52,7 @@ public class KhuyenMaiDAO
 
     public boolean insert(KhuyenMai km)
     {
-        String sql = "INSERT INTO khumay (maKM, tenKM, loaiKM, giatrigiam, giamtoida, giatridonhangtoithieu, ngaybatdau, ngayketthuc, soluong, dasudung) " +
+        String sql = "INSERT INTO khuyenmai (maKM, tenKM, loaiKM, giatrigiam, giamtoida, giatridonhangtoithieu, ngaybatdau, ngayketthuc, soluong, dasudung) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         // Tạo mã khu tự động
@@ -226,6 +226,7 @@ public class KhuyenMaiDAO
     {
         String sql = "SELECT maKM FROM khuyenmai "+
                 "ORDER BY maKM DESC LIMIT 1";
+       //  String sql = "SELECT TOP 1 maKM FROM khuyenmai ORDER BY maKM DESC";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql))

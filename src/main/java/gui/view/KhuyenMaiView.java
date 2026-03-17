@@ -54,11 +54,11 @@ public class KhuyenMaiView extends JFrame {
     };
 
     public KhuyenMaiView() {
-        this("Nhan vien"); // mặc định
+        this("Nhân viên"); // mặc định
     }
 
     public KhuyenMaiView(String chucvu) {
-        this.chiXem = !("Quan ly".equals(chucvu));
+        this.chiXem = !("Quản lý".equals(chucvu));
         setTitle("Quản lý Khuyến Mãi");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1280, 720);
@@ -139,7 +139,7 @@ public class KhuyenMaiView extends JFrame {
         });
 
         cbLoaiKM = new JComboBox<>(new String[]{
-                "Tất cả loại", "PHANTRAM", "TIENCODINH"
+                "Tất cả loại", "Phần trăm", "Tiền cố định"
         });
         cbTrangThai = new JComboBox<>(new String[]{
                 "Tất cả trạng thái", "Còn hiệu lực", "Hết hạn"
@@ -222,7 +222,7 @@ public class KhuyenMaiView extends JFrame {
                     l.setOpaque(true);
                     l.setFont(new Font("Dialog", Font.BOLD, 11));
                     l.setBackground(sel ? ROW_SEL : row % 2 == 0 ? SURFACE : ROW_ODD);
-                    l.setForeground(s.equals("PHANTRAM") ? CYAN : YELLOW);
+                    l.setForeground(s.equals("Phần trăm") ? CYAN : YELLOW);
                     return l;
                 }
         );

@@ -116,7 +116,7 @@ public class SanPhamView extends JFrame {
                 "Tất cả loại", "Áo", "Quần", "Váy", "Giày", "Dép", "Phụ kiện", "Khác"
         });
         cbTrangThai = new JComboBox<>(new String[]{
-                "Tất cả trạng thái", "CONHANG", "HETHANG"
+                "Tất cả trạng thái", "Còn hàng", "HẾT HÀNG"
         });
 
         styleCombo(cbLoai);
@@ -175,7 +175,7 @@ public class SanPhamView extends JFrame {
                     l.setOpaque(true);
                     l.setFont(new Font("Dialog", Font.BOLD, 11));
                     l.setBackground(sel ? ROW_SEL : row % 2 == 0 ? SURFACE : ROW_ODD);
-                    l.setForeground(s.equals("CONHANG") ? GREEN : RED);
+                    l.setForeground(s.equals("Còn hàng") ? GREEN : RED);
                     return l;
                 }
         );
@@ -243,7 +243,7 @@ public class SanPhamView extends JFrame {
         int conHang = 0, hetHang = 0;
         for (int i = 0; i < total; i++) {
             Object tt = tableModel.getValueAt(i, 8);
-            if ("CONHANG".equals(tt)) conHang++;
+            if ("Còn hàng".equals(tt)) conHang++;
             else hetHang++;
         }
         lblTongSP.setText("Tổng: "      + total);

@@ -101,8 +101,8 @@ public class ChiTietHoaDonDialog extends JDialog {
         JPanel p = new JPanel(new GridLayout(1, 4, 10, 0));
         p.setBackground(BG);
 
-        Color ttColor = "DATHANHTOAN".equals(hd.getTrangthai()) ? GREEN : YELLOW;
-        String ttText = "DATHANHTOAN".equals(hd.getTrangthai()) ? "Đã thanh toán" : "Chưa thanh toán";
+        Color ttColor = "Đã thanh toán".equals(hd.getTrangthai()) ? GREEN : YELLOW;
+        String ttText = "Đã thanh toán".equals(hd.getTrangthai()) ? "Đã thanh toán" : "Chưa thanh toán";
 
         p.add(makeInfoCard("Khách hàng",    hd.getMaKH(),      TEXT1));
         p.add(makeInfoCard("Khuyến mãi",    hd.getKhuyenmai() != null ? hd.getKhuyenmai() : "Không có", ACCENT));
@@ -190,7 +190,7 @@ public class ChiTietHoaDonDialog extends JDialog {
         btnDong.addActionListener(e -> dispose());
 
         // Nút duyệt chỉ hiện nếu chưa thanh toán
-        if ("CHUATHANHTOAN".equals(hd.getTrangthai())) {
+        if ("Chưa thanh toán".equals(hd.getTrangthai())) {
             JButton btnDuyet = makeButton("Xác nhận thanh toán", GREEN, Color.WHITE);
             btnDuyet.addActionListener(e -> {
                 int ok = JOptionPane.showConfirmDialog(this,

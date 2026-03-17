@@ -49,11 +49,11 @@ public class KhachHangView extends JFrame {
     private boolean chiXem = false; // phân quyền
 
     public KhachHangView() {
-        this("Nhan vien"); // mặc định
+        this("Nhân viên"); // mặc định
     }
 
     public KhachHangView(String chucvu) {
-        this.chiXem = !("Quan ly".equals(chucvu) || "Thu ngan".equals(chucvu));
+        this.chiXem = !("Quản lý".equals(chucvu) || "Thu ngân".equals(chucvu));
         controller = new KhachHangController(this, chucvu);
 
         setTitle("Quản lý Khách Hàng");

@@ -68,7 +68,7 @@ public class ChiTietPhieuNhapDAO {
     public String getLastMaCTPN() {
 
         String sql = "SELECT maCTPN FROM chitietphieunhap ORDER BY maCTPN DESC LIMIT 1";
-      //  String sql = "SELECT TOP 1 maCTPN FROM chitietphieunhap ORDER BY maCTPN DESC"; // SQL Server
+       // String sql = "SELECT TOP 1 maCTPN FROM chitietphieunhap ORDER BY maCTPN DESC"; // SQL Server
         try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 return rs.getString("maCTPN");

@@ -124,11 +124,11 @@ public class HoaDonView extends JFrame {
         styleTextField(searchField);
 
         cbPhuongThuc = new JComboBox<>(new String[]{
-                "Tất cả phương thức", "TIENMAT", "CHUYENKHOAN", "MOMO", "VNPAY", "ZaloPay"
+                "Tất cả phương thức", "Tiền mặt", "Chuyển khoản", "MOMO", "VNPAY", "ZaloPay"
         });
 
         cbTrangThai = new JComboBox<>(new String[]{
-                "Tất cả trạng thái", "CHUATHANHTOAN", "DATHANHTOAN"
+                "Tất cả trạng thái", "Chưa thanh toán", "Đã thanh toán"
         });
 
         styleCombo(cbPhuongThuc);
@@ -194,7 +194,7 @@ public class HoaDonView extends JFrame {
                     l.setOpaque(true);
                     l.setFont(new Font("Sans serif", Font.BOLD, 11));
                     l.setBackground(sel ? ROW_SEL : row % 2 == 0 ? SURFACE : ROW_ODD);
-                    l.setForeground(s.equals("DATHANHTOAN") ? GREEN : YELLOW);
+                    l.setForeground(s.equals("Đã thanh toán") ? GREEN : YELLOW);
                     return l;
                 }
         );
@@ -208,8 +208,8 @@ public class HoaDonView extends JFrame {
                     l.setFont(new Font("Dialog", Font.BOLD, 11));
                     l.setBackground(sel ? ROW_SEL : row % 2 == 0 ? SURFACE : ROW_ODD);
                     l.setForeground(
-                            s.equals("TIENMAT")      ? GREEN  :
-                                    s.equals("CHUYENKHOAN")  ? CYAN   :
+                            s.equals("Tiền mặt")      ? GREEN  :
+                                    s.equals("Chuyển khoản")  ? CYAN   :
                                             s.equals("MOMO")         ? new Color(219, 39, 119) :
                                                     s.equals("VNPAY")        ? RED    : ACCENT
                     );
@@ -243,7 +243,7 @@ public class HoaDonView extends JFrame {
         int chuaTT = 0;
         double tongThu = 0;
         for (int i = 0; i < total; i++) {
-            if ("CHUATHANHTOAN".equals(tableModel.getValueAt(i, 10))) chuaTT++;
+            if ("Chưa thanh toán".equals(tableModel.getValueAt(i, 10))) chuaTT++;
             // col 8 = "Thanh toán" dạng "1,000 đ" → cần parse
             try {
                 String val = tableModel.getValueAt(i, 8).toString()

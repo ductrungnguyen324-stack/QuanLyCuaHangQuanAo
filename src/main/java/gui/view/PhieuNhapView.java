@@ -1,6 +1,7 @@
 package gui.view;
 
 import gui.controller.PhieuNhapController;
+import gui.controller.SanPhamController;
 import entity.PhieuNhapHangDTO;
 import gui.dialog.PhieuNhapChiTietDialog;
 import gui.dialog.PhieuNhapDialog;
@@ -16,10 +17,13 @@ import java.util.ArrayList;
  * PhieuNhapPanel — Chỉ chứa code giao diện. Mọi logic gọi qua
  * PhieuNhapPanelController.
  */
-public class PhieuNhapView extends JPanel {
+public class PhieuNhapView extends JFrame {
 
     // ── Controller ───────────────────────────────────────
     private final PhieuNhapController controller = new PhieuNhapController();
+
+    // ── Tham chiếu SanPhamController để reload tồn kho sau khi duyệt ─────────
+    private SanPhamController sanPhamController;
 
     // ── Màu sắc ──────────────────────────────────────────
     private static final Color BG = new Color(7, 10, 20);
@@ -48,8 +52,14 @@ public class PhieuNhapView extends JPanel {
         "Ngày tạo", "Thành tiền", "Trạng thái", "Thao tác"
     };
 
-    // ── Constructor ──────────────────────────────────────
+    // ── Constructor mặc định — dùng khi không cần sync SanPhamView ──────────
     public PhieuNhapView() {
+        this(null);
+    }
+
+    // ── Constructor chính — truyền SanPhamController để reload tồn kho ───────
+    public PhieuNhapView(SanPhamController sanPhamController) {
+        this.sanPhamController = sanPhamController;
         setBackground(BG);
         setLayout(new BorderLayout(0, 0));
 
@@ -329,8 +339,17 @@ public class PhieuNhapView extends JPanel {
     private void xemChiTiet(String maPN) {
         PhieuNhapHangDTO pn = controller.getById(maPN);
         if (pn != null) {
+            // Truyền callback reload SanPhamView nếu có sanPhamController
+            Runnable callback = () -> {
+                loadDanhSach(); // reload phiếu nhập
+                if (sanPhamController != null) {
+                    sanPhamController.loadDanhSach(); // reload sản phẩm
+                }
+            };
+
             new PhieuNhapChiTietDialog(
-                    (Frame) SwingUtilities.getWindowAncestor(this), pn).setVisible(true);
+                    (Frame) SwingUtilities.getWindowAncestor(this), pn, callback
+            ).setVisible(true);// reload lại trạng thái phiếu nhập
         } else {
             JOptionPane.showMessageDialog(this, "Không tìm thấy phiếu!", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
@@ -348,6 +367,9 @@ public class PhieuNhapView extends JPanel {
                 tableModel.setValueAt("Đã nhập kho", modelRow, 6);
                 // Cập nhật stats từ dữ liệu mới nhất
                 loadDanhSach();
+                if (sanPhamController != null) {
+                sanPhamController.loadDanhSach();
+            }
                 JOptionPane.showMessageDialog(this, "Duyệt thành công!");
             } else {
                 JOptionPane.showMessageDialog(this, "Duyệt thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);

@@ -3,6 +3,7 @@ package bus;
 import dao.PhieuNhapHangDAO;
 import dao.ChiTietPhieuNhapDAO;
 import dao.DBConnection;
+import dao.SanPhamDAO;
 import entity.PhieuNhapHangDTO;
 import entity.ChiTietPhieuNhapDTO;
 import java.sql.Connection;
@@ -13,7 +14,8 @@ public class PhieuNhapHangBUS {
 
     private final PhieuNhapHangDAO pnDAO = new PhieuNhapHangDAO();
     private final ChiTietPhieuNhapDAO ctpnDAO = new ChiTietPhieuNhapDAO();
-
+ private SanPhamDAO spDAO = new SanPhamDAO();
+ 
     public ArrayList<PhieuNhapHangDTO> getAll() {
         return pnDAO.getAll();
     }
@@ -174,9 +176,42 @@ public class PhieuNhapHangBUS {
         }
     }
 
-    public boolean duyetPhieu(String maPN) {
-        return pnDAO.updateTrangThai(maPN, "Đã nhập kho");
+public boolean duyetPhieu(String maPN) {
+
+        PhieuNhapHangDTO pn = pnDAO.getPhieuNhapById(maPN);
+        if (pn == null) {
+            System.out.println("Không tìm thấy phiếu!");
+            return false;
+        }
+
+        if ("Đã nhập kho".equalsIgnoreCase(pn.getTrangThai())) {
+            System.out.println("Phiếu đã duyệt rồi!");
+            return false;
+        }
+
+        boolean ok = pnDAO.updateTrangThai(maPN, "Đã nhập kho");
+        if (!ok) {
+            System.out.println("Cập nhật trạng thái thất bại!");
+            return false;
+        }
+
+        ArrayList<ChiTietPhieuNhapDTO> ds = ctpnDAO.getByMaPN(maPN);
+
+        if (ds.isEmpty()) {
+            System.out.println("Phiếu không có chi tiết!");
+            return false;
+        }
+
+        for (ChiTietPhieuNhapDTO ct : ds) {
+            boolean kq = spDAO.tangTonKho(ct.getMaSP(), ct.getSoLuong());
+            if (!kq) {
+                System.out.println("Lỗi tăng kho SP: " + ct.getMaSP());
+            }
+        }
+
+        return true;
     }
+
 
     public ArrayList<PhieuNhapHangDTO> timKiemVaLoc(String keyword, String trangThaiLoc) {
         ArrayList<PhieuNhapHangDTO> all = pnDAO.getAll();

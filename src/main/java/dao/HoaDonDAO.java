@@ -94,6 +94,7 @@ public class HoaDonDAO {
 
     public String generateHD() {
         String sql = "SELECT maHD from HoaDon ORDER BY maHD DESC LIMIT 1";
+        // String sql = "SELECT TOP 1 maHD FROM HoaDon ORDER BY maHD DESC";
 
         try(Connection conn = DBConnection.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql);

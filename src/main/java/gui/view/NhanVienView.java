@@ -26,15 +26,15 @@ public class NhanVienView extends JFrame implements NhanVienController.IView {
 
     // Su dung Unicode escape de dam bao hien thi dung tren moi OS/encoding
     static final String[] CHUC_VU_LIST    = {
-            "T\u1ea5t c\u1ea3 ch\u1ee9c v\u1ee5",
-            "Qu\u1ea3n l\u00fd",
-            "Nh\u00e2n vi\u00ean",
-            "Thu ng\u00e2n"
+             "Tất cả chức vụ",
+        "Quản lý",
+        "Nhân viên",
+        "Thu ngân"
     };
     static final String[] TRANG_THAI_LIST = {
-            "T\u1ea5t c\u1ea3 tr\u1ea1ng th\u00e1i",
-            "Ho\u1ea1t \u0111\u1ed9ng",
-            "Ng\u1eebng ho\u1ea1t \u0111\u1ed9ng"
+           "Tất cả trạng thái",
+        "Hoạt động",
+        "Ngừng hoạt động"
     };
 
     private final NhanVienController controller;
@@ -46,25 +46,25 @@ public class NhanVienView extends JFrame implements NhanVienController.IView {
     private JLabel            lblTongNV, lblHoatDong, lblNghiViec;
 
     private static final String[] COLUMNS = {
-            "ID",
-            "M\u00e3 NV",
-            "H\u1ecd t\u00ean",
-            "S\u1ed1 \u0111i\u1ec7n tho\u1ea1i",
-            "Ch\u1ee9c v\u1ee5",
-            "T\u00ean \u0111\u0103ng nh\u1eadp",
-            "Tr\u1ea1ng th\u00e1i",
-            "Thao t\u00e1c"
+             "ID",
+        "Mã NV",
+        "Họ tên",
+        "Số điện thoại",
+        "Chức vụ",
+        "Tên đăng nhập",
+        "Trạng thái",
+        "Thao tác"
     };
 
     public NhanVienView() {
-        this("Nhan vien"); // mặc định
+        this("Nhân viên"); // mặc định
     }
 
     public NhanVienView(String chucvu) {
         setBackground(BG);
         setLayout(new BorderLayout(0, 0));
         this.controller = new NhanVienController(this, chucvu);
-        this.chiXem = !("Quan ly".equals(chucvu));
+        this.chiXem = !("Quản lý".equals(chucvu));
 
         JPanel top = new JPanel(new BorderLayout());
         top.setOpaque(false);
@@ -88,9 +88,9 @@ public class NhanVienView extends JFrame implements NhanVienController.IView {
 
     @Override
     public void updateStats(int total, int hoatDong, int nghiViec) {
-        lblTongNV.setText("T\u1ed5ng: "           + total);
-        lblHoatDong.setText("Ho\u1ea1t \u0111\u1ed9ng: " + hoatDong);
-        lblNghiViec.setText("Ng\u1eebng H\u0110: " + nghiViec);
+        lblTongNV.setText("Tổng: "           + total);
+        lblHoatDong.setText("Hoạt động: " + hoatDong);
+        lblNghiViec.setText("Ngừng HĐ: " + nghiViec);
     }
 
     // ── HEADER ───────────────────────────────────────────────
@@ -101,13 +101,13 @@ public class NhanVienView extends JFrame implements NhanVienController.IView {
                 BorderFactory.createMatteBorder(0,0,1,0,BORDER),
                 BorderFactory.createEmptyBorder(14,22,14,22)));
 
-        JLabel title = new JLabel("Qu\u1ea3n l\u00fd Nh\u00e2n vi\u00ean");
-        title.setFont(new Font("Dialog", Font.BOLD, 20));
-        title.setForeground(TEXT1);
+       JLabel title = new JLabel("Quản lý Nhân viên");
+title.setFont(new Font("Dialog", Font.BOLD, 20));
+title.setForeground(TEXT1);
 
-        lblTongNV   = chip("T\u1ed5ng: 0",             ACCENT);
-        lblHoatDong = chip("Ho\u1ea1t \u0111\u1ed9ng: 0", GREEN);
-        lblNghiViec = chip("Ng\u1eebng H\u0110: 0",    RED);
+lblTongNV   = chip("Tổng: 0", ACCENT);
+lblHoatDong = chip("Hoạt động: 0", GREEN);
+lblNghiViec = chip("Ngừng HĐ: 0", RED);
 
         JPanel chips = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         chips.setOpaque(false);
@@ -119,7 +119,7 @@ public class NhanVienView extends JFrame implements NhanVienController.IView {
         left.add(chips, BorderLayout.CENTER);
 
         FlatBtn btnThem = new FlatBtn(
-                "+ Th\u00eam nh\u00e2n vi\u00ean", ACCENT, Color.WHITE, 170, 36);
+                "+ Thêm nhân viên", ACCENT, Color.WHITE, 170, 36);
         btnThem.addClickListener(() -> controller.them());
         if (chiXem) btnThem.setVisible(false);
 
@@ -137,7 +137,7 @@ public class NhanVienView extends JFrame implements NhanVienController.IView {
                 BorderFactory.createMatteBorder(0,0,1,0,BORDER),
                 BorderFactory.createEmptyBorder(8,16,8,16)));
 
-        JLabel lblSearch = new JLabel("T\u00ecm ki\u1ebfm:");
+        JLabel lblSearch = new JLabel("Tìm kiếm:");
         lblSearch.setForeground(TEXT2);
         lblSearch.setFont(new Font("Dialog", Font.BOLD, 13));
         lblSearch.setAlignmentY(Component.CENTER_ALIGNMENT);
@@ -248,7 +248,7 @@ public class NhanVienView extends JFrame implements NhanVienController.IView {
             JLabel l = new JLabel("  " + s); l.setOpaque(true);
             l.setFont(new Font("Dialog",Font.BOLD,12));
             l.setBackground(sel?ROW_SEL:row%2==0?SURFACE:ROW_ODD);
-            l.setForeground("Ho\u1ea1t \u0111\u1ed9ng".equals(s) ? GREEN : RED);
+            l.setForeground("Hoạt động".equals(s) ? GREEN : RED);
             return l;
         });
         // col7 Thao tac — ẩn nút nếu chiXem=true
@@ -287,9 +287,9 @@ public class NhanVienView extends JFrame implements NhanVienController.IView {
 
     // ── HELPERS ──────────────────────────────────────────────
     private Color chucVuColor(String cv) {
-        if ("Qu\u1ea3n l\u00fd".equals(cv))   return ACCENT;
-        if ("Nh\u00e2n vi\u00ean".equals(cv)) return CYAN;
-        if ("Thu ng\u00e2n".equals(cv))       return GREEN;
+        if ("Quản lý".equals(cv))   return ACCENT;
+        if ("Nhân viên".equals(cv)) return CYAN;
+        if ("Thu ngân".equals(cv))       return GREEN;
         return TEXT2;
     }
 

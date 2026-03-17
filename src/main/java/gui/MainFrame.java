@@ -208,16 +208,15 @@ public class MainFrame extends JFrame {
         new NhanVienController(nvview, chucvu); // ← truyền chucvu
         contentPanel.add(wrapView(nvview), "NHANVIEN");
 
-        // ── Sản phẩm ──
+        // ── Sản phẩm ── //thêm
         SanPhamView sanPhamView = new SanPhamView();
-        new SanPhamController(sanPhamView, chucvu); // ← truyền chucvu
+        SanPhamController sanPhamController=new SanPhamController(sanPhamView, chucvu); // ← truyền chucvu
         contentPanel.add(wrapView(sanPhamView), "SANPHAM");
 
-        // ── Phiếu nhập ──
-//         (nếu có PhieuNhapView thì thêm tương tự — hiện để placeholder)
-         PhieuNhapView phieuNhapView = new PhieuNhapView();
+        // ── Phiếu nhập ──//thêm
+         PhieuNhapView phieuNhapView = new PhieuNhapView(sanPhamController);
          new PhieuNhapController(chucvu);
-        // contentPanel.add(wrapView(phieuNhapView), "PHIEUNHAP");
+         contentPanel.add(wrapView(phieuNhapView), "PHIEUNHAP");
 
          BaoCaoView baocaoview = new BaoCaoView();
          contentPanel.add(wrapView(baocaoview), "BAOCAO");

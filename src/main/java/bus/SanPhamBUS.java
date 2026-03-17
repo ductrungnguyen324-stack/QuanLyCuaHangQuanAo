@@ -48,4 +48,12 @@ public class SanPhamBUS {
     public SanPham getById(String maSP) {
         return spDAO.getById(maSP);
     }
+    //thêm
+     public void tangTonKho(String maSP, int soLuong) {
+        if (soLuong <= 0) throw new RuntimeException("Số lượng tăng phải > 0, maSP: " + maSP);
+        if (spDAO.getById(maSP) == null) throw new RuntimeException("Không tìm thấy SP: " + maSP);
+        if (!spDAO.tangTonKho(maSP, soLuong)) {
+            throw new RuntimeException("Cập nhật tồn kho thất bại, maSP: " + maSP);
+        }
+    }
 }

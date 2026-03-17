@@ -30,7 +30,7 @@ public class NhanVienDialog extends JDialog {
 
     public NhanVienDialog(Frame parent, NhanVien nv) {
         super(parent,
-                nv == null ? "Th\u00eam nh\u00e2n vi\u00ean m\u1edbi" : "C\u1eadp nh\u1eadt nh\u00e2n vi\u00ean",
+                nv == null ? "Thêm nhân viên mới" : "Cập nhật nhân viên",
                 true);
         this.isEdit = (nv != null);
         getContentPane().setBackground(BG);
@@ -59,11 +59,11 @@ public class NhanVienDialog extends JDialog {
 
         // Ti\u00eau \u0111\u1ec1 - tho\u00e1t Unicode
         String title = isEdit
-                ? "C\u1eadp nh\u1eadt nh\u00e2n vi\u00ean"
-                : "Th\u00eam nh\u00e2n vi\u00ean m\u1edbi";
+                ? "Cập nhật nhân viên"
+                : "Thêm nhân viên mới";
         String sub = isEdit
-                ? "Ch\u1ec9nh s\u1eeda th\u00f4ng tin nh\u00e2n vi\u00ean"
-                : "\u0110i\u1ec1n \u0111\u1ea7y \u0111\u1ee7 th\u00f4ng tin \u0111\u1ec3 th\u00eam nh\u00e2n vi\u00ean m\u1edbi";
+                ? "Chỉnh sửa thông tin nhân viên"
+                : "Điền đầy đủ thông tin để thêm nhân viên mới";
 
         JLabel lblTitle = new JLabel(title);
         lblTitle.setFont(new Font("Dialog", Font.BOLD, 17));
@@ -97,7 +97,7 @@ public class NhanVienDialog extends JDialog {
         form.setBorder(BorderFactory.createEmptyBorder(16,24,10,24));
 
         // --- Section 1 ---
-        form.add(secLbl("TH\u00d4NG TIN C\u01a0 B\u1ea2N"));
+        form.add(secLbl("THÔNG TIN CƠ BẢN"));
         form.add(vg(10));
 
         fMaNV    = mkField(); errMaNV  = errLbl();
@@ -111,53 +111,53 @@ public class NhanVienDialog extends JDialog {
         if (nv != null) fHoten.setText(s(nv.getHoten()));
 
         String lbMa = isEdit
-                ? "M\u00e3 nh\u00e2n vi\u00ean"
-                : "M\u00e3 nh\u00e2n vi\u00ean *  (VD: NV001)";
+                ? "Mã nhân viên"
+                : "Mã nhân viên *  (VD: NV001)";
         form.add(row2(
                 blk(lbMa,              fMaNV,  errMaNV),
-                blk("H\u1ecd v\u00e0 t\u00ean *", fHoten, errHoten)));
+                blk("Họ và tên *", fHoten, errHoten)));
         form.add(vg(6));
 
         fSdt     = mkField(); errSdt = errLbl();
         cbChucVu = new FakeCombo(
-                new String[]{"Qu\u1ea3n l\u00fd","Nh\u00e2n vi\u00ean","Thu ng\u00e2n"},
+                new String[]{"Quản lý","Nhân viên","Thu ngân"},
                 COMBO_BG, TEXT1);
         if (nv != null) { fSdt.setText(s(nv.getSdt())); cbChucVu.setSelectedItem(nv.getChucvu()); }
         form.add(row2(
-                blk("S\u1ed1 \u0111i\u1ec7n tho\u1ea1i  (VD: 0901234567)", fSdt, errSdt),
-                blk("Ch\u1ee9c v\u1ee5 *", cbChucVu, errLbl())));
+                blk("Số điện thoại  (VD: 0901234567)", fSdt, errSdt),
+                blk("Chức vụ *", cbChucVu, errLbl())));
         form.add(vg(16));
 
         // --- Section 2 ---
-        form.add(secLbl("T\u00c0I KHO\u1ea2N \u0110\u0102NG NH\u1eadP"));
+        form.add(secLbl("TÀI KHOẢN ĐĂNG NHẬP"));
         form.add(vg(10));
 
         fTendangnhap = mkField(); errTendangnhap = errLbl();
         if (nv != null) fTendangnhap.setText(s(nv.getTendannhap()));
         form.add(row1(blk(
-                "T\u00ean \u0111\u0103ng nh\u1eadp *  (\u22654 k\u00fd t\u1ef1, a-z 0-9 _ .)",
+                 "Tên đăng nhập * (≥4 ký tự, a-z 0-9 _ .)",
                 fTendangnhap, errTendangnhap)));
         form.add(vg(6));
 
         fMatkhau   = mkPassField(); errMatkhau = errLbl();
         fXacNhanMK = mkPassField(); errXacNhan = errLbl();
         String lbMk = isEdit
-                ? "M\u1eadt kh\u1ea9u m\u1edbi  (tr\u1ed1ng = gi\u1eef c\u0169)"
-                : "M\u1eadt kh\u1ea9u *  (\u22656 k\u00fd t\u1ef1)";
+                 ? "Mật khẩu mới (trống = giữ cũ)"
+        : "Mật khẩu * (≥6 ký tự)";
         form.add(row2(
                 blk(lbMk, fMatkhau, errMatkhau),
-                blk("X\u00e1c nh\u1eadn m\u1eadt kh\u1ea9u", fXacNhanMK, errXacNhan)));
+                blk("Xác nhận mật khẩu", fXacNhanMK, errXacNhan)));
         form.add(vg(16));
 
         // --- Section 3 ---
-        form.add(secLbl("TR\u1ea0NG TH\u00c1I"));
+        form.add(secLbl("TRẠNG THÁI"));
         form.add(vg(10));
 
         cbTrangThai = new FakeCombo(
-                new String[]{"Ho\u1ea1t \u0111\u1ed9ng","Ng\u1eebng ho\u1ea1t \u0111\u1ed9ng"},
+                new String[]{"Hoạt động", "Ngừng hoạt động"},
                 COMBO_BG, TEXT1);
         if (nv != null) cbTrangThai.setSelectedItem(nv.getTrangthai());
-        form.add(row1(blk("Tr\u1ea1ng th\u00e1i *", cbTrangThai, errLbl())));
+        form.add(row1(blk("Trạng thái *", cbTrangThai, errLbl())));
         form.add(vg(10));
 
         JScrollPane sc = new JScrollPane(form);
@@ -176,11 +176,11 @@ public class NhanVienDialog extends JDialog {
         f.setBackground(SURFACE);
         f.setBorder(new MatteBorder(1,0,0,0,BORDER_C));
 
-        FlatBtn btnHuy = new FlatBtn("H\u1ee7y", new Color(22,30,58), TEXT2, 90, 38);
+        FlatBtn btnHuy = new FlatBtn("Hủy", new Color(22,30,58), TEXT2, 90, 38);
         btnHuy.setBorderColor(new Color(50,70,110));
         btnHuy.addClickListener(this::dispose);
 
-        String lblLuu = isEdit ? "C\u1eadp nh\u1eadt" : "Th\u00eam m\u1edbi";
+        String lblLuu = isEdit ? "Cập nhật" : "Thêm mới";
         FlatBtn btnLuu = new FlatBtn(lblLuu, ACCENT, Color.WHITE, 120, 38);
         btnLuu.addClickListener(this::onSave);
 
@@ -207,35 +207,82 @@ public class NhanVienDialog extends JDialog {
     }
 
     private boolean doValidate() {
-        clearErr(); boolean ok = true;
-        if (!isEdit) {
-            String v = fMaNV.getText().trim();
-            if (v.isEmpty())                  { setErr(errMaNV,"Kh\u00f4ng \u0111\u01b0\u1ee3c \u0111\u1ec3 tr\u1ed1ng!"); ok=false; }
-            else if (!v.matches("NV\\d{3,}")) { setErr(errMaNV,"D\u1ea1ng NV+\u22653 s\u1ed1. VD: NV001"); ok=false; }
-        }
-        String ht = fHoten.getText().trim();
-        if (ht.isEmpty())       { setErr(errHoten,"Kh\u00f4ng \u0111\u01b0\u1ee3c \u0111\u1ec3 tr\u1ed1ng!"); ok=false; }
-        else if (ht.length()<3) { setErr(errHoten,"\u00cdt nh\u1ea5t 3 k\u00fd t\u1ef1!"); ok=false; }
-        String sdt = fSdt.getText().trim();
-        if (!sdt.isEmpty() && !sdt.matches("0[0-9]{9}")) { setErr(errSdt,"S\u0110T kh\u00f4ng h\u1ee3p l\u1ec7!"); ok=false; }
-        String tdn = fTendangnhap.getText().trim();
-        if (tdn.isEmpty())              { setErr(errTendangnhap,"Kh\u00f4ng \u0111\u01b0\u1ee3c \u0111\u1ec3 tr\u1ed1ng!"); ok=false; }
-        else if (tdn.length()<4)        { setErr(errTendangnhap,"\u00cdt nh\u1ea5t 4 k\u00fd t\u1ef1!"); ok=false; }
-        else if (!tdn.matches("[a-zA-Z0-9_.]+")) { setErr(errTendangnhap,"Ch\u1ec9 a-z, 0-9, _ v\u00e0 ."); ok=false; }
-        String mk=new String(fMatkhau.getPassword()).trim(),
-                mk2=new String(fXacNhanMK.getPassword()).trim();
-        if (!isEdit && mk.isEmpty())           { setErr(errMatkhau,"Kh\u00f4ng \u0111\u01b0\u1ee3c \u0111\u1ec3 tr\u1ed1ng!"); ok=false; }
-        else if (!mk.isEmpty()&&mk.length()<6) { setErr(errMatkhau,"\u00cdt nh\u1ea5t 6 k\u00fd t\u1ef1!"); ok=false; }
-        else if (!mk.isEmpty()&&!mk.equals(mk2)) { setErr(errXacNhan,"M\u1eadt kh\u1ea9u kh\u00f4ng kh\u1edbp!"); ok=false; }
-        return ok;
-    }
-    private void clearErr() {
-        for (JLabel l : new JLabel[]{errMaNV,errHoten,errSdt,errTendangnhap,errMatkhau,errXacNhan})
-            l.setText(" ");
-    }
-    private void setErr(JLabel l, String m) { l.setText("! " + m); }
-    public NhanVien getKetQua() { return ketQua; }
+    clearErr();
+    boolean ok = true;
 
+    if (!isEdit) {
+        String v = fMaNV.getText().trim();
+        if (v.isEmpty()) {
+            setErr(errMaNV, "Vui lòng nhập thông tin!");
+            ok = false;
+        } 
+        else if (!v.matches("NV\\d{3,}")) {
+            setErr(errMaNV, "Dạng NV + ≥3 số. VD: NV001");
+            ok = false;
+        }
+    }
+
+    String ht = fHoten.getText().trim();
+    if (ht.isEmpty()) {
+        setErr(errHoten, "Vui lòng nhập thông tin!");
+        ok = false;
+    } 
+    else if (ht.length() < 3) {
+        setErr(errHoten, "Ít nhất 3 ký tự!");
+        ok = false;
+    }
+
+    String sdt = fSdt.getText().trim();
+    if (!sdt.isEmpty() && !sdt.matches("0[0-9]{9}")) {
+        setErr(errSdt, "SĐT không hợp lệ!");
+        ok = false;
+    }
+
+    String tdn = fTendangnhap.getText().trim();
+    if (tdn.isEmpty()) {
+        setErr(errTendangnhap, "Vui lòng nhập thông tin!");
+        ok = false;
+    } 
+    else if (tdn.length() < 4) {
+        setErr(errTendangnhap, "Ít nhất 4 ký tự!");
+        ok = false;
+    } 
+    else if (!tdn.matches("[a-zA-Z0-9_.]+")) {
+        setErr(errTendangnhap, "Chỉ a-z, 0-9, _ và .");
+        ok = false;
+    }
+
+    String mk = new String(fMatkhau.getPassword()).trim();
+    String mk2 = new String(fXacNhanMK.getPassword()).trim();
+
+    if (!isEdit && mk.isEmpty()) {
+        setErr(errMatkhau, "Vui lòng nhập thông tin!");
+        ok = false;
+    } 
+    else if (!mk.isEmpty() && mk.length() < 6) {
+        setErr(errMatkhau, "Ít nhất 6 ký tự!");
+        ok = false;
+    } 
+    else if (!mk.isEmpty() && !mk.equals(mk2)) {
+        setErr(errXacNhan, "Mật khẩu không khớp!");
+        ok = false;
+    }
+
+    return ok;
+}
+
+private void clearErr() {
+    for (JLabel l : new JLabel[]{errMaNV, errHoten, errSdt, errTendangnhap, errMatkhau, errXacNhan})
+        l.setText(" ");
+}
+
+private void setErr(JLabel l, String m) {
+    l.setText("! " + m);
+}
+
+public NhanVien getKetQua() {
+    return ketQua;
+}
     // =========================================================
     // UI HELPERS
     // =========================================================

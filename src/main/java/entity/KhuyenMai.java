@@ -33,9 +33,9 @@ public class KhuyenMai
             return 0;
 
         double sotienduocgiam = 0;
-        if (loaiKM.equals("TIENCODINH"))
+        if (loaiKM.equals("Tiền cố định"))
             sotienduocgiam = giatrigiam;
-        else if (loaiKM.equals("PHANTRAM"))
+        else if (loaiKM.equals("Phần trăm"))
         {
             sotienduocgiam = tongtienhoadon * (giatrigiam / 100);
             if (sotienduocgiam > giamtoida)

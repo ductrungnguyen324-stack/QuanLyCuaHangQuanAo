@@ -135,7 +135,7 @@ public class SanPhamDialog extends JDialog {
 
         // Trạng thái
         lc.gridy = 8; form.add(makeLabel("Trạng thái"), lc);
-        fc.gridy = 8; cboTrangThai = makeCombo(new String[]{"CONHANG", "HETHANG"});
+        fc.gridy = 8; cboTrangThai = makeCombo(new String[]{"Còn hàng", "HẾT HÀNG"});
         form.add(cboTrangThai, fc);
 
         wrap.add(form, BorderLayout.CENTER);

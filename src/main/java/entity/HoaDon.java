@@ -18,8 +18,8 @@ public class HoaDon
     public HoaDon()
     {
         this.ngaytao = LocalDateTime.now();
-        this.phuongthucTT = "TIENMAT";
-        this.trangthai = "CHUATHANHTOAN";
+        this.phuongthucTT = "Tiền mặt";
+        this.trangthai = "Chưa thanh toán";
         this.sotiengiam = 0;
     }
 

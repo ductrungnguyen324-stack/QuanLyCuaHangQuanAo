@@ -174,7 +174,7 @@ public class PhieuNhapHangDAO {
     // ── Lấy mã phiếu nhập lớn nhất để sinh mã mới ───────────────────────────
     public String getLastMaPhieuNhap() {
         // SQL Server
-        //String sql = "SELECT TOP 1 maPN FROM phieunhap ORDER BY maPN DESC";
+       // String sql = "SELECT TOP 1 maPN FROM phieunhap ORDER BY maPN DESC";
 
         String sql = "SELECT maPN FROM phieunhap ORDER BY maPN DESC LIMIT 1";
         try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
